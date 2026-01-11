@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}AI Tools Intelligence{% endblock %} | AIJACK</title>
+        <meta name="description" content="{% block meta_description %}Discover the best AI tools for your profession. Semantic search, curated stacks, and expert recommendations.{% endblock %}">
+
+        <!-- Fonts: Orbitron (Headings) + Rajdhani (Body) -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+        <!-- FontAwesome 6 -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+        <!-- Tailwind CSS CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            heading: [ 'Orbitron', 'sans-serif' ],
+                            body: [ 'Rajdhani', 'sans-serif' ],
+                        },
+                        colors: {
+                            brand: {
+                                50: '#f0f9ff',
+                                100: '#e0f2fe',
+                                200: '#bae6fd',
+                                300: '#7dd3fc',
+                                400: '#38bdf8',
+                                500: '#0ea5e9',
+                                600: '#0284c7',
+                                700: '#0369a1',
+                                800: '#075985',
+                                900: '#0c4a6e',
+                            },
+                            neon: {
+                                cyan: '#00f0ff',
+                                magenta: '#ff00ff',
+                                lime: '#39ff14',
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
+
+        <!-- Alpine.js -->
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+        <style>
+            /* ============================================
+           NEONPUNK DESIGN SYSTEM
+           ============================================ */
+
+            :root {
+                --brand-primary: #0284c7;
+                --brand-dark: #0369a1;
+                --neon-cyan: #00f0ff;
+                --neon-magenta: #ff00ff;
+                --neon-lime: #39ff14;
+                --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4), 0 0 40px rgba(0, 240, 255, 0.2);
+                --glow-magenta: 0 0 20px rgba(255, 0, 255, 0.4), 0 0 40px rgba(255, 0, 255, 0.2);
+                --glass-bg: rgba(255, 255, 255, 0.75);
+                --glass-border: rgba(2, 132, 199, 0.2);
+            }
+
+            * {
+                font-family: 'Rajdhani', sans-serif;
+            }
+
+            body {
+                background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f0f9ff 100%);
+                min-height: 100vh;
+            }
+
+            /* Grid Background Pattern */
+            body::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-image:
+                    linear-gradient(rgba(2, 132, 199, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(2, 132, 199, 0.03) 1px, transparent 1px);
+                background-size: 50px 50px;
+                pointer-events: none;
+                z-index: -1;
+            }
+
+            /* Heading Font */
+            .font-heading,
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                font-family: 'Orbitron', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            /* ============================================
+           GLASSMORPHISM CARDS
+           ============================================ */
+            .neon-card {
+                background: var(--glass-bg);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid var(--glass-border);
+                border-radius: 16px;
+                transition: all 0.3s ease;
+            }
+
+            .neon-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 20px 40px rgba(2, 132, 199, 0.15);
+                border-color: var(--brand-primary);
+            }
+
+            /* ============================================
+           NEON BUTTONS
+           ============================================ */
+            .neon-button-cyan {
+                background: transparent;
+                border: 2px solid var(--brand-primary);
+                color: var(--brand-primary);
+                padding: 12px 32px;
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 700;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .neon-button-cyan:hover {
+                background: var(--brand-primary);
+                color: white;
+                box-shadow: var(--glow-cyan);
+                transform: translateY(-2px);
+            }
+
+            .neon-button-cyan::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+                transition: left 0.5s ease;
+            }
+
+            .neon-button-cyan:hover::before {
+                left: 100%;
+            }
+
+            .neon-button-magenta {
+                background: transparent;
+                border: 2px solid var(--neon-magenta);
+                color: #c026d3;
+                padding: 12px 32px;
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 700;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .neon-button-magenta:hover {
+                background: #c026d3;
+                color: white;
+                box-shadow: var(--glow-magenta);
+            }
+
+            .neon-button-filled {
+                background: linear-gradient(135deg, var(--brand-primary), #0ea5e9);
+                border: none;
+                color: white;
+                padding: 14px 36px;
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 700;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+            }
+
+            .neon-button-filled:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(2, 132, 199, 0.4), var(--glow-cyan);
+            }
+
+            /* ============================================
+           INPUTS
+           ============================================ */
+            .neon-input {
+                background: rgba(255, 255, 255, 0.9);
+                border: 2px solid rgba(2, 132, 199, 0.2);
+                border-radius: 12px;
+                padding: 16px 24px;
+                font-size: 18px;
+                font-weight: 500;
+                color: #0f172a;
+                transition: all 0.3s ease;
+                outline: none;
+            }
+
+            .neon-input:focus {
+                border-color: var(--brand-primary);
+                box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1), var(--glow-cyan);
+            }
+
+            .neon-input::placeholder {
+                color: #94a3b8;
+            }
+
+            /* Hero Search Input - Extra Bold */
+            .hero-search-input {
+                background: rgba(255, 255, 255, 0.95);
+                border: 3px solid var(--brand-primary);
+                border-radius: 16px;
+                padding: 24px 32px;
+                font-size: 22px;
+                font-weight: 600;
+                width: 100%;
+                max-width: 700px;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 30px rgba(2, 132, 199, 0.15);
+            }
+
+            .hero-search-input:focus {
+                outline: none;
+                box-shadow: 0 12px 40px rgba(2, 132, 199, 0.25), var(--glow-cyan);
+                transform: scale(1.02);
+            }
+
+            /* ============================================
+           BADGES
+           ============================================ */
+            .neon-badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .neon-badge-cyan {
+                background: rgba(2, 132, 199, 0.1);
+                color: var(--brand-primary);
+                border: 1px solid rgba(2, 132, 199, 0.3);
+            }
+
+            .neon-badge-green {
+                background: rgba(34, 197, 94, 0.1);
+                color: #16a34a;
+                border: 1px solid rgba(34, 197, 94, 0.3);
+            }
+
+            .neon-badge-yellow {
+                background: rgba(234, 179, 8, 0.1);
+                color: #ca8a04;
+                border: 1px solid rgba(234, 179, 8, 0.3);
+            }
+
+            .neon-badge-magenta {
+                background: rgba(192, 38, 211, 0.1);
+                color: #c026d3;
+                border: 1px solid rgba(192, 38, 211, 0.3);
+            }
+
+            /* ============================================
+           PROFESSION CHIPS
+           ============================================ */
+            .profession-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 24px;
+                background: var(--glass-bg);
+                backdrop-filter: blur(8px);
+                border: 2px solid transparent;
+                border-radius: 50px;
+                font-weight: 600;
+                font-size: 15px;
+                color: #334155;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-decoration: none;
+            }
+
+            .profession-chip:hover {
+                border-color: var(--brand-primary);
+                color: var(--brand-primary);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(2, 132, 199, 0.15);
+            }
+
+            .profession-chip.active {
+                background: var(--brand-primary);
+                color: white;
+                border-color: var(--brand-primary);
+            }
+
+            /* ============================================
+           NAVIGATION
+           ============================================ */
+            .nav-link {
+                font-family: 'Orbitron', sans-serif;
+                font-weight: 600;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: #475569;
+                padding: 8px 16px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                text-decoration: none;
+            }
+
+            .nav-link:hover {
+                color: var(--brand-primary);
+                background: rgba(2, 132, 199, 0.1);
+            }
+
+            /* ============================================
+           TOOL CARDS
+           ============================================ */
+            .tool-card {
+                background: var(--glass-bg);
+                backdrop-filter: blur(12px);
+                border: 1px solid var(--glass-border);
+                border-radius: 20px;
+                padding: 24px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .tool-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, var(--brand-primary), var(--neon-cyan));
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .tool-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 20px 50px rgba(2, 132, 199, 0.2);
+                border-color: var(--brand-primary);
+            }
+
+            .tool-card:hover::before {
+                opacity: 1;
+            }
+
+            /* Featured Tool Glow */
+            .tool-card.featured {
+                border: 2px solid var(--brand-primary);
+                box-shadow: 0 0 30px rgba(2, 132, 199, 0.15);
+            }
+
+            .tool-card.featured::before {
+                opacity: 1;
+                height: 5px;
+            }
+
+            /* ============================================
+           STACK CARDS
+           ============================================ */
+            .stack-card {
+                background: linear-gradient(135deg, var(--glass-bg), rgba(224, 242, 254, 0.5));
+                backdrop-filter: blur(12px);
+                border: 2px solid var(--brand-primary);
+                border-radius: 24px;
+                padding: 32px;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .stack-card:hover {
+                transform: scale(1.02);
+                box-shadow: 0 25px 60px rgba(2, 132, 199, 0.25), var(--glow-cyan);
+            }
+
+            /* ============================================
+           GLOW EFFECTS
+           ============================================ */
+            .glow-text {
+                text-shadow: 0 0 20px rgba(2, 132, 199, 0.5);
+            }
+
+            .glow-pulse {
+                animation: glow-pulse 2s ease-in-out infinite;
+            }
+
+            @keyframes glow-pulse {
+
+                0%,
+                100% {
+                    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+                }
+
+                50% {
+                    box-shadow: 0 0 25px rgba(0, 240, 255, 0.6), 0 0 50px rgba(0, 240, 255, 0.3);
+                }
+            }
+
+            /* Floating Animation */
+            .float {
+                animation: float 3s ease-in-out infinite;
+            }
+
+            @keyframes float {
+
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            /* ============================================
+           DIVIDERS
+           ============================================ */
+            .neon-divider {
+                height: 2px;
+                background: linear-gradient(90deg, transparent, var(--brand-primary), transparent);
+                margin: 40px 0;
+            }
+
+            /* ============================================
+           RESPONSIVE
+           ============================================ */
+            @media (max-width: 768px) {
+                .hero-search-input {
+                    font-size: 18px;
+                    padding: 18px 24px;
+                }
+
+                .profession-chip {
+                    padding: 10px 18px;
+                    font-size: 14px;
+                }
+            }
+        </style>
+
+        {% block extra_css %}{% endblock %}
+    </head>
+
+    <body class="font-body text-slate-900">
+        <!-- Navigation -->
+        <nav class="sticky top-0 z-50" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(2,132,199,0.1);">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Logo -->
+                    <a href="{% url 'home' %}" class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-brand-400 flex items-center justify-center shadow-lg">
+                            <span class="text-white font-heading font-bold text-lg">AI</span>
+                        </div>
+                        <span class="font-heading font-bold text-xl text-brand-600 tracking-wider">AIJACK</span>
+                    </a>
+
+                    <!-- Desktop Nav -->
+                    <div class="hidden md:flex items-center gap-2">
+                        <a href="{% url 'home' %}" class="nav-link">Home</a>
+                        <a href="{% url 'professions' %}" class="nav-link">Professions</a>
+                        <a href="{% url 'stacks' %}" class="nav-link">Tool Stacks</a>
+                        <a href="{% url 'search' %}" class="nav-link">Search</a>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button x-data x-on:click="$dispatch('toggle-mobile-menu')" class="md:hidden p-2 rounded-lg hover:bg-brand-50">
+                        <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div x-data="{ open: false }" x-on:toggle-mobile-menu.window="open = !open" x-show="open" x-transition class="md:hidden border-t border-brand-100">
+                <div class="px-4 py-4 space-y-2 bg-white/90 backdrop-blur-lg">
+                    <a href="{% url 'home' %}" class="block nav-link">Home</a>
+                    <a href="{% url 'professions' %}" class="block nav-link">Professions</a>
+                    <a href="{% url 'stacks' %}" class="block nav-link">Tool Stacks</a>
+                    <a href="{% url 'search' %}" class="block nav-link">Search</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-20 py-12 border-t border-brand-100" style="background: rgba(255,255,255,0.5);">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-600 to-brand-400 flex items-center justify-center">
+                            <span class="text-white font-heading font-bold text-sm">AI</span>
+                        </div>
+                        <span class="font-heading font-semibold text-brand-600">AIJACK</span>
+                    </div>
+                    <p class="text-slate-500 text-sm">
+                        © 2026 AIJACK. Find the best AI tools for your profession.
+                    </p>
+                </div>
+            </div>
+        </footer>
+
+        {% block extra_js %}{% endblock %}
+    </body>
+
+</html>

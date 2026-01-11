@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Tool Stacks{% endblock %}
+
+{% block content %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4">
+                AI <span class="text-brand-600 glow-text">TOOLKITS</span>
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+                Curated combinations of AI tools that work together to solve complex workflows
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            {% for stack in stacks %}
+            <a href="{% url 'stack_detail' stack.slug %}" class="stack-card group">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-14 h-14 rounded-xl bg-brand-100 flex items-center justify-center group-hover:bg-brand-600 transition-colors">
+                            <svg class="w-7 h-7 text-brand-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <span class="neon-badge neon-badge-cyan">{{ stack.tools.count }} Tools</span>
+                    </div>
+                    {% if stack.is_featured %}
+                    <span class="neon-badge neon-badge-magenta">Featured</span>
+                    {% endif %}
+                </div>
+
+                <h3 class="font-heading font-bold text-2xl text-slate-900 mb-2">{{ stack.name }}</h3>
+                <p class="text-slate-600 mb-4">{{ stack.tagline }}</p>
+
+                <!-- Tool Avatars Preview -->
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="flex -space-x-3">
+                        {% for tool in stack.tools.all|slice:":4" %}
+                        {% if tool.logo %}
+                        <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-10 h-10 rounded-lg border-2 border-white object-cover">
+                        {% else %}
+                        <div class="w-10 h-10 rounded-lg border-2 border-white bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold text-xs">
+                            {{ tool.name|slice:":2"|upper }}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% if stack.tools.count > 4 %}
+                    <span class="text-sm text-slate-500">+{{ stack.tools.count|add:"-4" }} more</span>
+                    {% endif %}
+                </div>
+
+                <!-- Professions -->
+                {% if stack.professions.exists %}
+                <div class="flex flex-wrap gap-2">
+                    {% for profession in stack.professions.all|slice:":3" %}
+                    <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-1 rounded">{{ profession.name }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="mt-6 flex items-center text-brand-600 font-semibold">
+                    <span>Explore Stack</span>
+                    <svg class="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </div>
+            </a>
+            {% empty %}
+            <div class="col-span-full text-center py-16">
+                <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand-100 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <h3 class="font-heading font-bold text-xl text-slate-900 mb-2">No Stacks Yet</h3>
+                <p class="text-slate-600">Visit the admin panel to create tool stacks.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

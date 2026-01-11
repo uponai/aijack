@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ stack.name }} - AI Toolkit{% endblock %}
+
+{% block content %}
+<section class="py-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-3 mb-8 text-sm">
+            <a href="{% url 'home' %}" class="text-brand-600 hover:underline">Home</a>
+            <span class="text-slate-400">/</span>
+            <a href="{% url 'stacks' %}" class="text-brand-600 hover:underline">Stacks</a>
+            <span class="text-slate-400">/</span>
+            <span class="text-slate-600">{{ stack.name }}</span>
+        </div>
+
+        <!-- Stack Header -->
+        <div class="stack-card p-8 md:p-10 mb-8 text-center">
+            <div class="inline-flex items-center gap-2 mb-4">
+                <span class="neon-badge neon-badge-cyan">{{ stack.tools.count }} Tools</span>
+                {% if stack.is_featured %}
+                <span class="neon-badge neon-badge-magenta">Featured Stack</span>
+                {% endif %}
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-heading font-black text-slate-900 mb-4">
+                {{ stack.name }}
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto">{{ stack.tagline }}</p>
+
+            <!-- Professions -->
+            {% if stack.professions.exists %}
+            <div class="mt-6 flex flex-wrap justify-center gap-3">
+                {% for profession in stack.professions.all %}
+                <a href="{% url 'profession_detail' profession.slug %}" class="profession-chip">
+                    {{ profession.name }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Description -->
+        <div class="neon-card p-8 mb-8">
+            <h2 class="font-heading font-bold text-xl text-slate-900 mb-4">ABOUT THIS STACK</h2>
+            <div class="text-slate-700 text-lg leading-relaxed">
+                {{ stack.description|linebreaks }}
+            </div>
+        </div>
+
+        <!-- Workflow -->
+        <div class="neon-card p-8 mb-8">
+            <h2 class="font-heading font-bold text-xl text-slate-900 mb-6">
+                <span class="text-brand-600">WORKFLOW</span> INTEGRATION
+            </h2>
+            <div class="text-slate-700 leading-relaxed">
+                {{ stack.workflow_description|linebreaks }}
+            </div>
+        </div>
+
+        <div class="neon-divider"></div>
+
+        <!-- Tools in Stack -->
+        <section class="mt-8">
+            <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">
+                TOOLS IN THIS <span class="text-brand-600">STACK</span>
+            </h2>
+
+            <div class="space-y-4">
+                {% for tool in stack.tools.all %}
+                <a href="{% url 'tool_detail' tool.slug %}" class="tool-card flex items-center gap-6 group">
+                    <!-- Logo -->
+                    {% if tool.logo %}
+                    <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
+                    {% else %}
+                    <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold text-xl flex-shrink-0">
+                        {{ tool.name|slice:":2"|upper }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Info -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-1">
+                            <h3 class="font-heading font-bold text-xl text-slate-900">{{ tool.name }}</h3>
+                            <span class="neon-badge neon-badge-{% if tool.pricing_type == 'free' %}green{% elif tool.pricing_type == 'freemium' %}yellow{% else %}magenta{% endif %}">
+                                {{ tool.get_pricing_type_display }}
+                            </span>
+                        </div>
+
+                        {% with translation=tool.get_translation %}
+                        {% if translation %}
+                        <p class="text-slate-600">{{ translation.short_description }}</p>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+
+                    <!-- Arrow -->
+                    <svg class="w-6 h-6 text-brand-600 flex-shrink-0 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</section>
+{% endblock %}

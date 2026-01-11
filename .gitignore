@@ -1,0 +1,21 @@
+# Python
+venv/
+*.pyc
+__pycache__/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# System
+.AppleDouble
+.LSOverride
+._*

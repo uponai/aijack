@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ tool.name }} - AI Tool{% endblock %}
+
+{% block content %}
+<section class="py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-3 mb-8 text-sm">
+            <a href="{% url 'home' %}" class="text-brand-600 hover:underline">Home</a>
+            <span class="text-slate-400">/</span>
+            {% if tool.professions.first %}
+            <a href="{% url 'profession_detail' tool.professions.first.slug %}" class="text-brand-600 hover:underline">{{ tool.professions.first.name }}</a>
+            <span class="text-slate-400">/</span>
+            {% endif %}
+            <span class="text-slate-600">{{ tool.name }}</span>
+        </div>
+
+        <!-- Tool Header Card -->
+        <div class="neon-card p-8 md:p-10 mb-8">
+            <div class="flex flex-col md:flex-row md:items-start gap-6">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    {% if tool.logo %}
+                    <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-24 h-24 rounded-2xl object-cover shadow-lg">
+                    {% else %}
+                    <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-black text-3xl shadow-lg">
+                        {{ tool.name|slice:":2"|upper }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1">
+                    <div class="flex flex-wrap items-center gap-3 mb-3">
+                        <span class="neon-badge neon-badge-{% if tool.pricing_type == 'free' %}green{% elif tool.pricing_type == 'freemium' %}yellow{% else %}magenta{% endif %}">
+                            {{ tool.get_pricing_type_display }}
+                        </span>
+                        {% if tool.is_featured %}
+                        <span class="neon-badge neon-badge-cyan">Featured</span>
+                        {% endif %}
+                    </div>
+
+                    <h1 class="text-3xl md:text-4xl font-heading font-black text-slate-900 mb-3">
+                        {{ tool.name }}
+                    </h1>
+
+                    {% if translation %}
+                    <p class="text-xl text-slate-600 mb-6">{{ translation.short_description }}</p>
+                    {% endif %}
+
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        {% for tag in tool.tags.all %}
+                        <span class="text-sm font-semibold text-brand-600 bg-brand-50 px-3 py-1 rounded-lg">{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-wrap gap-4">
+                        <a href="{{ tool.affiliate_url|default:tool.website_url }}" target="_blank" rel="noopener" class="neon-button-filled inline-flex items-center gap-2">
+                            <span>Visit Website</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                        {% if tool.affiliate_url %}
+                        <span class="text-xs text-slate-500 self-center">*Affiliate link</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Tabs -->
+        {% if translation %}
+        <div x-data="{ activeTab: 'overview' }" class="neon-card overflow-hidden">
+            <!-- Tab Headers -->
+            <div class="flex border-b border-brand-100">
+                <button @click="activeTab = 'overview'"
+                        :class="activeTab === 'overview' ? 'border-b-2 border-brand-600 text-brand-600 bg-brand-50' : 'text-slate-600'"
+                        class="px-6 py-4 font-heading font-semibold text-sm uppercase tracking-wider transition-colors">
+                    Overview
+                </button>
+                {% if translation.use_cases %}
+                <button @click="activeTab = 'usecases'"
+                        :class="activeTab === 'usecases' ? 'border-b-2 border-brand-600 text-brand-600 bg-brand-50' : 'text-slate-600'"
+                        class="px-6 py-4 font-heading font-semibold text-sm uppercase tracking-wider transition-colors">
+                    Use Cases
+                </button>
+                {% endif %}
+                {% if translation.pros or translation.cons %}
+                <button @click="activeTab = 'proscons'"
+                        :class="activeTab === 'proscons' ? 'border-b-2 border-brand-600 text-brand-600 bg-brand-50' : 'text-slate-600'"
+                        class="px-6 py-4 font-heading font-semibold text-sm uppercase tracking-wider transition-colors">
+                    Pros & Cons
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-8">
+                <!-- Overview -->
+                <div x-show="activeTab === 'overview'">
+                    {% if translation.long_description %}
+                    <div class="prose prose-lg max-w-none text-slate-700">
+                        {{ translation.long_description|linebreaks }}
+                    </div>
+                    {% else %}
+                    <p class="text-slate-600">{{ translation.short_description }}</p>
+                    {% endif %}
+
+                    <!-- Best For -->
+                    {% if tool.professions.exists %}
+                    <div class="mt-8 pt-8 border-t border-brand-100">
+                        <h3 class="font-heading font-bold text-lg text-slate-900 mb-4">BEST FOR</h3>
+                        <div class="flex flex-wrap gap-3">
+                            {% for profession in tool.professions.all %}
+                            <a href="{% url 'profession_detail' profession.slug %}" class="profession-chip">
+                                {{ profession.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Use Cases -->
+                {% if translation.use_cases %}
+                <div x-show="activeTab === 'usecases'" x-cloak>
+                    <ul class="space-y-4">
+                        {% for use_case in translation.get_use_cases_list %}
+                        <li class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="text-slate-700 text-lg">{{ use_case }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Pros & Cons -->
+                {% if translation.pros or translation.cons %}
+                <div x-show="activeTab === 'proscons'" x-cloak>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        {% if translation.pros %}
+                        <div>
+                            <h3 class="font-heading font-bold text-lg text-green-600 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                </svg>
+                                PROS
+                            </h3>
+                            <ul class="space-y-3">
+                                {% for pro in translation.get_pros_list %}
+                                <li class="flex items-start gap-2 text-slate-700">
+                                    <span class="text-green-500 font-bold">+</span>
+                                    {{ pro }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        {% if translation.cons %}
+                        <div>
+                            <h3 class="font-heading font-bold text-lg text-red-500 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
+                                </svg>
+                                CONS
+                            </h3>
+                            <ul class="space-y-3">
+                                {% for con in translation.get_cons_list %}
+                                <li class="flex items-start gap-2 text-slate-700">
+                                    <span class="text-red-500 font-bold">-</span>
+                                    {{ con }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Related Tools -->
+        {% if related_tools %}
+        <section class="mt-12">
+            <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">
+                <span class="text-brand-600">SIMILAR</span> TOOLS
+            </h2>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for rel_tool in related_tools %}
+                <a href="{% url 'tool_detail' rel_tool.slug %}" class="tool-card group">
+                    <div class="flex items-center gap-3 mb-3">
+                        {% if rel_tool.logo %}
+                        <img src="{{ rel_tool.logo.url }}" alt="{{ rel_tool.name }}" class="w-10 h-10 rounded-xl object-cover">
+                        {% else %}
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold">
+                            {{ rel_tool.name|slice:":2"|upper }}
+                        </div>
+                        {% endif %}
+                        <h3 class="font-heading font-bold text-slate-900">{{ rel_tool.name }}</h3>
+                    </div>
+
+                    {% with rel_trans=rel_tool.get_translation %}
+                    {% if rel_trans %}
+                    <p class="text-slate-600 text-sm line-clamp-2">{{ rel_trans.short_description }}</p>
+                    {% endif %}
+                    {% endwith %}
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+    [x-cloak] {
+        display: none !important;
+    }
+</style>
+{% endblock %}
