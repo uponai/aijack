@@ -1,0 +1,14 @@
+<div class="flex flex-wrap border-b border-slate-200 mb-8">
+    <a href="{% url 'admin_dashboard' %}" class="px-6 py-3 font-heading font-bold text-sm {% if active_tab == 'analytics' %}text-brand-600 border-b-2 border-brand-600{% else %}text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-t-lg{% endif %} transition">
+        <i class="fa-solid fa-chart-line mr-2"></i>Analytics
+    </a>
+    <a href="{% url 'admin_tools' %}" class="px-6 py-3 font-heading font-bold text-sm {% if active_tab == 'tools' %}text-brand-600 border-b-2 border-brand-600{% else %}text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-t-lg{% endif %} transition">
+        <i class="fa-solid fa-cube mr-2"></i>Tools
+    </a>
+    <a href="{% url 'admin_stacks' %}" class="px-6 py-3 font-heading font-bold text-sm {% if active_tab == 'stacks' %}text-brand-600 border-b-2 border-brand-600{% else %}text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-t-lg{% endif %} transition">
+        <i class="fa-solid fa-layer-group mr-2"></i>Stacks
+    </a>
+    <a href="{% url 'admin_professions' %}" class="px-6 py-3 font-heading font-bold text-sm {% if active_tab == 'professions' %}text-brand-600 border-b-2 border-brand-600{% else %}text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-t-lg{% endif %} transition">
+        <i class="fa-solid fa-user-tie mr-2"></i>Professions
+    </a>
+</div>

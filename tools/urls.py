@@ -19,5 +19,25 @@ urlpatterns = [
     path('api/create-custom-stack/', views.create_custom_stack, name='create_custom_stack'),
     path('api/save-tool/<int:tool_id>/', views.toggle_save_tool, name='toggle_save_tool'),
     path('api/save-stack/<slug:stack_slug>/', views.toggle_save_stack, name='toggle_save_stack'),
+    
+    # Admin Dashboard
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    
+    # Tool Management
+    path('admin-dashboard/tools/', views.admin_tools, name='admin_tools'),
+    path('admin-dashboard/tools/add/', views.admin_tool_create, name='admin_tool_create'),
+    path('admin-dashboard/tools/<slug:slug>/edit/', views.admin_tool_edit, name='admin_tool_edit'),
+    path('admin-dashboard/tools/<slug:slug>/delete/', views.admin_tool_delete, name='admin_tool_delete'),
+
+    # Stack Management
+    path('admin-dashboard/stacks/', views.admin_stacks, name='admin_stacks'),
+    path('admin-dashboard/stacks/add/', views.admin_stack_create, name='admin_stack_create'),
+    path('admin-dashboard/stacks/<slug:slug>/edit/', views.admin_stack_edit, name='admin_stack_edit'),
+    path('admin-dashboard/stacks/<slug:slug>/delete/', views.admin_stack_delete, name='admin_stack_delete'),
+
+    # Profession Management
+    path('admin-dashboard/professions/', views.admin_professions, name='admin_professions'),
+    path('admin-dashboard/professions/add/', views.admin_profession_create, name='admin_profession_create'),
+    path('admin-dashboard/professions/<slug:slug>/edit/', views.admin_profession_edit, name='admin_profession_edit'),
+    path('admin-dashboard/professions/<slug:slug>/delete/', views.admin_profession_delete, name='admin_profession_delete'),
 ]

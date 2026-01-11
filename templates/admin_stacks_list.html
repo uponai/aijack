@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Stacks | Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+
+    {% include 'partials/admin_nav.html' %}
+
+    <!-- Header & Actions -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <h1 class="text-3xl font-heading font-black text-slate-800">
+            Manage Stacks
+            <span class="ml-2 text-lg font-normal text-slate-400">({{ stacks.paginator.count }})</span>
+        </h1>
+        <div class="flex gap-3 w-full md:w-auto">
+            <form method="get" class="flex-1 md:flex-none flex items-center bg-white rounded-lg border border-slate-200 px-3 py-2 shadow-sm focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search stacks..." class="bg-transparent border-none outline-none text-sm w-full md:w-64 placeholder-slate-400">
+            </form>
+            <a href="{% url 'admin_stack_create' %}" class="neon-button-purple whitespace-nowrap">
+                <i class="fa-solid fa-plus mr-2"></i>Add Stack
+            </a>
+        </div>
+    </div>
+
+    <!-- Stacks List -->
+    <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/50">
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Stack</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Visibility</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Tools</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Owner</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for stack in stacks %}
+                    <tr class="hover:bg-slate-50/50 transition duration-150">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-purple-100 flex-shrink-0 flex items-center justify-center border border-purple-200 text-purple-600">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800">{{ stack.name }}</div>
+                                    <div class="text-xs text-slate-500">{{ stack.slug }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            {% if stack.visibility == 'public' %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-xs font-bold text-blue-700 uppercase">
+                                <i class="fa-solid fa-globe mr-1"></i> Public
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-xs font-bold text-slate-600 uppercase">
+                                <i class="fa-solid fa-lock mr-1"></i> Private
+                            </span>
+                            {% endif %}
+                            {% if stack.is_featured %}
+                            <span class="ml-1 inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-xs font-bold text-yellow-700 uppercase">
+                                <i class="fa-solid fa-star mr-1"></i>
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-sm text-slate-600">
+                            {{ stack.tools.count }} tools
+                        </td>
+                        <td class="p-4 text-sm text-slate-600">
+                            {% if stack.owner %}
+                            <div class="flex items-center gap-1">
+                                <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">
+                                    {{ stack.owner.username|slice:":1"|upper }}
+                                </div>
+                                <span>{{ stack.owner.username }}</span>
+                            </div>
+                            {% else %}
+                            <span class="text-slate-400 italic">System</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'stack_detail' stack.slug %}" target="_blank" class="p-2 text-slate-400 hover:text-brand-600 transition" title="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{% url 'admin_stack_edit' stack.slug %}" class="p-2 text-slate-400 hover:text-blue-600 transition" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="{% url 'admin_stack_delete' stack.slug %}" class="p-2 text-slate-400 hover:text-red-600 transition" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-12 text-center text-slate-400">
+                            <i class="fa-solid fa-layer-group text-4xl mb-4 opacity-50"></i>
+                            <p>No stacks found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if stacks.paginator.num_pages > 1 %}
+        <div class="border-t border-slate-200 p-4 bg-slate-50/50 flex justify-center">
+            <div class="flex gap-2">
+                {% if stacks.has_previous %}
+                <a href="?page={{ stacks.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Previous</a>
+                {% endif %}
+
+                <span class="px-3 py-1 text-slate-500 text-sm">Page {{ stacks.number }} of {{ stacks.paginator.num_pages }}</span>
+
+                {% if stacks.has_next %}
+                <a href="?page={{ stacks.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

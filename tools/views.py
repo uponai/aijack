@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 import json
 from .models import Tool, Profession, Category, ToolStack, Tag, SavedTool, SavedStack
+from .forms import ToolForm, ToolStackForm, ProfessionForm
 from .search import SearchService
 from .ai_service import AIService
 from .analytics import AnalyticsService
@@ -518,4 +519,263 @@ def admin_dashboard(request):
         'search_stats': search_stats,
         'click_stats': click_stats,
         'days': days,
+        'active_tab': 'analytics'
+    })
+
+
+# --- Admin Tool Management ---
+
+@staff_member_required
+def admin_tools(request):
+    """Admin: List and manage tools."""
+    query = request.GET.get('q', '')
+    if query:
+        tools_list = Tool.objects.filter(
+            Q(name__icontains=query) | Q(slug__icontains=query)
+        ).order_by('-created_at')
+    else:
+        tools_list = Tool.objects.all().order_by('-created_at')
+        
+    paginator = Paginator(tools_list, 20)
+    page_number = request.GET.get('page')
+    tools = paginator.get_page(page_number)
+    
+    return render(request, 'admin_tools_list.html', {
+        'tools': tools,
+        'query': query,
+        'active_tab': 'tools'
+    })
+
+@staff_member_required
+def admin_tool_create(request):
+    """Admin: Create a new tool."""
+    if request.method == 'POST':
+        form = ToolForm(request.POST, request.FILES)
+        if form.is_valid():
+            tool = form.save()
+            messages.success(request, f"Tool '{tool.name}' created successfully.")
+            return redirect('admin_tools')
+    else:
+        form = ToolForm()
+    
+    return render(request, 'admin_form.html', {
+        'form': form,
+        'title': 'Add New Tool',
+        'back_url': 'admin_tools',
+        'active_tab': 'tools'
+    })
+
+@staff_member_required
+def admin_tool_edit(request, slug):
+    """Admin: Edit an existing tool."""
+    tool = get_object_or_404(Tool, slug=slug)
+    if request.method == 'POST':
+        form = ToolForm(request.POST, request.FILES, instance=tool)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Tool '{tool.name}' updated successfully.")
+            return redirect('admin_tools')
+    else:
+        form = ToolForm(instance=tool)
+    
+    return render(request, 'admin_form.html', {
+        'form': form,
+        'title': f'Edit Tool: {tool.name}',
+        'back_url': 'admin_tools',
+        'active_tab': 'tools'
+    })
+
+@staff_member_required
+def admin_tool_delete(request, slug):
+    """Admin: Delete a tool."""
+    tool = get_object_or_404(Tool, slug=slug)
+    if request.method == 'POST':
+        name = tool.name
+        tool.delete()
+        messages.success(request, f"Tool '{name}' deleted successfully.")
+        return redirect('admin_tools')
+    
+    return render(request, 'admin_confirm_delete.html', {
+        'object': tool,
+        'title': f'Delete Tool: {tool.name}',
+        'back_url': 'admin_tools',
+        'active_tab': 'tools'
+    })
+
+
+# --- Admin Stack Management ---
+
+@staff_member_required
+def admin_stacks(request):
+    """Admin: List and manage stacks."""
+    query = request.GET.get('q', '')
+    if query:
+        stacks_list = ToolStack.objects.filter(
+            Q(name__icontains=query) | Q(slug__icontains=query)
+        ).order_by('-created_at')
+    else:
+        stacks_list = ToolStack.objects.all().order_by('-created_at')
+        
+    paginator = Paginator(stacks_list, 20)
+    page_number = request.GET.get('page')
+    stacks = paginator.get_page(page_number)
+    
+    return render(request, 'admin_stacks_list.html', {
+        'stacks': stacks,
+        'query': query,
+        'active_tab': 'stacks'
+    })
+
+@staff_member_required
+def admin_stack_create(request):
+    """Admin: Create a new stack."""
+    if request.method == 'POST':
+        form = ToolStackForm(request.POST)
+        if form.is_valid():
+            stack = form.save(commit=False)
+            
+            # Auto-generate workflow description if empty
+            tools = form.cleaned_data.get('tools', [])
+            if not stack.workflow_description and tools:
+                stack.workflow_description = AIService.generate_workflow_description(stack.name, tools)
+                
+            stack.save()
+            form.save_m2m() # Important for saving the tools relation
+            
+            messages.success(request, f"Stack '{stack.name}' created successfully.")
+            return redirect('admin_stacks')
+    else:
+        form = ToolStackForm()
+    
+    return render(request, 'admin_form.html', {
+        'form': form,
+        'title': 'Add New Stack',
+        'back_url': 'admin_stacks',
+        'active_tab': 'stacks'
+    })
+
+@staff_member_required
+def admin_stack_edit(request, slug):
+    """Admin: Edit an existing stack."""
+    stack = get_object_or_404(ToolStack, slug=slug)
+    if request.method == 'POST':
+        form = ToolStackForm(request.POST, instance=stack)
+        if form.is_valid():
+            stack_instance = form.save(commit=False)
+             
+            # Auto-generate workflow description if empty
+            tools = form.cleaned_data.get('tools', [])
+            if not stack_instance.workflow_description and tools:
+                stack_instance.workflow_description = AIService.generate_workflow_description(stack_instance.name, tools)
+                
+            stack_instance.save()
+            form.save_m2m() # Important for m2m
+            
+            messages.success(request, f"Stack '{stack.name}' updated successfully.")
+            return redirect('admin_stacks')
+    else:
+        form = ToolStackForm(instance=stack)
+    
+    return render(request, 'admin_form.html', {
+        'form': form,
+        'title': f'Edit Stack: {stack.name}',
+        'back_url': 'admin_stacks',
+        'active_tab': 'stacks'
+    })
+
+@staff_member_required
+def admin_stack_delete(request, slug):
+    """Admin: Delete a stack."""
+    stack = get_object_or_404(ToolStack, slug=slug)
+    if request.method == 'POST':
+        name = stack.name
+        stack.delete()
+        messages.success(request, f"Stack '{name}' deleted successfully.")
+        return redirect('admin_stacks')
+    
+    return render(request, 'admin_confirm_delete.html', {
+        'object': stack,
+        'title': f'Delete Stack: {stack.name}',
+        'back_url': 'admin_stacks',
+        'active_tab': 'stacks'
+    })
+
+
+# --- Admin Profession Management ---
+
+@staff_member_required
+def admin_professions(request):
+    """Admin: List and manage professions."""
+    query = request.GET.get('q', '')
+    if query:
+        professions_list = Profession.objects.filter(
+            Q(name__icontains=query) | Q(slug__icontains=query)
+        ).order_by('name')
+    else:
+        professions_list = Profession.objects.all().order_by('name')
+        
+    paginator = Paginator(professions_list, 20)
+    page_number = request.GET.get('page')
+    professions = paginator.get_page(page_number)
+    
+    return render(request, 'admin_professions_list.html', {
+        'professions': professions,
+        'query': query,
+        'active_tab': 'professions'
+    })
+
+@staff_member_required
+def admin_profession_create(request):
+    """Admin: Create a new profession."""
+    if request.method == 'POST':
+        form = ProfessionForm(request.POST)
+        if form.is_valid():
+            profession = form.save()
+            messages.success(request, f"Profession '{profession.name}' created successfully.")
+            return redirect('admin_professions')
+    else:
+        form = ProfessionForm()
+    
+    return render(request, 'admin_form.html', {
+        'form': form,
+        'title': 'Add New Profession',
+        'back_url': 'admin_professions',
+        'active_tab': 'professions'
+    })
+
+@staff_member_required
+def admin_profession_edit(request, slug):
+    """Admin: Edit an existing profession."""
+    profession = get_object_or_404(Profession, slug=slug)
+    if request.method == 'POST':
+        form = ProfessionForm(request.POST, instance=profession)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Profession '{profession.name}' updated successfully.")
+            return redirect('admin_professions')
+    else:
+        form = ProfessionForm(instance=profession)
+    
+    return render(request, 'admin_form.html', {
+        'form': form,
+        'title': f'Edit Profession: {profession.name}',
+        'back_url': 'admin_professions',
+        'active_tab': 'professions'
+    })
+
+@staff_member_required
+def admin_profession_delete(request, slug):
+    """Admin: Delete a profession."""
+    profession = get_object_or_404(Profession, slug=slug)
+    if request.method == 'POST':
+        name = profession.name
+        profession.delete()
+        messages.success(request, f"Profession '{name}' deleted successfully.")
+        return redirect('admin_professions')
+    
+    return render(request, 'admin_confirm_delete.html', {
+        'object': profession,
+        'title': f'Delete Profession: {profession.name}',
+        'back_url': 'admin_professions',
+        'active_tab': 'professions'
     })

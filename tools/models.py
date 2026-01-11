@@ -233,7 +233,7 @@ class ToolStack(SEOModel):
     slug = models.SlugField(unique=True)
     tagline = models.CharField(max_length=200)
     description = models.TextField()
-    workflow_description = models.TextField(help_text="Step-by-step how these tools work together")
+    workflow_description = models.TextField(help_text="Step-by-step how these tools work together", null=True, blank=True, default="")
     
     tools = models.ManyToManyField(Tool, related_name='stacks')
     professions = models.ManyToManyField(Profession, related_name='stacks', blank=True)

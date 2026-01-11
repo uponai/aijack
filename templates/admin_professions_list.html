@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Professions | Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+
+    {% include 'partials/admin_nav.html' %}
+
+    <!-- Header & Actions -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <h1 class="text-3xl font-heading font-black text-slate-800">
+            Manage Professions
+            <span class="ml-2 text-lg font-normal text-slate-400">({{ professions.paginator.count }})</span>
+        </h1>
+        <div class="flex gap-3 w-full md:w-auto">
+            <form method="get" class="flex-1 md:flex-none flex items-center bg-white rounded-lg border border-slate-200 px-3 py-2 shadow-sm focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search professions..." class="bg-transparent border-none outline-none text-sm w-full md:w-64 placeholder-slate-400">
+            </form>
+            <a href="{% url 'admin_profession_create' %}" class="neon-button-pink whitespace-nowrap">
+                <i class="fa-solid fa-plus mr-2"></i>Add Profession
+            </a>
+        </div>
+    </div>
+
+    <!-- Professions List -->
+    <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/50">
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Profession</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Hero Tagline</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Last Updated</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for profession in professions %}
+                    <tr class="hover:bg-slate-50/50 transition duration-150">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-pink-100 flex-shrink-0 flex items-center justify-center border border-pink-200 text-pink-600">
+                                    {% if profession.icon %}
+                                    <i class="{{ profession.icon }}"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-user-tie"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800">{{ profession.name }}</div>
+                                    <div class="text-xs text-slate-500">{{ profession.slug }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 text-sm text-slate-600">
+                            {{ profession.hero_tagline|truncatechars:40 }}
+                        </td>
+                        <td class="p-4 text-sm text-slate-600">
+                            {{ profession.updated_at|date:"Y-m-d" }}
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'profession_detail' profession.slug %}" target="_blank" class="p-2 text-slate-400 hover:text-brand-600 transition" title="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{% url 'admin_profession_edit' profession.slug %}" class="p-2 text-slate-400 hover:text-blue-600 transition" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="{% url 'admin_profession_delete' profession.slug %}" class="p-2 text-slate-400 hover:text-red-600 transition" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-12 text-center text-slate-400">
+                            <i class="fa-solid fa-user-tie text-4xl mb-4 opacity-50"></i>
+                            <p>No professions found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if professions.paginator.num_pages > 1 %}
+        <div class="border-t border-slate-200 p-4 bg-slate-50/50 flex justify-center">
+            <div class="flex gap-2">
+                {% if professions.has_previous %}
+                <a href="?page={{ professions.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Previous</a>
+                {% endif %}
+
+                <span class="px-3 py-1 text-slate-500 text-sm">Page {{ professions.number }} of {{ professions.paginator.num_pages }}</span>
+
+                {% if professions.has_next %}
+                <a href="?page={{ professions.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

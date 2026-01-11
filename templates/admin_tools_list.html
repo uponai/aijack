@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Tools | Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+
+    {% include 'partials/admin_nav.html' %}
+
+    <!-- Header & Actions -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <h1 class="text-3xl font-heading font-black text-slate-800">
+            Manage Tools
+            <span class="ml-2 text-lg font-normal text-slate-400">({{ tools.paginator.count }})</span>
+        </h1>
+        <div class="flex gap-3 w-full md:w-auto">
+            <form method="get" class="flex-1 md:flex-none flex items-center bg-white rounded-lg border border-slate-200 px-3 py-2 shadow-sm focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search tools..." class="bg-transparent border-none outline-none text-sm w-full md:w-64 placeholder-slate-400">
+            </form>
+            <a href="{% url 'admin_tool_create' %}" class="neon-button-primary whitespace-nowrap">
+                <i class="fa-solid fa-plus mr-2"></i>Add Tool
+            </a>
+        </div>
+    </div>
+
+    <!-- Tools List -->
+    <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/50">
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Tool</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Pricing</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Status</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Category</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for tool in tools %}
+                    <tr class="hover:bg-slate-50/50 transition duration-150">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
+                                    {% if tool.logo %}
+                                    <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <i class="fa-solid fa-cube text-slate-400"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800">{{ tool.name }}</div>
+                                    <div class="text-xs text-slate-500">{{ tool.slug }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-xs font-bold text-slate-600 uppercase">
+                                {{ tool.get_pricing_type_display }}
+                            </span>
+                        </td>
+                        <td class="p-4">
+                            {% if tool.status == 'published' %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-xs font-bold text-green-700 uppercase">
+                                <i class="fa-solid fa-check-circle mr-1"></i> Published
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-xs font-bold text-yellow-700 uppercase">
+                                <i class="fa-solid fa-pen-ruler mr-1"></i> Draft
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-sm text-slate-600">
+                            {% for cat in tool.categories.all|slice:":2" %}
+                            <span class="bg-slate-100 px-2 py-0.5 rounded text-xs">{{ cat.name }}</span>
+                            {% empty %}
+                            <span class="text-slate-400 italic">No category</span>
+                            {% endfor %}
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'tool_detail' tool.slug %}" target="_blank" class="p-2 text-slate-400 hover:text-brand-600 transition" title="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{% url 'admin_tool_edit' tool.slug %}" class="p-2 text-slate-400 hover:text-blue-600 transition" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="{% url 'admin_tool_delete' tool.slug %}" class="p-2 text-slate-400 hover:text-red-600 transition" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-12 text-center text-slate-400">
+                            <i class="fa-solid fa-cube text-4xl mb-4 opacity-50"></i>
+                            <p>No tools found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if tools.paginator.num_pages > 1 %}
+        <div class="border-t border-slate-200 p-4 bg-slate-50/50 flex justify-center">
+            <div class="flex gap-2">
+                {% if tools.has_previous %}
+                <a href="?page={{ tools.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Previous</a>
+                {% endif %}
+
+                <span class="px-3 py-1 text-slate-500 text-sm">Page {{ tools.number }} of {{ tools.paginator.num_pages }}</span>
+
+                {% if tools.has_next %}
+                <a href="?page={{ tools.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
