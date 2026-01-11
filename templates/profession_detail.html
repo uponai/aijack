@@ -1,6 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}AI Tools for {{ profession.name }}{% endblock %}
+{% block title %}{{ profession.get_seo_title }}{% endblock %}
+{% block meta_description %}{{ profession.get_seo_description }}{% endblock %}
+
+{% block extra_css %}
+<!-- Context for Base SEO -->
+{% with seo_title=profession.get_seo_title seo_description=profession.get_seo_description seo_image=profession.og_image|default:None canonical_url=profession.canonical_url %}
+{% endwith %}
+{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{{ profession.get_schema_json|safe }}
+</script>
+{% endblock %}
 
 {% block content %}
 <!-- Hero -->

@@ -1,6 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ tool.name }} - AI Tool{% endblock %}
+{% block title %}{{ tool.get_seo_title }}{% endblock %}
+{% block meta_description %}{{ tool.get_seo_description }}{% endblock %}
+
+{% block extra_css %}
+<!-- Context for Base SEO -->
+{% with seo_title=tool.get_seo_title seo_description=tool.get_seo_description seo_image=tool.og_image|default:tool.logo|default:None canonical_url=tool.canonical_url %}
+{% endwith %}
+{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{{ tool.get_schema_json|safe }}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="py-12">

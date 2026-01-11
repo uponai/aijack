@@ -1,7 +1,45 @@
 from django.db import models
+import json
+from django.utils.html import strip_tags
 
 
-class Category(models.Model):
+class SEOModel(models.Model):
+    """Abstract base class for SEO metadata."""
+    meta_title = models.CharField(
+        max_length=200, 
+        blank=True, 
+        help_text="Overwrites the default title. 50-60 chars recommended."
+    )
+    meta_description = models.TextField(
+        blank=True, 
+        help_text="Overwrites the default description. 150-160 chars recommended."
+    )
+    og_image = models.ImageField(
+        upload_to='seo_images/', 
+        blank=True, 
+        null=True,
+        help_text="Social share image (1200x630px recommended)."
+    )
+    canonical_url = models.URLField(
+        blank=True, 
+        help_text="Override canonical URL if needed (e.g., for syndicated content)."
+    )
+
+    class Meta:
+        abstract = True
+    
+    def get_seo_title(self):
+        return self.meta_title or str(self)
+
+    def get_seo_description(self):
+        return self.meta_description or ""
+
+    def get_schema_json(self):
+        """Override this in subclasses to return specific Schema.org JSON."""
+        return "{}"
+
+
+class Category(SEOModel):
     """Hierarchical category for tools (e.g., Construction -> Design -> BIM)."""
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
@@ -17,8 +55,18 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def get_schema_json(self):
+        data = {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": self.name,
+            "description": self.get_seo_description(),
+            "url": f"/category/{self.slug}/"  # Placeholder until get_absolute_url is implemented
+        }
+        return json.dumps(data)
 
-class Profession(models.Model):
+
+class Profession(SEOModel):
     """Target user role (e.g., Architect, Designer, Marketer)."""
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
@@ -32,6 +80,19 @@ class Profession(models.Model):
     def __str__(self):
         return self.name
 
+    def get_seo_description(self):
+        return self.meta_description or self.description[:160]
+
+    def get_schema_json(self):
+        data = {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": f"AI Tools for {self.name}",
+            "description": self.get_seo_description(),
+            "url": f"/profession/{self.slug}/"
+        }
+        return json.dumps(data)
+
 
 class Tag(models.Model):
     """Feature tags (e.g., 'generative', 'automation', 'free')."""
@@ -42,7 +103,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Tool(models.Model):
+class Tool(SEOModel):
     """Core AI Tool entity."""
     PRICING_CHOICES = [
         ('free', 'Free'),
@@ -85,6 +146,37 @@ class Tool(models.Model):
                 return self.translations.get(language='en')
             except ToolTranslation.DoesNotExist:
                 return None
+    
+    def get_seo_description(self):
+        if self.meta_description:
+            return self.meta_description
+        trans = self.get_translation('en')
+        return trans.short_description[:160] if trans else ""
+
+    def get_schema_json(self):
+        trans = self.get_translation('en')
+        description = self.get_seo_description()
+        
+        data = {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": self.name,
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "offers": {
+                "@type": "Offer",
+                "price": "0" if self.pricing_type == 'free' else "0", # Simplified
+                "priceCurrency": "USD"
+            },
+            "description": description,
+            "url": f"/tool/{self.slug}/",
+            "image": self.logo.url if self.logo else ""
+        }
+        
+        if self.pricing_type == 'paid':
+             data["offers"]["price"] = "10.00" # Placeholder, implies paid
+        
+        return json.dumps(data)
 
 
 class ToolTranslation(models.Model):
@@ -119,7 +211,7 @@ class ToolTranslation(models.Model):
         return [c.strip() for c in self.cons.split(',') if c.strip()]
 
 
-class ToolStack(models.Model):
+class ToolStack(SEOModel):
     """Curated bundle of tools solving a specific workflow."""
     name = models.CharField(max_length=150)
     slug = models.SlugField(unique=True)
@@ -138,3 +230,17 @@ class ToolStack(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_seo_description(self):
+         return self.meta_description or self.description[:160]
+
+    def get_schema_json(self):
+        data = {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": self.name,
+            "description": self.get_seo_description(),
+            "url": f"/stacks/{self.slug}/",
+            "datePublished": self.created_at.isoformat()
+        }
+        return json.dumps(data)

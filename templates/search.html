@@ -2,6 +2,22 @@
 
 {% block title %}{% if query %}Search: {{ query }}{% else %}Search AI Tools{% endif %}{% endblock %}
 
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{% if query %}Search Results for {{ query }}{% else %}Search AI Tools{% endif %}",
+  "url": "{{ request.build_absolute_uri }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ request.scheme }}://{{ request.get_host }}/search/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <section class="py-16">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

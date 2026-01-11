@@ -1,6 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ stack.name }} - AI Toolkit{% endblock %}
+{% block title %}{{ stack.get_seo_title }}{% endblock %}
+{% block meta_description %}{{ stack.get_seo_description }}{% endblock %}
+
+{% block extra_css %}
+<!-- Context for Base SEO -->
+{% with seo_title=stack.get_seo_title seo_description=stack.get_seo_description seo_image=stack.og_image|default:None canonical_url=stack.canonical_url %}
+{% endwith %}
+{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{{ stack.get_schema_json|safe }}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="py-12">

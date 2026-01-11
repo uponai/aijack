@@ -1,6 +1,37 @@
 {% extends 'base.html' %}
 
-{% block title %}Discover AI Tools for Your Profession{% endblock %}
+{% block title %}AI Tools Intelligence - Find the Best AI Software{% endblock %}
+{% block meta_description %}Discover curated AI tools for Architects, Designers, and Marketers. Use our semantic search to find the perfect tool for your workflow.{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "AIJACK",
+      "url": "{{ request.build_absolute_uri }}",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ request.build_absolute_uri }}search/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "name": "AIJACK",
+      "url": "{{ request.build_absolute_uri }}",
+      "logo": "{{ request.scheme }}://{{ request.get_host }}/static/img/logo.png",
+      "sameAs": [
+        "https://twitter.com/aijack",
+        "https://linkedin.com/company/aijack"
+      ]
+    }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
