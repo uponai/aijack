@@ -195,7 +195,7 @@ def search(request):
             if stack_ids:
                 # Preserved order for stacks
                 preserved_stacks = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(stack_ids)])
-                stacks_results = ToolStack.objects.filter(id__in=stack_ids).order_by(preserved_stacks)
+                stacks_results = ToolStack.objects.filter(id__in=stack_ids).order_by(preserved_stacks)[:4]
             else:
                 stacks_results = []
                 
