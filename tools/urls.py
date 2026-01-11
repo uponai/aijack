@@ -14,4 +14,5 @@ urlpatterns = [
     path('ai-builder/', views.ai_stack_builder, name='ai_stack_builder'),
     path('api/ai-generate-tools/', views.ai_generate_tools, name='ai_generate_tools'),
     path('api/create-custom-stack/', views.create_custom_stack, name='create_custom_stack'),
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
 ]

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack
+from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SearchQuery, AffiliateClick
 
 
 class ToolTranslationInline(admin.TabularInline):
@@ -88,3 +88,43 @@ class ToolStackAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+
+
+class ToolMediaInline(admin.TabularInline):
+    model = ToolMedia
+    extra = 1
+
+
+@admin.register(ToolMedia)
+class ToolMediaAdmin(admin.ModelAdmin):
+    list_display = ['tool', 'media_type', 'alt_text', 'order', 'created_at']
+    list_filter = ['media_type', 'created_at']
+    search_fields = ['tool__name', 'alt_text', 'caption']
+    ordering = ['tool', 'order']
+
+
+@admin.register(SavedTool)
+class SavedToolAdmin(admin.ModelAdmin):
+    list_display = ['user', 'tool', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__username', 'tool__name']
+    raw_id_fields = ['user', 'tool']
+
+
+@admin.register(SearchQuery)
+class SearchQueryAdmin(admin.ModelAdmin):
+    list_display = ['query', 'user', 'results_count', 'clicked_tool', 'created_at']
+    list_filter = ['created_at', 'source_page']
+    search_fields = ['query', 'user__username']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'created_at'
+
+
+@admin.register(AffiliateClick)
+class AffiliateClickAdmin(admin.ModelAdmin):
+    list_display = ['tool', 'user', 'source_page', 'converted', 'conversion_value', 'clicked_at']
+    list_filter = ['converted', 'clicked_at', 'tool']
+    search_fields = ['tool__name', 'user__username', 'source_page']
+    readonly_fields = ['clicked_at']
+    date_hierarchy = 'clicked_at'
+

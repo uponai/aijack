@@ -4,10 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 import json
 from .models import Tool, Profession, Category, ToolStack, Tag
 from .search import SearchService
 from .ai_service import AIService
+from .analytics import AnalyticsService
 
 
 def home(request):
@@ -87,6 +89,9 @@ def tool_detail(request, slug):
         professions__in=tool.professions.all()
     ).exclude(id=tool.id).distinct()[:4]
     
+    # Log tool view for analytics
+    AnalyticsService.log_tool_click(request, tool, source_page='tool_detail')
+    
     return render(request, 'tool_detail.html', {
         'tool': tool,
         'translation': translation,
@@ -108,6 +113,9 @@ def stack_detail(request, slug):
         ToolStack.objects.prefetch_related('tools__translations', 'professions'),
         slug=slug
     )
+    
+    # Log stack view for analytics
+    AnalyticsService.log_stack_view(request, stack, source_page='stack_detail')
     
     return render(request, 'stack_detail.html', {
         'stack': stack,
@@ -171,6 +179,17 @@ def search(request):
     else:
         # No query
         stacks_results = []
+    
+    # Log search query for analytics
+    if query:
+        results_count = len(tools) if isinstance(tools, list) else tools.count() if hasattr(tools, 'count') else 0
+        AnalyticsService.log_search(
+            request, 
+            query, 
+            results_count,
+            source_page='search',
+            filters={'community': request.GET.get('community') == 'on'}
+        )
 
     return render(request, 'search.html', {
         'query': query,
@@ -213,8 +232,8 @@ def ai_generate_tools(request):
         tools_data = [{
             'id': tool.id,
             'name': tool.name,
-            'description': tool.description,
-            'pricing': tool.get_pricing_display(),
+            'description': tool.get_translation('en').short_description if tool.get_translation('en') else '',
+            'pricing': tool.get_pricing_type_display(),
             'logo': tool.logo.url if tool.logo else None
         } for tool in suggested_tools]
         
@@ -257,3 +276,30 @@ def create_custom_stack(request):
     
     messages.success(request, "Stack created successfully!")
     return redirect('my_stacks')
+
+
+@staff_member_required
+def admin_dashboard(request):
+    """Analytics dashboard for superusers only."""
+    if not request.user.is_superuser:
+        messages.error(request, "Access denied. Superuser required.")
+        return redirect('home')
+    
+    # Get time period from query params (default 30 days)
+    days = int(request.GET.get('days', 30))
+    
+    # Get analytics data
+    top_tools = AnalyticsService.get_top_clicked_tools(limit=10, days=days)
+    top_stacks = AnalyticsService.get_top_viewed_stacks(limit=10, days=days)
+    recent_searches = AnalyticsService.get_recent_searches(limit=50, days=days)
+    search_stats = AnalyticsService.get_search_stats(days=days)
+    click_stats = AnalyticsService.get_click_stats(days=days)
+    
+    return render(request, 'admin_dashboard.html', {
+        'top_tools': top_tools,
+        'top_stacks': top_stacks,
+        'recent_searches': recent_searches,
+        'search_stats': search_stats,
+        'click_stats': click_stats,
+        'days': days,
+    })

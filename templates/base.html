@@ -538,7 +538,44 @@
                         <a href="{% url 'my_stacks' %}" class="nav-link text-brand-600 font-bold">
                             <i class="fa-solid fa-layer-group mr-1"></i> My Stacks
                         </a>
-                        <a href="{% url 'account_logout' %}" class="nav-link text-sm">Logout</a>
+
+                        <!-- Account Dropdown -->
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open" @click.outside="open = false" class="font-heading font-semibold text-[13px] uppercase tracking-[0.08em] text-slate-600 hover:text-brand-600 hover:bg-brand-50/50 px-4 py-2 rounded-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-user-circle"></i>
+                                <span>Account</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-2 w-56 rounded-xl bg-white/95 backdrop-blur-lg shadow-xl border border-brand-100 py-2 z-50">
+
+                                <!-- Username Header -->
+                                <div class="px-4 py-2 border-b border-slate-100">
+                                    <p class="text-xs text-slate-400 uppercase tracking-wider">Signed in as</p>
+                                    <p class="text-sm font-semibold text-brand-600 truncate">{{ user.username }}</p>
+                                </div>
+
+                                {% if user.is_superuser %}
+                                <!-- Admin Dashboard -->
+                                <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-brand-50 transition text-slate-700">
+                                    <i class="fa-solid fa-chart-line text-brand-500 w-5"></i>
+                                    <span class="font-semibold">Admin Dashboard</span>
+                                </a>
+                                <a href="/admin/" class="flex items-center gap-3 px-4 py-3 hover:bg-brand-50 transition text-slate-700">
+                                    <i class="fa-solid fa-cog text-slate-400 w-5"></i>
+                                    <span class="font-semibold">Django Admin</span>
+                                </a>
+                                <div class="border-t border-slate-100 my-1"></div>
+                                {% endif %}
+
+                                <!-- Logout -->
+                                <a href="{% url 'account_logout' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition text-red-600">
+                                    <i class="fa-solid fa-right-from-bracket w-5"></i>
+                                    <span class="font-semibold">Logout</span>
+                                </a>
+                            </div>
+                        </div>
                         {% else %}
                         <a href="{% url 'account_login' %}" class="nav-link">Login</a>
                         <a href="{% url 'account_signup' %}" class="px-4 py-2 rounded-lg bg-brand-600 text-white font-heading font-bold text-xs hover:bg-brand-700 transition">Sign Up</a>
@@ -566,7 +603,16 @@
 
                     {% if user.is_authenticated %}
                     <a href="{% url 'my_stacks' %}" class="block nav-link font-bold text-brand-600">My Stacks</a>
-                    <a href="{% url 'account_logout' %}" class="block nav-link">Logout</a>
+
+                    <div class="border-t border-slate-100 my-2 pt-2"></div>
+                    <p class="px-4 py-2 text-xs text-slate-400 uppercase tracking-wider">{{ user.username }}</p>
+
+                    {% if user.is_superuser %}
+                    <a href="{% url 'admin_dashboard' %}" class="block nav-link"><i class="fa-solid fa-chart-line mr-2"></i>Admin Dashboard</a>
+                    <a href="/admin/" class="block nav-link"><i class="fa-solid fa-cog mr-2"></i>Django Admin</a>
+                    {% endif %}
+
+                    <a href="{% url 'account_logout' %}" class="block nav-link text-red-600"><i class="fa-solid fa-right-from-bracket mr-2"></i>Logout</a>
                     {% else %}
                     <a href="{% url 'account_login' %}" class="block nav-link">Login</a>
                     <a href="{% url 'account_signup' %}" class="block nav-link font-bold text-brand-600">Sign Up</a>

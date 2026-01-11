@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Analytics Dashboard | AIJACK{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
+        <div>
+            <h1 class="text-4xl md:text-5xl font-heading font-black text-brand-600 glow-text">
+                <i class="fa-solid fa-chart-line mr-3"></i>Analytics Dashboard
+            </h1>
+            <p class="text-xl text-slate-600 mt-2">Real-time insights for your platform</p>
+        </div>
+
+        <!-- Time Period Selector -->
+        <div class="flex items-center gap-3">
+            <span class="text-slate-500 font-semibold">Period:</span>
+            <div class="flex gap-2">
+                <a href="?days=7" class="px-4 py-2 rounded-lg font-heading text-sm {% if days == 7 %}bg-brand-600 text-white{% else %}bg-white/80 text-slate-600 hover:bg-brand-50{% endif %} transition">7 Days</a>
+                <a href="?days=30" class="px-4 py-2 rounded-lg font-heading text-sm {% if days == 30 %}bg-brand-600 text-white{% else %}bg-white/80 text-slate-600 hover:bg-brand-50{% endif %} transition">30 Days</a>
+                <a href="?days=90" class="px-4 py-2 rounded-lg font-heading text-sm {% if days == 90 %}bg-brand-600 text-white{% else %}bg-white/80 text-slate-600 hover:bg-brand-50{% endif %} transition">90 Days</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <!-- Total Searches -->
+        <div class="neon-card p-6 text-center">
+            <div class="text-4xl font-heading font-black text-brand-600 mb-2">{{ search_stats.total_searches|default:"0" }}</div>
+            <div class="text-slate-600 font-semibold uppercase text-sm tracking-wider">Total Searches</div>
+            <div class="mt-2 text-xs text-slate-400">{{ search_stats.unique_queries|default:"0" }} unique queries</div>
+        </div>
+
+        <!-- Total Clicks -->
+        <div class="neon-card p-6 text-center">
+            <div class="text-4xl font-heading font-black text-green-500 mb-2">{{ click_stats.total_clicks|default:"0" }}</div>
+            <div class="text-slate-600 font-semibold uppercase text-sm tracking-wider">Tool Clicks</div>
+            <div class="mt-2 text-xs text-slate-400">{{ click_stats.unique_tools|default:"0" }} unique tools</div>
+        </div>
+
+        <!-- Conversions -->
+        <div class="neon-card p-6 text-center">
+            <div class="text-4xl font-heading font-black text-purple-500 mb-2">{{ click_stats.conversions|default:"0" }}</div>
+            <div class="text-slate-600 font-semibold uppercase text-sm tracking-wider">Conversions</div>
+            <div class="mt-2 text-xs text-slate-400">From affiliate links</div>
+        </div>
+
+        <!-- Revenue -->
+        <div class="neon-card p-6 text-center">
+            <div class="text-4xl font-heading font-black text-yellow-500 mb-2">${{ click_stats.total_revenue|default:"0" }}</div>
+            <div class="text-slate-600 font-semibold uppercase text-sm tracking-wider">Revenue</div>
+            <div class="mt-2 text-xs text-slate-400">Tracked conversions</div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid lg:grid-cols-2 gap-8">
+
+        <!-- Top Tools -->
+        <div class="neon-card p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-heading font-bold text-brand-600">
+                    <i class="fa-solid fa-fire text-orange-500 mr-2"></i>Top 10 Clicked Tools
+                </h2>
+                <span class="neon-badge-cyan">Last {{ days }} days</span>
+            </div>
+
+            {% if top_tools %}
+            <div class="space-y-4">
+                {% for tool in top_tools %}
+                <div class="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/50 to-transparent hover:from-brand-50/50 transition group">
+                    <div class="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center font-heading font-bold text-brand-600 group-hover:scale-110 transition">
+                        {{ forloop.counter }}
+                    </div>
+                    {% if tool.logo %}
+                    <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-12 h-12 rounded-lg object-cover border border-brand-100">
+                    {% else %}
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
+                        <i class="fa-solid fa-cube text-white"></i>
+                    </div>
+                    {% endif %}
+                    <div class="flex-1 min-w-0">
+                        <a href="{% url 'tool_detail' tool.slug %}" class="font-bold text-slate-800 hover:text-brand-600 truncate block">{{ tool.name }}</a>
+                        <span class="text-sm text-slate-500">{{ tool.pricing_type|title }}</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-heading font-bold text-brand-600">{{ tool.click_count }}</div>
+                        <div class="text-xs text-slate-400 uppercase">clicks</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-slate-400">
+                <i class="fa-solid fa-chart-simple text-4xl mb-4 opacity-50"></i>
+                <p>No click data yet. Tools will appear here once users start clicking.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Top Stacks -->
+        <div class="neon-card p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-heading font-bold text-brand-600">
+                    <i class="fa-solid fa-layer-group text-purple-500 mr-2"></i>Top 10 Viewed Stacks
+                </h2>
+                <span class="neon-badge-cyan">Last {{ days }} days</span>
+            </div>
+
+            {% if top_stacks %}
+            <div class="space-y-4">
+                {% for stack in top_stacks %}
+                <div class="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/50 to-transparent hover:from-purple-50/50 transition group">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center font-heading font-bold text-purple-600 group-hover:scale-110 transition">
+                        {{ forloop.counter }}
+                    </div>
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                        <i class="fa-solid fa-boxes-stacked text-white"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <a href="{% url 'stack_detail' stack.slug %}" class="font-bold text-slate-800 hover:text-purple-600 truncate block">{{ stack.name }}</a>
+                        <span class="text-sm text-slate-500">{{ stack.tools.count }} tools</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-heading font-bold text-purple-600">{{ stack.view_count }}</div>
+                        <div class="text-xs text-slate-400 uppercase">views</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-slate-400">
+                <i class="fa-solid fa-layer-group text-4xl mb-4 opacity-50"></i>
+                <p>No stack views yet. Stacks will appear here once users start exploring.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Searches Table -->
+    <div class="neon-card p-8 mt-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-heading font-bold text-brand-600">
+                <i class="fa-solid fa-magnifying-glass text-cyan-500 mr-2"></i>Recent Search Queries
+            </h2>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-slate-500">
+                    Avg results: <strong class="text-brand-600">{{ search_stats.avg_results|floatformat:1|default:"0" }}</strong>
+                </span>
+                <span class="neon-badge-cyan">Last {{ days }} days</span>
+            </div>
+        </div>
+
+        {% if recent_searches %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-brand-200">
+                        <th class="text-left py-3 px-4 font-heading text-brand-600 uppercase text-sm tracking-wider">Query</th>
+                        <th class="text-center py-3 px-4 font-heading text-brand-600 uppercase text-sm tracking-wider">Results</th>
+                        <th class="text-center py-3 px-4 font-heading text-brand-600 uppercase text-sm tracking-wider">Source</th>
+                        <th class="text-center py-3 px-4 font-heading text-brand-600 uppercase text-sm tracking-wider">User</th>
+                        <th class="text-right py-3 px-4 font-heading text-brand-600 uppercase text-sm tracking-wider">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for search in recent_searches %}
+                    <tr class="border-b border-slate-100 hover:bg-brand-50/30 transition">
+                        <td class="py-3 px-4">
+                            <span class="font-semibold text-slate-800">{{ search.query|truncatechars:60 }}</span>
+                            {% if search.clicked_tool %}
+                            <span class="ml-2 text-xs text-green-600">
+                                <i class="fa-solid fa-arrow-right"></i> {{ search.clicked_tool.name }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">
+                                {{ search.results_count }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="neon-badge-cyan text-xs">{{ search.source_page }}</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            {% if search.user %}
+                            <span class="text-slate-600">{{ search.user.username }}</span>
+                            {% else %}
+                            <span class="text-slate-400 text-sm">Anonymous</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-right text-sm text-slate-500">
+                            {{ search.created_at|timesince }} ago
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12 text-slate-400">
+            <i class="fa-solid fa-magnifying-glass text-4xl mb-4 opacity-50"></i>
+            <p>No search queries yet. Queries will appear here once users start searching.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Link back to Admin -->
+    <div class="mt-8 text-center">
+        <a href="/admin/" class="neon-button-cyan">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back to Django Admin
+        </a>
+    </div>
+
+</div>
+{% endblock %}

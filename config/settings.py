@@ -24,13 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-21lqbp4t3&8ocfw(*#ukw$7&vn6=w(90$2*abq_q$@l^g84w!s'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+# API Keys
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 # Application definition
 
@@ -58,7 +60,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/my-stacks/'
 LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGOUT_ON_GET = True
@@ -75,9 +77,6 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
-
-# API Keys
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

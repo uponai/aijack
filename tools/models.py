@@ -254,3 +254,92 @@ class ToolStack(SEOModel):
             "datePublished": self.created_at.isoformat()
         }
         return json.dumps(data)
+
+
+class ToolMedia(models.Model):
+    """Screenshots, videos, and other media for tools."""
+    MEDIA_TYPE_CHOICES = [
+        ('image', 'Image'),
+        ('video', 'Video'),
+        ('gif', 'GIF'),
+    ]
+
+    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, related_name='media')
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES, default='image')
+    file = models.FileField(upload_to='tool_media/')
+    alt_text = models.CharField(max_length=200, blank=True, help_text="Alternative text for accessibility")
+    caption = models.CharField(max_length=300, blank=True)
+    order = models.PositiveIntegerField(default=0, help_text="Display order")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Tool Media"
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return f"{self.tool.name} - {self.media_type} #{self.order}"
+
+
+class SavedTool(models.Model):
+    """User's saved/favorited tools."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_tools')
+    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, related_name='saved_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, help_text="User's personal notes about this tool")
+
+    class Meta:
+        unique_together = ['user', 'tool']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.tool.name}"
+
+
+class SearchQuery(models.Model):
+    """Analytics for search queries."""
+    query = models.CharField(max_length=500)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session_key = models.CharField(max_length=40, blank=True, help_text="Anonymous session tracking")
+    results_count = models.PositiveIntegerField(default=0)
+    clicked_tool = models.ForeignKey(Tool, on_delete=models.SET_NULL, null=True, blank=True, related_name='search_clicks')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Search context
+    source_page = models.CharField(max_length=100, blank=True, help_text="Page where search was initiated")
+    filters_applied = models.JSONField(default=dict, blank=True, help_text="Filters used in search")
+
+    class Meta:
+        verbose_name_plural = "Search Queries"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"'{self.query}' ({self.results_count} results)"
+
+
+class AffiliateClick(models.Model):
+    """Tracking affiliate link clicks for analytics and revenue."""
+    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, related_name='affiliate_clicks')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session_key = models.CharField(max_length=40, blank=True)
+    
+    # Click context
+    source_page = models.CharField(max_length=200, help_text="Page where click originated")
+    referrer = models.URLField(blank=True)
+    user_agent = models.CharField(max_length=500, blank=True)
+    ip_hash = models.CharField(max_length=64, blank=True, help_text="Hashed IP for fraud detection")
+    
+    # Timestamps
+    clicked_at = models.DateTimeField(auto_now_add=True)
+    
+    # Conversion tracking (updated via webhook or manual)
+    converted = models.BooleanField(default=False)
+    conversion_value = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    converted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-clicked_at']
+
+    def __str__(self):
+        status = "✓" if self.converted else "○"
+        return f"{status} {self.tool.name} click @ {self.clicked_at.strftime('%Y-%m-%d %H:%M')}"
+
