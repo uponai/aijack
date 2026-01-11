@@ -312,13 +312,13 @@ templates/
 | Comparison feature | ✅ In DEV.md | ❌ Not implemented |
 | hreflang multilingual SEO | ✅ In DEV.md | ❌ Not implemented |
 
-### 6.5 Sitemap Issues
+### 6.5 ~~Sitemap Issues~~ — RESOLVED ✅
 
-| Issue | Location | Status |
-|-------|----------|--------|
-| Stack URL mismatch | `sitemaps.py:49` uses `/stacks/{slug}/`, views use `/stack/{slug}/` | 🟠 Mismatch |
-| No lastmod on Profession | Missing update tracking | 🟠 Pending |
-| Exposes private stacks | `StackSitemap` returns all stacks including private | 🟠 Privacy issue |
+| Issue | Location | Resolution |
+|-------|----------|------------|
+| ~~Stack URL mismatch~~ | `sitemaps.py` | ✅ Fixed to use `/stack/{slug}/` |
+| ~~No lastmod on Profession~~ | `models.py` | ✅ Added `updated_at` field to Profession model |
+| ~~Exposes private stacks~~ | `sitemaps.py` | ✅ Now filters to `visibility='public'` only |
 
 ### 6.6 Duplicate Management Commands
 

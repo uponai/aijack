@@ -32,6 +32,9 @@ class ProfessionSitemap(Sitemap):
     def items(self):
         return Profession.objects.all()
 
+    def lastmod(self, obj):
+        return obj.updated_at
+
     def location(self, obj):
         return f"/profession/{obj.slug}/"
 
@@ -40,10 +43,11 @@ class StackSitemap(Sitemap):
     priority = 0.7
 
     def items(self):
-        return ToolStack.objects.all()
+        # Only include public stacks in sitemap
+        return ToolStack.objects.filter(visibility='public')
 
     def lastmod(self, obj):
         return obj.created_at
 
     def location(self, obj):
-        return f"/stacks/{obj.slug}/"
+        return f"/stack/{obj.slug}/"

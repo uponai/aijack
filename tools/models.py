@@ -73,6 +73,7 @@ class Profession(SEOModel):
     description = models.TextField(blank=True)
     icon = models.CharField(max_length=50, blank=True)
     hero_tagline = models.CharField(max_length=200, blank=True, help_text="e.g., 'AI tools that design faster'")
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['name']
