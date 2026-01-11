@@ -66,19 +66,19 @@
             <span class="font-heading font-semibold text-slate-700">FILTER:</span>
             <a href="{% url 'profession_detail' profession.slug %}"
                class="profession-chip {% if not request.resolver_match.kwargs.pricing %}active{% endif %}">
-                All
+                All ({{ counts.all }})
             </a>
             <a href="{% url 'profession_detail_filtered' profession.slug 'free' %}"
                class="profession-chip {% if request.resolver_match.kwargs.pricing == 'free' %}active{% endif %}">
-                Free
+                Free ({{ counts.free }})
             </a>
             <a href="{% url 'profession_detail_filtered' profession.slug 'freemium' %}"
                class="profession-chip {% if request.resolver_match.kwargs.pricing == 'freemium' %}active{% endif %}">
-                Freemium
+                Freemium ({{ counts.freemium }})
             </a>
             <a href="{% url 'profession_detail_filtered' profession.slug 'paid' %}"
                class="profession-chip {% if request.resolver_match.kwargs.pricing == 'paid' %}active{% endif %}">
-                Paid
+                Paid ({{ counts.paid }})
             </a>
         </div>
 

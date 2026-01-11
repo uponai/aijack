@@ -33,7 +33,21 @@ def profession_detail(request, slug, pricing=None):
         professions=profession
     ).prefetch_related('translations', 'tags')
     
-    # Filters
+    # Base query for counts (unfiltered by pricing)
+    base_tools = Tool.objects.filter(
+        status='published',
+        professions=profession
+    )
+    
+    # Calculate counts
+    counts = {
+        'all': base_tools.count(),
+        'free': base_tools.filter(pricing_type='free').count(),
+        'freemium': base_tools.filter(pricing_type='freemium').count(),
+        'paid': base_tools.filter(pricing_type='paid').count(),
+    }
+
+    # Apply pricing filter if selected
     # Check both path param (pricing) and query param (request.GET) for backward compatibility if needed
     pricing_filter = pricing or request.GET.get('pricing')
     
@@ -45,6 +59,7 @@ def profession_detail(request, slug, pricing=None):
         'profession': profession,
         'tools': tools,
         'stacks': stacks,
+        'counts': counts,
     })
 
 
