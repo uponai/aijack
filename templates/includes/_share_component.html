@@ -1,0 +1,52 @@
+<!-- Share Component -->
+<!-- 
+    Expects context variables:
+    - share_url: The absolute URL to share
+    - share_title: Title of content
+    - share_text: Description or text for the post
+-->
+<div class="flex items-center gap-2" x-data="{ copied: false }">
+    <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider mr-2">Share:</span>
+
+    <!-- X (Twitter) -->
+    <!-- <a href="https://twitter.com/intent/tweet?url={{ share_url }}&text={{ share_text|urlencode }}"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-black hover:text-white transition"
+       title="Share on X">
+        <i class="fa-brands fa-x-twitter"></i>
+    </a> -->
+
+    <!-- LinkedIn -->
+    <!-- <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url }}"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#0077b5] hover:text-white transition"
+       title="Share on LinkedIn">
+        <i class="fa-brands fa-linkedin-in"></i>
+    </a> -->
+
+    <!-- Facebook -->
+    <!-- <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#1877f2] hover:text-white transition"
+       title="Share on Facebook">
+        <i class="fa-brands fa-facebook-f"></i>
+    </a> -->
+
+    <!-- Copy Link -->
+    <button @click="navigator.clipboard.writeText('{{ share_url }}'); copied = true; setTimeout(() => copied = false, 2000)"
+            class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-brand-600 hover:text-white transition relative"
+            title="Copy Link">
+        <i class="fa-solid" :class="copied ? 'fa-check' : 'fa-link'"></i>
+
+        <!-- Tooltip -->
+        <span x-show="copied"
+              x-transition
+              class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0"
+              :class="{ 'opacity-100': copied }">
+            Copied!
+        </span>
+    </button>
+</div>

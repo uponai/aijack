@@ -51,6 +51,11 @@
                 {% endfor %}
             </div>
             {% endif %}
+
+            <!-- Share Buttons -->
+            <div class="mt-8 flex justify-center">
+                {% include 'includes/_share_component.html' with share_url=request.build_absolute_uri share_title=stack.name share_text=stack.description %}
+            </div>
         </div>
 
         <!-- Description -->
