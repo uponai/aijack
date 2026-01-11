@@ -1,58 +1,76 @@
-{# Tool Card Partial - Include with: tool, compact (optional), show_created_at (optional) #}
-{# Usage: {% include 'includes/_tool_card.html' with tool=tool %} #}
+{% load tools_extras %}
+<div class="relative h-full group">
+    <a href="{% url 'tool_detail' tool.slug %}" class="tool-card {% if tool.is_featured %}featured{% endif %} group block h-full">
+        {# Header: Logo, Name, Pricing #}
+        <div class="flex items-start gap-4 mb-4">
+            {% if tool.logo %}
+            <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-14 h-14 rounded-xl object-cover shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
+            {% else %}
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold text-lg flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
+                {{ tool.name|slice:":2"|upper }}
+            </div>
+            {% endif %}
 
-<a href="{% url 'tool_detail' tool.slug %}" class="tool-card {% if tool.is_featured %}featured{% endif %} group block">
-    {# Header: Logo, Name, Pricing #}
-    <div class="flex items-start gap-4 mb-4">
-        {% if tool.logo %}
-        <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-14 h-14 rounded-xl object-cover shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
-        {% else %}
-        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold text-lg flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
-            {{ tool.name|slice:":2"|upper }}
-        </div>
-        {% endif %}
-
-        <div class="flex-1 min-w-0">
-            <h3 class="font-heading font-bold text-lg text-slate-900 truncate group-hover:text-brand-600 transition-colors">{{ tool.name }}</h3>
-            <div class="flex items-center gap-2 mt-1">
-                <span class="neon-badge neon-badge-{% if tool.pricing_type == 'free' %}green{% elif tool.pricing_type == 'freemium' %}yellow{% else %}magenta{% endif %}">
-                    {{ tool.get_pricing_type_display }}
-                </span>
-                {% if tool.is_featured %}
-                <span class="text-xs font-semibold text-amber-600 flex items-center gap-1">
-                    <i class="fa-solid fa-star"></i> Featured
-                </span>
-                {% endif %}
+            <div class="flex-1 min-w-0">
+                <h3 class="font-heading font-bold text-lg text-slate-900 truncate group-hover:text-brand-600 transition-colors">{{ tool.name }}</h3>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="neon-badge neon-badge-{% if tool.pricing_type == 'free' %}green{% elif tool.pricing_type == 'freemium' %}yellow{% else %}magenta{% endif %}">
+                        {{ tool.get_pricing_type_display }}
+                    </span>
+                    {% if tool.is_featured %}
+                    <span class="text-xs font-semibold text-amber-600 flex items-center gap-1">
+                        <i class="fa-solid fa-star"></i> Featured
+                    </span>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
 
-    {# Description #}
-    {% with translation=tool.get_translation %}
-    {% if translation %}
-    <p class="text-slate-600 mb-4 line-clamp-2">{{ translation.short_description }}</p>
-    {% endif %}
-    {% endwith %}
+        {# Description #}
+        {% with translation=tool.get_translation %}
+        {% if translation %}
+        <p class="text-slate-600 mb-4 line-clamp-2">{{ translation.short_description }}</p>
+        {% endif %}
+        {% endwith %}
 
-    {# Tags #}
-    {% if not compact %}
-    <div class="flex flex-wrap gap-2 mb-4">
-        {% for tag in tool.tags.all|slice:":3" %}
-        <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-1 rounded">{{ tag.name }}</span>
-        {% endfor %}
-    </div>
-    {% endif %}
+        {# Tags #}
+        {% if not compact %}
+        <div class="flex flex-wrap gap-2 mb-4">
+            {% for tag in tool.tags.all|slice:":3" %}
+            <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-1 rounded">{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-    {# Footer #}
-    <div class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
-        <span class="text-brand-600 font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
-            Learn More
-            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-        </span>
-        {% if show_created_at and tool.created_at %}
-        <span class="text-xs text-slate-400">{{ tool.created_at|timesince }} ago</span>
+        {# Footer #}
+        <div class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-brand-600 font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
+                Learn More
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+            </span>
+            {% if show_created_at and tool.created_at %}
+            <span class="text-xs text-slate-400">{{ tool.created_at|timesince }} ago</span>
+            {% endif %}
+        </div>
+    </a>
+
+    {# Favorite Button (Absolute - Top Right) #}
+    <div class="absolute top-3 right-3 z-10">
+        {% if request.user.is_authenticated %}
+        <button onclick="toggleToolSave(event, {{ tool.id }})"
+                class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center transition-colors group/btn"
+                title="{% if tool|is_saved_by:request.user %}Remove from favorites{% else %}Add to favorites{% endif %}">
+            <i class="fa-solid fa-heart transition-colors {% if tool|is_saved_by:request.user %}text-red-500{% else %}text-slate-300 group-hover/btn:text-red-500{% endif %}" id="tool-heart-{{ tool.id }}"></i>
+        </button>
+        {% else %}
+        <a href="{% url 'account_signup' %}"
+           class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-white transition-colors"
+           onclick="event.stopPropagation();"
+           title="Sign up to save tools">
+            <i class="fa-regular fa-heart"></i>
+        </a>
         {% endif %}
     </div>
-</a>
+</div>

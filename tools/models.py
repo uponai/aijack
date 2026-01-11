@@ -306,6 +306,21 @@ class SavedTool(models.Model):
         return f"{self.user.username} saved {self.tool.name}"
 
 
+class SavedStack(models.Model):
+    """User's saved/favorited stacks."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_stacks')
+    stack = models.ForeignKey(ToolStack, on_delete=models.CASCADE, related_name='saved_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, help_text="User's personal notes about this stack")
+
+    class Meta:
+        unique_together = ['user', 'stack']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.stack.name}"
+
+
 class SearchQuery(models.Model):
     """Analytics for search queries."""
     query = models.CharField(max_length=500)

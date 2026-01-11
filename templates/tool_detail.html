@@ -81,6 +81,24 @@
                         <!-- Share Buttons -->
                         {% include 'includes/_share_component.html' with share_url=request.build_absolute_uri share_title=tool.name share_text=translation.short_description %}
 
+                        <!-- Favorite Button -->
+                        {% load tools_extras %}
+                        <div>
+                            {% if request.user.is_authenticated %}
+                            <button onclick="toggleToolSave(event, {{ tool.id }})"
+                                    class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center transition-colors group/btn hover:bg-white border border-transparent hover:border-slate-200"
+                                    title="{% if tool|is_saved_by:request.user %}Remove from favorites{% else %}Add to favorites{% endif %}">
+                                <i class="fa-solid fa-heart text-lg transition-colors {% if tool|is_saved_by:request.user %}text-red-500{% else %}text-slate-400 group-hover/btn:text-red-500{% endif %}" id="tool-heart-{{ tool.id }}"></i>
+                            </button>
+                            {% else %}
+                            <a href="{% url 'account_signup' %}"
+                               class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-white border border-transparent hover:border-slate-200 transition-colors"
+                               title="Sign up to save tools">
+                                <i class="fa-regular fa-heart text-lg"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+
                         {% if tool.affiliate_url %}
                         <span class="text-xs text-slate-500 self-center">*Affiliate link</span>
                         {% endif %}

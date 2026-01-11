@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 import json
-from .models import Tool, Profession, Category, ToolStack, Tag
+from .models import Tool, Profession, Category, ToolStack, Tag, SavedTool, SavedStack
 from .search import SearchService
 from .ai_service import AIService
 from .analytics import AnalyticsService
@@ -250,11 +250,66 @@ def tag_detail(request, slug):
 
 @login_required
 def my_stacks(request):
-    """List authenticated user's stacks."""
-    stacks = ToolStack.objects.filter(owner=request.user).order_by('-created_at')
+    """List authenticated user's created and saved stacks/tools."""
+    # User's created stacks
+    my_stacks = ToolStack.objects.filter(owner=request.user).order_by('-created_at')
+    
+    # User's saved stacks
+    saved_stacks = SavedStack.objects.filter(user=request.user).select_related('stack').order_by('-created_at')
+    
+    # User's saved tools
+    saved_tools = SavedTool.objects.filter(user=request.user).select_related('tool').order_by('-created_at')
+    
     return render(request, 'my_stacks.html', {
-        'stacks': stacks,
+        'stacks': my_stacks,
+        'saved_stacks': [s.stack for s in saved_stacks],
+        'saved_tools': [t.tool for t in saved_tools],
     })
+
+@login_required
+@require_POST
+def toggle_save_tool(request, tool_id):
+    """Toggle save status for a tool."""
+    tool = get_object_or_404(Tool, id=tool_id)
+    saved, created = SavedTool.objects.get_or_create(user=request.user, tool=tool)
+    
+    if not created:
+        saved.delete()
+        is_saved = False
+        message = "Tool removed from favorites."
+    else:
+        is_saved = True
+        message = "Tool added to favorites."
+        
+    # Return JSON for both HTMX and Fetch/AJAX
+    if request.headers.get('HX-Request') or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+         return JsonResponse({'is_saved': is_saved, 'message': message})
+         
+    messages.success(request, message)
+    return redirect(request.META.get('HTTP_REFERER', 'tool_detail'))
+
+
+@login_required
+@require_POST
+def toggle_save_stack(request, stack_slug):
+    """Toggle save status for a stack."""
+    stack = get_object_or_404(ToolStack, slug=stack_slug)
+    saved, created = SavedStack.objects.get_or_create(user=request.user, stack=stack)
+    
+    if not created:
+        saved.delete()
+        is_saved = False
+        message = "Stack removed from favorites."
+    else:
+        is_saved = True
+        message = "Stack added to favorites."
+
+    # Return JSON for both HTMX and Fetch/AJAX
+    if request.headers.get('HX-Request') or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+         return JsonResponse({'is_saved': is_saved, 'message': message})
+
+    messages.success(request, message)
+    return redirect(request.META.get('HTTP_REFERER', 'stack_detail'))
 
 @login_required
 def ai_stack_builder(request):

@@ -41,6 +41,9 @@
             </div>
             {% endfor %}
         </div>
+
+
+
         {% else %}
         <div class="text-center py-24 neon-card bg-white/80">
             <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
@@ -51,6 +54,38 @@
             <a href="{% url 'ai_stack_builder' %}" class="neon-button-cyan px-8 py-4 rounded-xl inline-flex items-center gap-2 shadow-lg uppercase text-sm tracking-wider font-bold">
                 <i class="fa-solid fa-plus"></i> Build a Stack
             </a>
+        </div>
+        {% endif %}
+
+        <!-- Saved Stacks Section -->
+        {% if saved_stacks %}
+        <div class="mt-16 mb-8 flex items-center gap-4">
+            <h2 class="text-2xl font-heading font-bold text-slate-900">
+                FAVORITE <span class="text-brand-600 glow-text">STACKS</span>
+            </h2>
+            <div class="h-0.5 flex-1 bg-slate-200"></div>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for stack in saved_stacks %}
+            {% include 'includes/_stack_card.html' with stack=stack %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Saved Tools Section -->
+        {% if saved_tools %}
+        <div class="mt-16 mb-8 flex items-center gap-4">
+            <h2 class="text-2xl font-heading font-bold text-slate-900">
+                FAVORITE <span class="text-brand-600 glow-text">TOOLS</span>
+            </h2>
+            <div class="h-0.5 flex-1 bg-slate-200"></div>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for tool in saved_tools %}
+            {% include 'includes/_tool_card.html' with tool=tool %}
+            {% endfor %}
         </div>
         {% endif %}
     </div>

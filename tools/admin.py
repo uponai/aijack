@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SearchQuery, AffiliateClick
+from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick
 
 
 class ToolTranslationInline(admin.TabularInline):
@@ -136,4 +136,12 @@ class AffiliateClickAdmin(admin.ModelAdmin):
     search_fields = ['tool__name', 'user__username', 'source_page']
     readonly_fields = ['clicked_at']
     date_hierarchy = 'clicked_at'
+
+
+@admin.register(SavedStack)
+class SavedStackAdmin(admin.ModelAdmin):
+    list_display = ['user', 'stack', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__username', 'stack__name']
+    raw_id_fields = ['user', 'stack']
 
