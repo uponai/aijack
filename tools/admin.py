@@ -72,13 +72,14 @@ class ToolAdmin(admin.ModelAdmin):
 
 @admin.register(ToolStack)
 class ToolStackAdmin(admin.ModelAdmin):
-    list_display = ['name', 'tagline', 'is_featured', 'created_at']
-    list_filter = ['is_featured', 'professions']
+    list_display = ['name', 'owner', 'visibility', 'tagline', 'is_featured', 'created_at']
+    list_filter = ['is_featured', 'visibility', 'professions']
     prepopulated_fields = {'slug': ('name',)}
     filter_horizontal = ['tools', 'professions']
+    raw_id_fields = ['owner']
     fieldsets = (
         ('General', {
-            'fields': ('name', 'slug', 'tagline', 'description', 'workflow_description', 'is_featured')
+            'fields': ('name', 'slug', 'owner', 'visibility', 'tagline', 'description', 'workflow_description', 'is_featured')
         }),
         ('Relations', {
             'fields': ('tools', 'professions')

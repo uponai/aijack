@@ -249,6 +249,9 @@ def ai_generate_tools(request):
 @require_POST
 def create_custom_stack(request):
     """Save the stack from AI Builder."""
+    from django.utils.text import slugify
+    import uuid
+    
     name = request.POST.get('name')
     description = request.POST.get('description', '')
     visibility = request.POST.get('visibility', 'private')
@@ -257,14 +260,19 @@ def create_custom_stack(request):
     if not name:
         messages.error(request, "Stack name is required.")
         return redirect('ai_stack_builder')
+    
+    # Generate a valid slug using Django's slugify + unique suffix
+    base_slug = slugify(f"{request.user.username}-{name}")[:100]
+    unique_slug = f"{base_slug}-{uuid.uuid4().hex[:8]}"
         
     stack = ToolStack.objects.create(
         owner=request.user,
         name=name,
-        slug=f"{request.user.username}-{name.lower().replace(' ', '-')}"[:150], # Simple slug gen
+        slug=unique_slug,
         description=description,
         visibility=visibility,
-        tagline=description[:100] # Reuse desc
+        tagline=description[:100] if description else name[:100],
+        workflow_description=description  # Add workflow description
     )
     
     if tool_ids:
