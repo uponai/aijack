@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Case, When
 from .models import Tool, Profession, Category, ToolStack, Tag
+from .search import SearchService
 
 
 def home(request):
@@ -24,7 +25,7 @@ def professions(request):
     })
 
 
-def profession_detail(request, slug):
+def profession_detail(request, slug, pricing=None):
     """Profession landing page with filtered tools."""
     profession = get_object_or_404(Profession, slug=slug)
     tools = Tool.objects.filter(
@@ -33,10 +34,11 @@ def profession_detail(request, slug):
     ).prefetch_related('translations', 'tags')
     
     # Filters
-    pricing = request.GET.get('pricing')
-    if pricing:
-        tools = tools.filter(pricing_type=pricing)
+    # Check both path param (pricing) and query param (request.GET) for backward compatibility if needed
+    pricing_filter = pricing or request.GET.get('pricing')
     
+    if pricing_filter:
+        tools = tools.filter(pricing_type=pricing_filter)
     stacks = ToolStack.objects.filter(professions=profession)[:3]
     
     return render(request, 'profession_detail.html', {
@@ -97,14 +99,28 @@ def search(request):
     tools = []
     
     if query:
-        # Simple keyword search (semantic search would use vector DB)
-        tools = Tool.objects.filter(
-            status='published'
-        ).filter(
-            Q(name__icontains=query) |
-            Q(translations__short_description__icontains=query) |
-            Q(translations__use_cases__icontains=query)
-        ).distinct().prefetch_related('translations', 'tags')[:20]
+        # Semantic Search using ChromaDB
+        try:
+            tool_ids = SearchService.search(query)
+            if tool_ids:
+                # Preserve the order of IDs returned by vector search
+                preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(tool_ids)])
+                tools = Tool.objects.filter(
+                    status='published',
+                    id__in=tool_ids
+                ).prefetch_related('translations').order_by(preserved)
+            else:
+                tools = []
+        except Exception as e:
+            # Fallback to simple keyword search if semantic search fails (e.g., db not ready)
+            print(f"Semantic search failed: {e}. Falling back to keyword search.")
+            tools = Tool.objects.filter(
+                status='published'
+            ).filter(
+                Q(name__icontains=query) |
+                Q(translations__short_description__icontains=query) |
+                Q(translations__use_cases__icontains=query)
+            ).distinct().prefetch_related('translations', 'tags')[:20]
     
     return render(request, 'search.html', {
         'query': query,

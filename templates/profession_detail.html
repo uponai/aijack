@@ -65,19 +65,19 @@
         <div class="flex flex-wrap items-center gap-4 mb-8">
             <span class="font-heading font-semibold text-slate-700">FILTER:</span>
             <a href="{% url 'profession_detail' profession.slug %}"
-               class="profession-chip {% if not request.GET.pricing %}active{% endif %}">
+               class="profession-chip {% if not request.resolver_match.kwargs.pricing %}active{% endif %}">
                 All
             </a>
-            <a href="{% url 'profession_detail' profession.slug %}?pricing=free"
-               class="profession-chip {% if request.GET.pricing == 'free' %}active{% endif %}">
+            <a href="{% url 'profession_detail_filtered' profession.slug 'free' %}"
+               class="profession-chip {% if request.resolver_match.kwargs.pricing == 'free' %}active{% endif %}">
                 Free
             </a>
-            <a href="{% url 'profession_detail' profession.slug %}?pricing=freemium"
-               class="profession-chip {% if request.GET.pricing == 'freemium' %}active{% endif %}">
+            <a href="{% url 'profession_detail_filtered' profession.slug 'freemium' %}"
+               class="profession-chip {% if request.resolver_match.kwargs.pricing == 'freemium' %}active{% endif %}">
                 Freemium
             </a>
-            <a href="{% url 'profession_detail' profession.slug %}?pricing=paid"
-               class="profession-chip {% if request.GET.pricing == 'paid' %}active{% endif %}">
+            <a href="{% url 'profession_detail_filtered' profession.slug 'paid' %}"
+               class="profession-chip {% if request.resolver_match.kwargs.pricing == 'paid' %}active{% endif %}">
                 Paid
             </a>
         </div>

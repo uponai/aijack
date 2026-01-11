@@ -89,13 +89,6 @@
                     Use Cases
                 </button>
                 {% endif %}
-                {% if translation.pros or translation.cons %}
-                <button @click="activeTab = 'proscons'"
-                        :class="activeTab === 'proscons' ? 'border-b-2 border-brand-600 text-brand-600 bg-brand-50' : 'text-slate-600'"
-                        class="px-6 py-4 font-heading font-semibold text-sm uppercase tracking-wider transition-colors">
-                    Pros & Cons
-                </button>
-                {% endif %}
             </div>
 
             <!-- Tab Content -->
@@ -108,6 +101,47 @@
                     </div>
                     {% else %}
                     <p class="text-slate-600">{{ translation.short_description }}</p>
+                    {% endif %}
+
+                    <!-- Pros & Cons -->
+                    {% if translation.pros or translation.cons %}
+                    <div class="mt-8 pt-8 border-t border-brand-100">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            {% if translation.pros %}
+                            <div>
+                                <h3 class="font-heading font-bold text-lg text-green-600 mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-thumbs-up"></i>
+                                    PROS
+                                </h3>
+                                <ul class="space-y-3">
+                                    {% for pro in translation.get_pros_list %}
+                                    <li class="flex items-start gap-2 text-slate-700">
+                                        <span class="text-green-500 font-bold">+</span>
+                                        {{ pro }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            {% if translation.cons %}
+                            <div>
+                                <h3 class="font-heading font-bold text-lg text-red-500 mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-thumbs-down"></i>
+                                    CONS
+                                </h3>
+                                <ul class="space-y-3">
+                                    {% for con in translation.get_cons_list %}
+                                    <li class="flex items-start gap-2 text-slate-700">
+                                        <span class="text-red-500 font-bold">-</span>
+                                        {{ con }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                     {% endif %}
 
                     <!-- Best For -->
@@ -144,49 +178,6 @@
                 {% endif %}
 
                 <!-- Pros & Cons -->
-                {% if translation.pros or translation.cons %}
-                <div x-show="activeTab === 'proscons'" x-cloak>
-                    <div class="grid md:grid-cols-2 gap-8">
-                        {% if translation.pros %}
-                        <div>
-                            <h3 class="font-heading font-bold text-lg text-green-600 mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                                </svg>
-                                PROS
-                            </h3>
-                            <ul class="space-y-3">
-                                {% for pro in translation.get_pros_list %}
-                                <li class="flex items-start gap-2 text-slate-700">
-                                    <span class="text-green-500 font-bold">+</span>
-                                    {{ pro }}
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
-
-                        {% if translation.cons %}
-                        <div>
-                            <h3 class="font-heading font-bold text-lg text-red-500 mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
-                                </svg>
-                                CONS
-                            </h3>
-                            <ul class="space-y-3">
-                                {% for con in translation.get_cons_list %}
-                                <li class="flex items-start gap-2 text-slate-700">
-                                    <span class="text-red-500 font-bold">-</span>
-                                    {{ con }}
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </div>
         {% endif %}
