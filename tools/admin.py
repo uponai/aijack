@@ -47,8 +47,8 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Tool)
 class ToolAdmin(admin.ModelAdmin):
-    list_display = ['name', 'pricing_type', 'status', 'is_featured', 'created_at']
-    list_filter = ['status', 'pricing_type', 'is_featured', 'professions']
+    list_display = ['name', 'pricing_type', 'status', 'is_featured', 'highlight_start', 'highlight_end', 'created_at']
+    list_filter = ['status', 'pricing_type', 'is_featured', 'highlight_start', 'highlight_end', 'professions']
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name']
     filter_horizontal = ['categories', 'professions', 'tags']
@@ -59,6 +59,10 @@ class ToolAdmin(admin.ModelAdmin):
         }),
         ('Links', {
             'fields': ('website_url', 'affiliate_url')
+        }),
+        ('Highlight Period', {
+            'fields': ('highlight_start', 'highlight_end'),
+            'description': 'Set date range when this tool should be highlighted on the homepage',
         }),
         ('Classification', {
             'fields': ('pricing_type', 'categories', 'professions', 'tags')
@@ -72,14 +76,18 @@ class ToolAdmin(admin.ModelAdmin):
 
 @admin.register(ToolStack)
 class ToolStackAdmin(admin.ModelAdmin):
-    list_display = ['name', 'owner', 'visibility', 'tagline', 'is_featured', 'created_at']
-    list_filter = ['is_featured', 'visibility', 'professions']
+    list_display = ['name', 'owner', 'visibility', 'tagline', 'is_featured', 'highlight_start', 'highlight_end', 'created_at']
+    list_filter = ['is_featured', 'visibility', 'highlight_start', 'highlight_end', 'professions']
     prepopulated_fields = {'slug': ('name',)}
     filter_horizontal = ['tools', 'professions']
     raw_id_fields = ['owner']
     fieldsets = (
         ('General', {
             'fields': ('name', 'slug', 'owner', 'visibility', 'tagline', 'description', 'workflow_description', 'is_featured')
+        }),
+        ('Highlight Period', {
+            'fields': ('highlight_start', 'highlight_end'),
+            'description': 'Set date range when this stack should be highlighted on the homepage',
         }),
         ('Relations', {
             'fields': ('tools', 'professions')

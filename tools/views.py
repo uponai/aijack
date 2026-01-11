@@ -14,15 +14,49 @@ from .analytics import AnalyticsService
 
 def home(request):
     """Homepage with search and featured content."""
+    from datetime import date, timedelta
+    
+    today = date.today()
+    thirty_days_ago = today - timedelta(days=30)
+    
     professions = Profession.objects.all()[:8]
-    featured_stacks = ToolStack.objects.filter(is_featured=True)[:3]
+    featured_stacks = ToolStack.objects.filter(is_featured=True, visibility='public')[:3]
     featured_tools = Tool.objects.filter(status='published', is_featured=True)[:6]
+    
+    # Highlighted items (within highlight date range)
+    highlighted_stacks = ToolStack.objects.filter(
+        visibility='public',
+        highlight_start__lte=today,
+        highlight_end__gte=today
+    ).order_by('-highlight_start')[:4]
+    
+    highlighted_tools = Tool.objects.filter(
+        status='published',
+        highlight_start__lte=today,
+        highlight_end__gte=today
+    ).prefetch_related('translations', 'tags').order_by('-highlight_start')[:6]
+    
+    # Newbies (created in last 30 days)
+    stack_newbies = ToolStack.objects.filter(
+        visibility='public',
+        created_at__gte=thirty_days_ago
+    ).order_by('-created_at')[:4]
+    
+    app_newbies = Tool.objects.filter(
+        status='published',
+        created_at__gte=thirty_days_ago
+    ).prefetch_related('translations', 'tags').order_by('-created_at')[:6]
     
     return render(request, 'home.html', {
         'professions': professions,
         'featured_stacks': featured_stacks,
         'featured_tools': featured_tools,
+        'highlighted_stacks': highlighted_stacks,
+        'highlighted_tools': highlighted_tools,
+        'stack_newbies': stack_newbies,
+        'app_newbies': app_newbies,
     })
+
 
 
 def professions(request):

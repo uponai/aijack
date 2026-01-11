@@ -129,6 +129,11 @@ class Tool(SEOModel):
     tags = models.ManyToManyField(Tag, related_name='tools', blank=True)
     
     is_featured = models.BooleanField(default=False)
+    
+    # Highlight period
+    highlight_start = models.DateField(null=True, blank=True, help_text="Start date of highlight period")
+    highlight_end = models.DateField(null=True, blank=True, help_text="End date of highlight period")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -234,6 +239,11 @@ class ToolStack(SEOModel):
     professions = models.ManyToManyField(Profession, related_name='stacks', blank=True)
     
     is_featured = models.BooleanField(default=False)
+    
+    # Highlight period
+    highlight_start = models.DateField(null=True, blank=True, help_text="Start date of highlight period")
+    highlight_end = models.DateField(null=True, blank=True, help_text="End date of highlight period")
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

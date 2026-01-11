@@ -24,24 +24,7 @@
         {% if stacks %}
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for stack in stacks %}
-            <div class="neon-card p-6 flex flex-col h-full bg-white/50 backdrop-blur-sm group hover:scale-[1.02] transition-all duration-300">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-brand-100 flex items-center justify-center text-brand-600 group-hover:bg-brand-500 group-hover:text-white transition-colors shadow-inner">
-                        <i class="fa-solid fa-layer-group text-xl"></i>
-                    </div>
-                    <span class="px-2 py-1 rounded text-xs font-bold {% if stack.visibility == 'public' %}bg-green-100 text-green-700{% else %}bg-slate-100 text-slate-600{% endif %}">
-                        {{ stack.get_visibility_display }}
-                    </span>
-                </div>
-
-                <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-brand-600 transition-colors">{{ stack.name }}</h3>
-                <p class="text-slate-600 text-sm mb-4 line-clamp-3">{{ stack.description }}</p>
-
-                <div class="mt-auto pt-4 border-t border-slate-200 flex items-center justify-between">
-                    <span class="text-sm text-slate-500 font-medium">{{ stack.tools.count }} Tools</span>
-                    <a href="{% url 'stack_detail' stack.slug %}" class="text-brand-600 font-bold text-sm hover:underline flex items-center gap-1 group-hover:gap-2 transition-all">View Stack <i class="fa-solid fa-arrow-right"></i></a>
-                </div>
-            </div>
+            {% include 'includes/_stack_card.html' with stack=stack show_visibility=True show_created_at=True %}
             {% endfor %}
         </div>
         {% else %}
