@@ -65,6 +65,11 @@ LOGIN_REDIRECT_URL = '/my-stacks/'
 LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_ADAPTER = 'config.fast_adapter.AccountAdapter'
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*'] # Explicitly hide username, use correct password field name, mark required
+
 
 # Social Account Providers
 SOCIALACCOUNT_PROVIDERS = {
