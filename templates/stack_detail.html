@@ -66,8 +66,9 @@
             <h2 class="font-heading font-bold text-xl text-slate-900 mb-6">
                 <span class="text-brand-600">WORKFLOW</span> INTEGRATION
             </h2>
-            <div class="text-slate-700 leading-relaxed">
-                {{ stack.workflow_description|linebreaks }}
+            <div class="text-slate-700 leading-relaxed prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-bold prose-a:text-brand-600">
+                {% load markdown_extras %}
+                {{ stack.workflow_description|markdown|safe }}
             </div>
         </div>
 
