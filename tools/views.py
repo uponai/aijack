@@ -1,7 +1,13 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q, Case, When
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+import json
 from .models import Tool, Profession, Category, ToolStack, Tag
 from .search import SearchService
+from .ai_service import AIService
 
 
 def home(request):
@@ -116,9 +122,9 @@ def search(request):
     if query:
         # Semantic Search using ChromaDB
         try:
-            tool_ids = SearchService.search(query)
+            # 1. Search Tools
+            tool_ids = SearchService.search(query, collection_name='tools')
             if tool_ids:
-                # Preserve the order of IDs returned by vector search
                 preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(tool_ids)])
                 tools = Tool.objects.filter(
                     status='published',
@@ -126,8 +132,33 @@ def search(request):
                 ).prefetch_related('translations').order_by(preserved)
             else:
                 tools = []
+            
+            # 2. Search Stacks
+            include_community = request.GET.get('community') == 'on'
+            
+            # Default: System stacks (owner is None)
+            where_clause = {"owner_id": ""}
+            
+            if include_community:
+                # If community checked: Public stacks (System OR (User & Public))
+                # ChromaDB 'where' with $or is supported in newer versions, but if not:
+                # We can query visibility="public". System stacks shd be public too?
+                # System stacks usually public.
+                where_clause = {"visibility": "public"}
+            
+            # If user wants ONLY their own? No, request was "search in other users' public stacks".
+            
+            stack_ids = SearchService.search(query, collection_name='stacks', where=where_clause)
+            
+            if stack_ids:
+                # Preserved order for stacks
+                preserved_stacks = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(stack_ids)])
+                stacks_results = ToolStack.objects.filter(id__in=stack_ids).order_by(preserved_stacks)
+            else:
+                stacks_results = []
+                
         except Exception as e:
-            # Fallback to simple keyword search if semantic search fails (e.g., db not ready)
+            # Fallback to simple keyword search
             print(f"Semantic search failed: {e}. Falling back to keyword search.")
             tools = Tool.objects.filter(
                 status='published'
@@ -136,8 +167,93 @@ def search(request):
                 Q(translations__short_description__icontains=query) |
                 Q(translations__use_cases__icontains=query)
             ).distinct().prefetch_related('translations', 'tags')[:20]
-    
+            stacks_results = []
+    else:
+        # No query
+        stacks_results = []
+
     return render(request, 'search.html', {
         'query': query,
         'tools': tools,
+        'stacks': stacks_results,
     })
+
+
+@login_required
+def my_stacks(request):
+    """List authenticated user's stacks."""
+    stacks = ToolStack.objects.filter(owner=request.user).order_by('-created_at')
+    return render(request, 'my_stacks.html', {
+        'stacks': stacks,
+    })
+
+@login_required
+def ai_stack_builder(request):
+    """AI Stack Builder Interface."""
+    return render(request, 'ai_stack_builder.html')
+
+@login_required
+@require_POST
+def ai_generate_tools(request):
+    """AJAX endpoint for AI suggestions."""
+    data = json.loads(request.body)
+    prompt = data.get('prompt', '')
+    
+    if not prompt:
+        return JsonResponse({'error': 'No prompt provided'}, status=400)
+        
+    try:
+        # Get suggestions with metadata
+        result = AIService.generate_tool_suggestions(prompt)
+        
+        suggested_tools = result['tools']
+        title = result['title']
+        description = result['description']
+        
+        tools_data = [{
+            'id': tool.id,
+            'name': tool.name,
+            'description': tool.description,
+            'pricing': tool.get_pricing_display(),
+            'logo': tool.logo.url if tool.logo else None
+        } for tool in suggested_tools]
+        
+        return JsonResponse({
+            'tools': tools_data,
+            'title': title,
+            'description': description
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@require_POST
+def create_custom_stack(request):
+    """Save the stack from AI Builder."""
+    name = request.POST.get('name')
+    description = request.POST.get('description', '')
+    visibility = request.POST.get('visibility', 'private')
+    tool_ids = request.POST.getlist('tool_ids')
+    
+    if not name:
+        messages.error(request, "Stack name is required.")
+        return redirect('ai_stack_builder')
+        
+    stack = ToolStack.objects.create(
+        owner=request.user,
+        name=name,
+        slug=f"{request.user.username}-{name.lower().replace(' ', '-')}"[:150], # Simple slug gen
+        description=description,
+        visibility=visibility,
+        tagline=description[:100] # Reuse desc
+    )
+    
+    if tool_ids:
+        tools = Tool.objects.filter(id__in=tool_ids)
+        stack.tools.set(tools)
+        
+    # Index it
+    SearchService.add_stacks([stack])
+    
+    messages.success(request, "Stack created successfully!")
+    return redirect('my_stacks')

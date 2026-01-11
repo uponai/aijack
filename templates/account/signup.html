@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex justify-center relative overflow-hidden pt-20 pb-16">
+
+    <div class="max-w-md w-full px-4 relative z-10">
+        <div class="neon-card p-8" style="border-color: rgba(192, 38, 211, 0.3);">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-heading font-black text-slate-900 mb-2">JOIN <span class="text-brand-600 glow-text">AIJACK</span></h1>
+                <p class="text-slate-600">Create your account to build custom stacks</p>
+            </div>
+
+            <div class="space-y-4 mb-8">
+                {% get_providers as socialaccount_providers %}
+                {% for provider in socialaccount_providers %}
+                <a href="{% provider_login_url provider.id process='login' %}"
+                   class="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-slate-300 bg-white/50 hover:bg-white hover:border-purple-400 transition-all font-bold text-slate-700 hover:shadow-lg hover:scale-[1.02]">
+                    <i class="fa-brands fa-{{ provider.name|lower }} text-xl"></i>
+                    Continue with {{ provider.name }}
+                </a>
+                {% endfor %}
+            </div>
+
+            <div class="relative mb-8">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-slate-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white/80 backdrop-blur text-slate-500 rounded-full">Or sign up with email</span>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'account_signup' %}" class="space-y-6 auth-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                <button type="submit" class="w-full neon-button-magenta py-3 rounded-xl text-lg shadow-lg">Sign Up</button>
+            </form>
+
+            <div class="mt-6 text-center text-sm">
+                <p class="text-slate-600">Already have an account? <a href="{% url 'account_login' %}" class="text-brand-600 font-bold hover:underline hover:text-brand-500">Log In</a></p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Force Neon Styles on Django Form Inputs */
+        .auth-form p {
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-form label {
+            display: block;
+            color: #334155;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .auth-form input[type="text"],
+        .auth-form input[type="email"],
+        .auth-form input[type="password"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(192, 38, 211, 0.2);
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #0f172a;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .auth-form input[type="text"]:focus,
+        .auth-form input[type="email"]:focus,
+        .auth-form input[type="password"]:focus {
+            border-color: #c026d3;
+            box-shadow: 0 0 0 4px rgba(192, 38, 211, 0.1), var(--glow-magenta);
+        }
+
+        .helptext {
+            display: block;
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .auth-form ul.errorlist {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            list-style: disc;
+            padding-left: 1.5rem;
+        }
+    </style>
+</section>
+{% endblock %}

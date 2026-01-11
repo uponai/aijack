@@ -18,11 +18,9 @@ class SearchService:
         return cls._client
     
     @classmethod
-    def get_collection(cls):
-        if cls._collection is None:
-            client = cls.get_client()
-            cls._collection = client.get_or_create_collection(name="tools")
-        return cls._collection
+    def get_collection(cls, name="tools"):
+        client = cls.get_client()
+        return client.get_or_create_collection(name=name)
     
     @classmethod
     def get_model(cls):
@@ -42,7 +40,7 @@ class SearchService:
         Add or update tools in the vector database.
         tools: List of Tool instances
         """
-        collection = cls.get_collection()
+        collection = cls.get_collection("tools")
         model = cls.get_model()
         
         ids = []
@@ -79,24 +77,64 @@ class SearchService:
             )
             return len(ids)
         return 0
+
+    @classmethod
+    def add_stacks(cls, stacks):
+        """
+        Add or update stacks in the vector database.
+        stacks: List of ToolStack instances
+        """
+        collection = cls.get_collection("stacks")
+        model = cls.get_model()
+        
+        ids = []
+        documents = []
+        metadatas = []
+        embeddings = []
+        
+        for stack in stacks:
+            # Construct rich text representation for embedding
+            tools = ", ".join([t.name for t in stack.tools.all()])
+            text = f"Name: {stack.name}. Tagline: {stack.tagline}. Description: {stack.description}. Tools: {tools}. Workflow: {stack.workflow_description}"
+            
+            ids.append(str(stack.id))
+            documents.append(text)
+            metadatas.append({
+                "name": stack.name,
+                "slug": stack.slug,
+                "visibility": stack.visibility,
+                "owner_id": str(stack.owner_id) if stack.owner_id else ""
+            })
+            embeddings.append(model.encode(text).tolist())
+            
+        if ids:
+            collection.upsert(
+                 ids=ids,
+                 documents=documents,
+                 metadatas=metadatas,
+                 embeddings=embeddings
+            )
+            return len(ids)
+        return 0
     
     @classmethod
-    def search(cls, query, n_results=20):
+    def search(cls, query, n_results=20, collection_name="tools", where=None):
         """
-        Search for tools using semantic search.
-        Returns a list of Tool IDs.
+        Search for tools or stacks using semantic search.
+        Returns a list of IDs.
         """
         if not query:
             return []
             
-        collection = cls.get_collection()
+        collection = cls.get_collection(collection_name)
         model = cls.get_model()
         
         query_embedding = model.encode(query).tolist()
         
         results = collection.query(
             query_embeddings=[query_embedding],
-            n_results=n_results
+            n_results=n_results,
+            where=where
         )
         
         # Extract IDs

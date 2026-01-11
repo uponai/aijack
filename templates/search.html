@@ -45,13 +45,57 @@
                         </svg>
                     </button>
                 </div>
+                <div class="mt-4 flex justify-center">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="community" class="form-checkbox w-5 h-5 text-brand-600 rounded bg-slate-100 border-slate-300 focus:ring-brand-500" {% if request.GET.community %}checked{% endif %}>
+                        <span class="ml-2 text-slate-600">Search in other users' public stacks</span>
+                    </label>
+                </div>
             </form>
         </div>
 
         {% if query %}
-        <!-- Results -->
+
+        <!-- Stacks Results -->
+        {% if stacks %}
+        <div class="mb-12">
+            <h2 class="text-2xl font-heading font-black text-slate-900 mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-layer-group text-brand-500"></i>
+                Matching Stacks
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for stack in stacks %}
+                <a href="{% url 'stack_detail' stack.slug %}" class="stack-card group block p-6 bg-white rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl hover:border-brand-300 transition-all hover:scale-[1.02]">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+                            <i class="fa-solid fa-layer-group text-xl"></i>
+                        </div>
+                        {% if stack.is_featured %}
+                        <span class="neon-badge-magenta">Featured</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="font-heading font-bold text-xl text-slate-900 mb-2">{{ stack.name }}</h3>
+                    <p class="text-slate-600 text-sm mb-4 line-clamp-2">{{ stack.description }}</p>
+                    <div class="flex items-center gap-2 text-sm text-slate-500">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                        <span>{{ stack.tools.count }} Tools</span>
+                        {% if stack.owner %}
+                        <span class="text-xs bg-slate-100 px-2 py-1 rounded ml-auto">@{{ stack.owner.username }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tools Results -->
         <div class="mb-6">
-            <p class="text-slate-600">
+            <h2 class="text-2xl font-heading font-black text-slate-900 mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-cube text-brand-500"></i>
+                Matching Tools
+            </h2>
+            <p class="text-slate-600 mb-4">
                 {% if tools %}
                 Found <span class="font-semibold text-brand-600">{{ tools|length }}</span> tools for "<span class="font-semibold">{{ query }}</span>"
                 {% else %}

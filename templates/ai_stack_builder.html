@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Stack Builder{% endblock %}
+
+{% block content %}
+<section class="min-h-screen relative overflow-hidden flex justify-center pt-20 pb-16">
+
+    <!-- Background Glow -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-4xl w-full px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center mb-12">
+            <h1 class="text-3xl md:text-5xl font-heading font-black text-slate-900 mb-4">
+                BUILD YOUR <span class="text-brand-600 glow-text">CUSTOM STACK</span>
+            </h1>
+            <p class="text-lg text-slate-600">
+                Describe your workflow, and our AI will select the perfect toolset for you.
+            </p>
+        </div>
+
+        <!-- AI Input Section -->
+        <div class="neon-card p-8 mb-8" x-data="stackBuilder()">
+
+            <div class="mb-8">
+                <label class="block text-slate-700 font-bold mb-2">What workflow do you want to automate?</label>
+                <div class="relative">
+                    <textarea
+                              x-model="prompt"
+                              class="w-full h-32 rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500 p-4 neon-input"
+                              placeholder="e.g. I need to edit videos for YouTube, clear audio noise, and generate thumbnails..."></textarea>
+
+                    <button
+                            @click="generateTools"
+                            :disabled="loading"
+                            class="absolute bottom-4 right-4 neon-button-magenta px-6 py-2 rounded-lg flex items-center gap-2 shadow-lg">
+                        <span x-show="!loading"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Stack</span>
+                        <span x-show="loading"><i class="fa-solid fa-circle-notch fa-spin"></i> Thinking...</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div x-show="error" class="bg-red-50 text-red-600 p-4 rounded-xl mb-6" x-text="error" style="display: none;"></div>
+
+            <!-- Tool Selection Form -->
+            <form action="{% url 'create_custom_stack' %}" method="POST" x-show="tools.length > 0" style="display: none;">
+                {% csrf_token %}
+
+                <h3 class="text-xl font-heading font-bold text-slate-900 mb-4">Select Tools for Your Stack</h3>
+
+                <div class="grid gap-4 mb-8">
+                    <template x-for="tool in tools" :key="tool.id">
+                        <label class="flex items-start gap-4 p-4 rounded-xl border border-slate-200 cursor-pointer hover:bg-white/50 transition-colors bg-white/30 backdrop-blur-sm">
+                            <input type="checkbox" name="tool_ids" :value="tool.id" checked class="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500">
+
+                            <img :src="tool.logo ? tool.logo : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDUwIDUwIj48cmVjdCB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIGZpbGw9IiNlMmU4ZjAiLz48L3N2Zz4='" class="w-12 h-12 rounded-lg object-cover bg-slate-200">
+
+                            <div class="flex-1">
+                                <div class="flex justify-between">
+                                    <span class="font-bold text-slate-900" x-text="tool.name"></span>
+                                    <span class="text-xs px-2 py-1 rounded bg-slate-100 text-slate-600" x-text="tool.pricing"></span>
+                                </div>
+                                <p class="text-sm text-slate-600 line-clamp-2" x-text="tool.description"></p>
+                            </div>
+                        </label>
+                    </template>
+                </div>
+
+                <div class="border-t border-slate-200 pt-8">
+                    <h3 class="text-xl font-heading font-bold text-slate-900 mb-4">Stack Details</h3>
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-slate-700 font-semibold mb-2">Stack Name</label>
+                            <input type="text" name="name" x-model="name" required class="w-full neon-input">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-semibold mb-2">Visibility</label>
+                            <select name="visibility" class="w-full neon-input">
+                                <option value="private">Private (Only Me)</option>
+                                <option value="public">Public (Share with Community)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-slate-700 font-semibold mb-2">Description</label>
+                        <textarea name="description" x-model="description" rows="3" class="w-full neon-input"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full neon-button-cyan text-lg py-4 rounded-xl shadow-lg">
+                        <i class="fa-solid fa-save mr-2"></i> Save to My Stacks
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    function stackBuilder ()
+    {
+        return {
+            prompt: '',
+            loading: false,
+            tools: [],
+            name: '',
+            description: '',
+            error: null,
+            generateTools ()
+            {
+                if ( !this.prompt ) return;
+                this.loading = true;
+                this.error = null;
+                this.tools = [];
+
+                fetch( '{% url "ai_generate_tools" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify( { prompt: this.prompt } )
+                } )
+                    .then( response => response.json() )
+                    .then( data =>
+                    {
+                        this.loading = false;
+                        if ( data.error )
+                        {
+                            this.error = data.error;
+                        } else
+                        {
+                            this.tools = data.tools;
+                            this.name = data.title;
+                            this.description = data.description;
+                        }
+                    } )
+                    .catch( err =>
+                    {
+                        this.loading = false;
+                        this.error = 'Something went wrong. Please try again.';
+                        console.error( err );
+                    } );
+            }
+        };
+    }
+</script>
+{% endblock %}

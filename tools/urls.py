@@ -10,4 +10,8 @@ urlpatterns = [
     path('stacks/', views.stacks, name='stacks'),
     path('stack/<slug:slug>/', views.stack_detail, name='stack_detail'),
     path('search/', views.search, name='search'),
+    path('my-stacks/', views.my_stacks, name='my_stacks'),
+    path('ai-builder/', views.ai_stack_builder, name='ai_stack_builder'),
+    path('api/ai-generate-tools/', views.ai_generate_tools, name='ai_generate_tools'),
+    path('api/create-custom-stack/', views.create_custom_stack, name='create_custom_stack'),
 ]

@@ -526,11 +526,23 @@
                     </a>
 
                     <!-- Desktop Nav -->
-                    <div class="hidden md:flex items-center gap-2">
+                    <div class="hidden md:flex items-center gap-4">
                         <a href="{% url 'home' %}" class="nav-link">Home</a>
                         <a href="{% url 'professions' %}" class="nav-link">Professions</a>
                         <a href="{% url 'stacks' %}" class="nav-link">Tool Stacks</a>
                         <a href="{% url 'search' %}" class="nav-link">Search</a>
+
+                        <div class="h-6 w-px bg-slate-200 mx-2"></div>
+
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'my_stacks' %}" class="nav-link text-brand-600 font-bold">
+                            <i class="fa-solid fa-layer-group mr-1"></i> My Stacks
+                        </a>
+                        <a href="{% url 'account_logout' %}" class="nav-link text-sm">Logout</a>
+                        {% else %}
+                        <a href="{% url 'account_login' %}" class="nav-link">Login</a>
+                        <a href="{% url 'account_signup' %}" class="px-4 py-2 rounded-lg bg-brand-600 text-white font-heading font-bold text-xs hover:bg-brand-700 transition">Sign Up</a>
+                        {% endif %}
                     </div>
 
                     <!-- Mobile Menu Button -->
@@ -549,6 +561,16 @@
                     <a href="{% url 'professions' %}" class="block nav-link">Professions</a>
                     <a href="{% url 'stacks' %}" class="block nav-link">Tool Stacks</a>
                     <a href="{% url 'search' %}" class="block nav-link">Search</a>
+
+                    <div class="border-t border-slate-100 my-2 pt-2"></div>
+
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'my_stacks' %}" class="block nav-link font-bold text-brand-600">My Stacks</a>
+                    <a href="{% url 'account_logout' %}" class="block nav-link">Logout</a>
+                    {% else %}
+                    <a href="{% url 'account_login' %}" class="block nav-link">Login</a>
+                    <a href="{% url 'account_signup' %}" class="block nav-link font-bold text-brand-600">Sign Up</a>
+                    {% endif %}
                 </div>
             </div>
         </nav>

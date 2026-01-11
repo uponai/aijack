@@ -211,8 +211,18 @@ class ToolTranslation(models.Model):
         return [c.strip() for c in self.cons.split(',') if c.strip()]
 
 
+from django.contrib.auth.models import User
+
 class ToolStack(SEOModel):
     """Curated bundle of tools solving a specific workflow."""
+    VISIBILITY_CHOICES = [
+        ('public', 'Public'),
+        ('private', 'Private'),
+    ]
+
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='public')
+    
     name = models.CharField(max_length=150)
     slug = models.SlugField(unique=True)
     tagline = models.CharField(max_length=200)
