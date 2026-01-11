@@ -1,0 +1,35 @@
+{% for search in recent_searches %}
+<tr class="border-b border-slate-100 hover:bg-brand-50/30 transition"
+    {% if forloop.last and recent_searches.has_next %}
+    hx-get="{% url 'admin_dashboard' %}?page={{ recent_searches.next_page_number }}&days={{ days }}"
+    hx-trigger="revealed"
+    hx-swap="afterend"
+    {% endif %}>
+    <td class="py-3 px-4">
+        <span class="font-semibold text-slate-800">{{ search.query|truncatechars:60 }}</span>
+        {% if search.clicked_tool %}
+        <span class="ml-2 text-xs text-green-600">
+            <i class="fa-solid fa-arrow-right"></i> {{ search.clicked_tool.name }}
+        </span>
+        {% endif %}
+    </td>
+    <td class="py-3 px-4 text-center">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">
+            {{ search.results_count }}
+        </span>
+    </td>
+    <td class="py-3 px-4 text-center">
+        <span class="neon-badge-cyan text-xs">{{ search.source_page|default:"unknown" }}</span>
+    </td>
+    <td class="py-3 px-4 text-center">
+        {% if search.user %}
+        <span class="text-slate-600">{{ search.user.username }}</span>
+        {% else %}
+        <span class="text-slate-400 text-sm">Anonymous</span>
+        {% endif %}
+    </td>
+    <td class="py-3 px-4 text-right text-sm text-slate-500">
+        {{ search.created_at|timesince }} ago
+    </td>
+</tr>
+{% endfor %}

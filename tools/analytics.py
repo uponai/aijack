@@ -47,7 +47,7 @@ class AnalyticsService:
             session_key=session_key,
             results_count=results_count,
             clicked_tool=clicked_tool,
-            source_page=source_page,
+            source_page=source_page or 'U/N',
             filters_applied=filters or {}
         )
     

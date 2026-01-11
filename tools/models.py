@@ -316,7 +316,7 @@ class SearchQuery(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     # Search context
-    source_page = models.CharField(max_length=100, blank=True, help_text="Page where search was initiated")
+    source_page = models.CharField(max_length=100, default='U/N', help_text="Page where search was initiated")
     filters_applied = models.JSONField(default=dict, blank=True, help_text="Filters used in search")
 
     class Meta:

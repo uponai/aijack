@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q, Case, When
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -408,7 +409,35 @@ def admin_dashboard(request):
     # Get analytics data
     top_tools = AnalyticsService.get_top_clicked_tools(limit=10, days=days)
     top_stacks = AnalyticsService.get_top_viewed_stacks(limit=10, days=days)
-    recent_searches = AnalyticsService.get_recent_searches(limit=50, days=days)
+    
+    # Pagination for recent searches
+    # Fetch more results to allow for deep scrolling (e.g. 500 instead of 50)
+    # The AnalyticsService.get_recent_searches creates a slice, which returns a list/queryset. 
+    # We should probably modify get_recent_searches or just slice it larger here if it returned a queryset.
+    # Looking at likely implementation of get_recent_searches, it returns a sliced queryset.
+    # Let's see... it returns SearchQuery.objects.filter(...).order_by(...)[:limit]
+    # Pagination requires an unsliced queryset usually, OR we can just paginate the list, but for infinite scroll 
+    # and large datasets, better to paginate the queryset.
+    # For now, let's just ask for a larger limit from the service and paginate that, 
+    # or better, bypassing the limit in the service if we want true infinite scroll.
+    # But for this task, I will just call it with a large limit (e.g. 1000) and paginate locally, 
+    # or I should modify the service to return a queryset. 
+    # Let's check the service code again... 
+    # it does: return SearchQuery.objects.filter(...)...[:limit]
+    # So it returns a queryset but sliced. Sliced querysets cannot be filtered or re-ordered, but can be iterated.
+    # Paginator works on lists/tuples too.
+    
+    recent_searches_list = AnalyticsService.get_recent_searches(limit=1000, days=days)
+    paginator = Paginator(recent_searches_list, 20) # Show 20 per page
+    page_number = request.GET.get('page')
+    recent_searches = paginator.get_page(page_number)
+
+    if request.headers.get('HX-Request'):
+         return render(request, 'partials/search_rows.html', {
+            'recent_searches': recent_searches,
+             'days': days
+         })
+    
     search_stats = AnalyticsService.get_search_stats(days=days)
     click_stats = AnalyticsService.get_click_stats(days=days)
     
