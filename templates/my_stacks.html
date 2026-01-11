@@ -24,7 +24,21 @@
         {% if stacks %}
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for stack in stacks %}
-            {% include 'includes/_stack_card.html' with stack=stack show_visibility=True show_created_at=True %}
+            <div class="flex flex-col">
+                {% include 'includes/_stack_card.html' with stack=stack show_visibility=True show_created_at=True %}
+
+                <div class="flex justify-end gap-3 mt-3 px-1">
+                    <a href="{% url 'edit_custom_stack' stack.slug %}" class="text-sm font-bold text-slate-500 hover:text-brand-600 flex items-center gap-1 transition-colors">
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </a>
+                    <form action="{% url 'delete_custom_stack' stack.slug %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this stack? This action cannot be undone.');" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-sm font-bold text-slate-500 hover:text-red-600 flex items-center gap-1 transition-colors">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
             {% endfor %}
         </div>
         {% else %}

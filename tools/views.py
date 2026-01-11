@@ -296,9 +296,17 @@ def create_custom_stack(request):
         return redirect('ai_stack_builder')
     
     # Generate a valid slug using Django's slugify + unique suffix
-    base_slug = slugify(f"{request.user.username}-{name}")[:100]
+    base_slug = slugify(name)[:100]
     unique_slug = f"{base_slug}-{uuid.uuid4().hex[:8]}"
+    
+    # Fetch tools first to generate workflow description
+    tools = []
+    if tool_ids:
+        tools = Tool.objects.filter(id__in=tool_ids)
         
+    # Generate AI Workflow Description
+    workflow_description = AIService.generate_workflow_description(name, tools)
+    
     stack = ToolStack.objects.create(
         owner=request.user,
         name=name,
@@ -306,18 +314,85 @@ def create_custom_stack(request):
         description=description,
         visibility=visibility,
         tagline=description[:100] if description else name[:100],
-        workflow_description=description  # Add workflow description
+        workflow_description=workflow_description # Use AI generated description
     )
     
-    if tool_ids:
-        tools = Tool.objects.filter(id__in=tool_ids)
+    if tools:
         stack.tools.set(tools)
         
     # Index it
     SearchService.add_stacks([stack])
     
-    messages.success(request, "Stack created successfully!")
+    messages.success(request, "Stack created successfully with AI Workflow!")
     return redirect('my_stacks')
+
+
+@login_required
+def edit_custom_stack(request, slug):
+    """Edit an existing custom stack."""
+    stack = get_object_or_404(ToolStack, slug=slug)
+    
+    # Permission check: Only owner can edit
+    if stack.owner != request.user:
+        messages.error(request, "You do not have permission to edit this stack.")
+        return redirect('my_stacks')
+        
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        workflow_description = request.POST.get('workflow_description', '')
+        visibility = request.POST.get('visibility', 'private')
+        tool_ids = request.POST.getlist('tool_ids')
+        
+        if not name:
+            messages.error(request, "Stack name is required.")
+            return render(request, 'edit_stack.html', {'stack': stack, 'all_tools': Tool.objects.filter(status='published')})
+
+        stack.name = name
+        stack.description = description
+        stack.workflow_description = workflow_description
+        stack.visibility = visibility
+        stack.save()
+        
+        if tool_ids:
+             tools = Tool.objects.filter(id__in=tool_ids)
+             stack.tools.set(tools)
+        else:
+            stack.tools.clear()
+            
+        # Re-index
+        SearchService.add_stacks([stack])
+            
+        messages.success(request, "Stack updated successfully.")
+        return redirect('my_stacks')
+    
+    # GET request - show form
+    all_tools = Tool.objects.filter(status='published')
+    return render(request, 'edit_stack.html', {
+        'stack': stack, 
+        'all_tools': all_tools
+    })
+
+
+@login_required
+def delete_custom_stack(request, slug):
+    """Delete a custom stack."""
+    stack = get_object_or_404(ToolStack, slug=slug)
+    
+    # Permission check
+    if stack.owner != request.user:
+        messages.error(request, "You do not have permission to delete this stack.")
+        return redirect('my_stacks')
+        
+    if request.method == 'POST':
+        stack.delete()
+        messages.success(request, "Stack deleted successfully.")
+        return redirect('my_stacks')
+        
+    # Confirmation page (optional, but good practice. For now we will rely on a JS confirm or a modal in my_stacks, 
+    # but if visited via GET, we should probably show a confirm page or redirect. 
+    # Let's assume the UI handles the POST directly or we show a confirm page.)
+    return render(request, 'confirm_delete_stack.html', {'stack': stack})
 
 
 @staff_member_required

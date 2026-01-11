@@ -97,3 +97,54 @@ class AIService:
                 'title': 'Suggested Tools (Fallback)',
                 'description': 'Tools based on semantic search due to AI error.'
             }
+
+    @staticmethod
+    def generate_workflow_description(stack_name, tools_list):
+        """
+        Generates a step-by-step workflow description for a given stack.
+        """
+        if not settings.GEMINI_API_KEY:
+            return "Workflow description unavailable (No API Key)."
+        
+        # Prepare context
+        tools_context = []
+        for tool in tools_list:
+            trans = tool.get_translation('en')
+            desc = trans.short_description if trans else ""
+            tools_context.append(f"- {tool.name}: {desc}")
+        
+        context_str = "\n".join(tools_context)
+        
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        system_instruction = """
+        You are an expert AI software architect.
+        User will provide a Stack Name and a list of Tools.
+        
+        Your task:
+        Create a practical, step-by-step workflow description explaining how these tools work together to solve a problem.
+        
+        Guidelines:
+        - Do not add title
+        - Start with a brief overview.
+        - Use numbered steps (1., 2., 3.).
+        - Focus on integration and data flow between the tools.
+        - Be professional but engaging.
+        - Keep it under 200 words.
+        - Used markdown formatting.
+        """
+        
+        prompt = f"Stack Name: {stack_name}\n\nTools:\n{context_str}"
+        
+        try:
+            response = client.models.generate_content(
+                model="gemini-flash-lite-latest",
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                ),
+                contents=[prompt]
+            )
+            return response.text
+        except Exception as e:
+            print(f"AI Workflow Gen Error: {e}")
+            return "Could not generate workflow description at this time."
