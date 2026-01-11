@@ -233,6 +233,21 @@ def search(request):
     })
 
 
+
+def tag_detail(request, slug):
+    """List tools by tag."""
+    tag = get_object_or_404(Tag, slug=slug)
+    tools = Tool.objects.filter(
+        status='published',
+        tags=tag
+    ).prefetch_related('translations', 'tags')
+    
+    return render(request, 'tag_detail.html', {
+        'tag': tag,
+        'tools': tools,
+    })
+
+
 @login_required
 def my_stacks(request):
     """List authenticated user's stacks."""

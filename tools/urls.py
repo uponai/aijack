@@ -10,6 +10,7 @@ urlpatterns = [
     path('stacks/', views.stacks, name='stacks'),
     path('stack/<slug:slug>/', views.stack_detail, name='stack_detail'),
     path('search/', views.search, name='search'),
+    path('tag/<slug:slug>/', views.tag_detail, name='tag_detail'),
     path('my-stacks/', views.my_stacks, name='my_stacks'),
     path('stack/<slug:slug>/edit/', views.edit_custom_stack, name='edit_custom_stack'),
     path('stack/<slug:slug>/delete/', views.delete_custom_stack, name='delete_custom_stack'),

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+<!-- 
+    Tag Detail Page
+    Displays tools associated with a specific tag.
+-->
+
+{% block title %}Tools tagged "{{ tag.name }}" | AIJACK{% endblock %}
+{% block meta_description %}Browse AI tools tagged with "{{ tag.name }}". Find the best resources for your needs.{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-white/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-3 mb-8 text-sm">
+            <a href="{% url 'home' %}" class="text-brand-600 hover:underline">Home</a>
+            <span class="text-slate-400">/</span>
+            <span class="text-slate-600">Tag: {{ tag.name }}</span>
+        </div>
+
+        <!-- Header -->
+        <div class="mb-12">
+            <h1 class="text-3xl md:text-5xl font-heading font-black text-slate-900 mb-4">
+                <span class="text-brand-600">TAG:</span> {{ tag.name|upper }}
+            </h1>
+            <p class="text-xl text-slate-600">
+                Found {{ tools.count }} tools tagged with "<span class="font-semibold">{{ tag.name }}</span>"
+            </p>
+        </div>
+
+        <!-- Tools Grid -->
+        {% if tools %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for tool in tools %}
+            {% include 'includes/_tool_card.html' with tool=tool %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-20 neon-card">
+            <i class="fa-solid fa-tags text-4xl text-slate-300 mb-4"></i>
+            <h3 class="text-xl font-heading font-bold text-slate-900 mb-2">No tools found</h3>
+            <p class="text-slate-500">There are no tools associated with this tag yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
