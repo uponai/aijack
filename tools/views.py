@@ -22,7 +22,7 @@ def home(request):
     thirty_days_ago = today - timedelta(days=30)
     
     professions = Profession.objects.all()[:8]
-    featured_stacks = ToolStack.objects.filter(is_featured=True, visibility='public')[:3]
+    featured_stacks = ToolStack.objects.filter(is_featured=True, visibility='public')[:4]
     featured_tools = Tool.objects.filter(status='published', is_featured=True)[:6]
     
     # Highlighted items (within highlight date range)
