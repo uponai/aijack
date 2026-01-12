@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms and Conditions | AIJACK{% endblock %}
+{% block meta_description %}Read our Terms and Conditions regarding the use of AIJACK, our subscription policies, and affiliate disclosures.{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4">
+            TERMS & <span class="text-brand-600 glow-text">CONDITIONS</span>
+        </h1>
+        <p class="text-xl text-slate-600">Please read these terms carefully before using AIJACK.</p>
+    </div>
+
+    <div class="neon-card p-8 md:p-12 space-y-8 text-slate-700 leading-relaxed">
+
+        <div class="prose prose-slate max-w-none">
+            <h3 class="text-2xl font-heading font-bold text-slate-900 mb-4">1. Acceptance of Terms</h3>
+            <p>By accessing and using AIJACK ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. In addition, when using these particular services, you shall be subject to any posted guidelines or rules applicable to such services.</p>
+
+            <div class="neon-divider"></div>
+
+            <h3 class="text-2xl font-heading font-bold text-slate-900 mb-4">2. Subscription & Pricing Policy</h3>
+            <div class="bg-brand-50 border-l-4 border-brand-500 p-4 rounded-r-lg mb-4">
+                <p class="font-bold text-brand-700 m-0">IMPORTANT NOTICE REGARDING FREE ACCESS</p>
+                <p class="text-sm text-brand-600 mt-1 m-0">We reserve the right to modify our pricing structure at any time.</p>
+            </div>
+            <p>While AIJACK may initially offer free access to certain features or the entire platform, we explicitly reserve the right to transition to a paid subscription model at any time. Users acknowledge that:</p>
+            <ul class="list-disc pl-6 space-y-2 mt-2">
+                <li>There is no "free forever" right guaranteed to any user.</li>
+                <li>We may introduce premium tiers, paywalls, or subscription fees for features that were previously free.</li>
+                <li>We will provide reasonable notice before implementing mandatory charges for existing core functionalities.</li>
+            </ul>
+
+            <div class="neon-divider"></div>
+
+            <h3 class="text-2xl font-heading font-bold text-slate-900 mb-4">3. Affiliate Disclosure</h3>
+            <p>AIJACK participates in various affiliate marketing programs, which means we may get paid commissions on editorially chosen products purchased through our links to retailer sites.</p>
+            <p><strong>Transparency:</strong> Our recommendations are based on our analysis of the tool's quality, not solely on commission. However, users should assume that any link to an external tool or service may be an affiliate link.</p>
+
+            <div class="neon-divider"></div>
+
+            <h3 class="text-2xl font-heading font-bold text-slate-900 mb-4">4. Fraud & System Integrity</h3>
+            <p>To protect our community and system integrity, we strictly prohibit:</p>
+            <ul class="list-disc pl-6 space-y-2 mt-2">
+                <li>Usage of the Service for any illegal activities or to promote illegal acts.</li>
+                <li>Attempting to disrupt, compromise, or attack the system integrity (DDoS, injection attacks, etc.).</li>
+                <li>Creating multiple accounts for the purpose of manipulating ratings, reviews, or system metrics.</li>
+            </ul>
+            <p class="mt-4"><strong>Termination:</strong> We reserve the right to terminate or suspend access to our Service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
+
+            <div class="neon-divider"></div>
+
+            <h3 class="text-2xl font-heading font-bold text-slate-900 mb-4">6. AI Usage & Data Privacy</h3>
+            <div class="bg-brand-50 border-l-4 border-brand-500 p-4 rounded-r-lg mb-6">
+                <p class="font-bold text-brand-700 m-0">OUR PROMISE ON DATA PRIVACY</p>
+                <p class="text-sm text-brand-600 mt-1 m-0">Your data is yours. We do not use your personal data or private stack content to train our AI models.</p>
+            </div>
+
+            <h4 class="text-lg font-bold text-slate-800 mb-2">6.1 No AI Training on User Data</h4>
+            <p>We explicitly guarantee that:</p>
+            <ul class="list-disc pl-6 space-y-2 mt-2 mb-4">
+                <li><strong>No Training:</strong> Content you create, searches you perform, and private stacks you build are <strong>never</strong> used to train our AI models (LLMs).</li>
+                <li><strong>Anonymization:</strong> When using AI features (such as "Generate Stacks"), the data sent to third-party LLM providers is stripped of personal identifiers and is strictly limited to the necessary prompt context.</li>
+                <li><strong>Data Isolation:</strong> Your private data remains isolated. We do not aggregate user data to improve general model performance in a way that could leak your proprietary information.</li>
+            </ul>
+
+            <h4 class="text-lg font-bold text-slate-800 mb-2">6.2 AI Responsibility & Limitations</h4>
+            <p>While we strive for accuracy, AI-generated content (including search results, stack suggestions, and workflow descriptions) may contain errors, inaccuracies, or hallucinations. You acknowledge that:</p>
+            <ul class="list-disc pl-6 space-y-2 mt-2">
+                <li>You typically verify critical information from authoritative sources.</li>
+                <li>We are not responsible for any decisions (financial, legal, technical) made based solely on AI-generated advice.</li>
+                <li>You are solely responsible for how you use the output generated by our AI tools.</li>
+            </ul>
+
+            <div class="neon-divider"></div>
+
+            <h3 class="text-2xl font-heading font-bold text-slate-900 mb-4">7. Disclaimer of Warranties</h3>
+            <p>The Service is provided on an "AS IS" and "AS AVAILABLE" basis. AIJACK makes no representations or warranties of any kind, express or implied, as to the operation of their services, or the information, content, or materials included therein.</p>
+
+            <p class="text-sm text-slate-500 mt-8 italic">Last updated: January 2026</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -40,4 +40,10 @@ urlpatterns = [
     path('admin-dashboard/professions/add/', views.admin_profession_create, name='admin_profession_create'),
     path('admin-dashboard/professions/<slug:slug>/edit/', views.admin_profession_edit, name='admin_profession_edit'),
     path('admin-dashboard/professions/<slug:slug>/delete/', views.admin_profession_delete, name='admin_profession_delete'),
+
+
+    # Legal
+    path('terms/', views.TermsView.as_view(), name='terms'),
+    path('privacy/', views.PrivacyView.as_view(), name='privacy'),
+    path('cookies/', views.CookieView.as_view(), name='cookies'),
 ]

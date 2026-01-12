@@ -39,6 +39,11 @@
                 {% if redirect_field_value %}
                 <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                 {% endif %}
+
+                <p class="text-xs text-slate-500">
+                    By clicking "Sign Up", you agree to our <a href="{% url 'terms' %}" class="text-brand-600 font-bold hover:underline" target="_blank">Terms & Conditions</a> and <a href="{% url 'privacy' %}" class="text-brand-600 font-bold hover:underline" target="_blank">Privacy Policy</a>.
+                </p>
+
                 <button type="submit" class="w-full neon-button-magenta py-3 rounded-xl text-lg shadow-lg">Sign Up</button>
             </form>
 

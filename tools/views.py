@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 import json
@@ -779,3 +780,14 @@ def admin_profession_delete(request, slug):
         'back_url': 'admin_professions',
         'active_tab': 'professions'
     })
+
+
+class TermsView(TemplateView):
+    template_name = "terms.html"
+
+class PrivacyView(TemplateView):
+    template_name = "privacy.html"
+
+class CookieView(TemplateView):
+    template_name = "cookies.html"
+
