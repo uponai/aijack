@@ -1,5 +1,5 @@
 from django import forms
-from .models import Tool, ToolStack, Profession, Category, Tag
+from .models import Tool, ToolStack, Profession, Category, Tag, SubmittedTool
 
 class ToolForm(forms.ModelForm):
     class Meta:
@@ -43,6 +43,19 @@ class ProfessionForm(forms.ModelForm):
     class Meta:
         model = Profession
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'neon-input w-full'})
+
+class ToolSubmissionForm(forms.ModelForm):
+    class Meta:
+        model = SubmittedTool
+        fields = ['name', 'website_url', 'recommended_profession', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

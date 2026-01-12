@@ -40,6 +40,11 @@
                 <span class="font-heading font-bold text-purple-600">{{ stacks|length }}</span>
                 <span class="text-slate-500 text-sm">Stacks Available</span>
             </div>
+
+            <a href="{% url 'submit_tool' %}" class="ml-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-brand-500 hover:text-brand-600 transition-colors shadow-sm text-slate-600 font-semibold text-sm">
+                <i class="fa-solid fa-plus"></i> Submit a Tool
+            </a>
+
             {% if not request.user.is_authenticated %}
             <div class="mt-2">
                 <a href="{% url 'account_signup' %}" class="neon-button-cyan text-base px-6 py-3 inline-flex items-center gap-2 group">

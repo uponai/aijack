@@ -713,6 +713,9 @@
                         <a href="{% url 'browse_tools' %}" class="nav-link {% if request.resolver_match.url_name == 'browse_tools' %}active{% endif %}">Tools</a>
                         <a href="{% url 'professions' %}" class="nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                         <a href="{% url 'stacks' %}" class="nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
+                        <a href="{% url 'submit_tool' %}" class="nav-link text-neon-magenta font-bold {% if request.resolver_match.url_name == 'submit_tool' %}active{% endif %}">
+                            <i class="fa-solid fa-plus-circle mr-1"></i> Submit Tool
+                        </a>
 
                         <div class="h-6 w-px bg-slate-200 mx-2"></div>
 
@@ -780,6 +783,7 @@
                     <a href="{% url 'browse_tools' %}" class="block nav-link {% if request.resolver_match.url_name == 'browse_tools' %}active{% endif %}">Tools</a>
                     <a href="{% url 'professions' %}" class="block nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                     <a href="{% url 'stacks' %}" class="block nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
+                    <a href="{% url 'submit_tool' %}" class="block nav-link text-neon-magenta {% if request.resolver_match.url_name == 'submit_tool' %}active{% endif %}">Submit Tool</a>
 
                     <div class="border-t border-slate-100 my-2 pt-2"></div>
 

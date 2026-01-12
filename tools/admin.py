@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick, NewsletterSubscriber
+from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick, NewsletterSubscriber, SubmittedTool
 
 
 class ToolTranslationInline(admin.TabularInline):
@@ -152,3 +152,17 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
     list_filter = ['created_at', 'is_active']
     search_fields = ['email']
     readonly_fields = ['created_at']
+
+
+@admin.register(SubmittedTool)
+class SubmittedToolAdmin(admin.ModelAdmin):
+    list_display = ['name', 'user', 'website_url', 'created_at', 'is_approved']
+    list_filter = ['created_at', 'is_approved']
+    search_fields = ['name', 'user__username', 'website_url']
+    actions = ['approve_tools']
+
+    def approve_tools(self, request, queryset):
+        # This action could technically move tools to the main Tool table, 
+        # but for now we just mark them as approved.
+        queryset.update(is_approved=True)
+    approve_tools.short_description = "Mark selected tools as approved"

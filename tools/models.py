@@ -481,3 +481,20 @@ class NewsletterSubscriber(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class SubmittedTool(models.Model):
+    """Tools submitted by users for approval."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submitted_tools')
+    name = models.CharField(max_length=150)
+    website_url = models.URLField()
+    description = models.TextField(blank=True)
+    recommended_profession = models.CharField(max_length=100, blank=True, help_text="The main profession this tool is for")
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} (by {self.user.username})"

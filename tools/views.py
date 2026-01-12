@@ -7,9 +7,11 @@ from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.mail import send_mail
+from django.conf import settings
 import json
-from .models import Tool, Profession, Category, ToolStack, Tag, SavedTool, SavedStack
-from .forms import ToolForm, ToolStackForm, ProfessionForm
+from .models import Tool, Profession, Category, ToolStack, Tag, SavedTool, SavedStack, SubmittedTool
+from .forms import ToolForm, ToolStackForm, ProfessionForm, ToolSubmissionForm
 from .search import SearchService
 from .ai_service import AIService
 from .analytics import AnalyticsService
@@ -290,6 +292,54 @@ def tool_detail(request, slug):
         'translation': translation,
         'related_tools': related_tools,
     })
+
+
+def submit_tool(request):
+    """Handle user tool submissions."""
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            messages.error(request, "You must be logged in to submit a tool.")
+            return redirect('account_login')
+            
+        form = ToolSubmissionForm(request.POST)
+        if form.is_valid():
+            tool = form.save(commit=False)
+            tool.user = request.user
+            tool.save()
+            
+            # Send email notification
+            try:
+                subject = 'Tool Submission Received'
+                # Render HTML content
+                from django.template.loader import render_to_string
+                from django.core.mail import EmailMultiAlternatives
+                from django.utils.html import strip_tags
+
+                html_content = render_to_string('emails/tool_submission_received.html', {
+                    'user': request.user,
+                    'tool': tool
+                })
+                text_content = strip_tags(html_content)
+                
+                msg = EmailMultiAlternatives(
+                    subject,
+                    text_content,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [request.user.email]
+                )
+                msg.attach_alternative(html_content, "text/html")
+                msg.send(fail_silently=True)
+
+            except Exception as e:
+                print(f"Failed to send email: {e}")
+                pass
+                
+            messages.success(request, "Tool submitted successfully! We've sent you a confirmation email.")
+            return redirect('submit_tool')
+    else:
+        form = ToolSubmissionForm()
+    
+    return render(request, 'submit_tool.html', {'form': form})
 
 
 def stacks(request):

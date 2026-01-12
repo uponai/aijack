@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Submit Your Tool - AIJack{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 md:py-12">
+    <!-- Header -->
+    <div class="max-w-4xl mx-auto text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-black mb-4 font-heading text-slate-900">SUBMIT A <span class="text-brand-600 glow-text">TOOL</span></h1>
+        <p class="text-xl text-slate-600">
+            Know an awesome AI tool that's missing from our directory? <br class="hidden md:inline">
+            Submit it below and help the community discover the best AI resources.
+        </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-2xl mx-auto">
+        <div class="neon-card p-8 rounded-2xl relative overflow-hidden">
+            <!-- Decorative blur -->
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary-500/10 blur-3xl rounded-full pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-secondary-500/10 blur-3xl rounded-full pointer-events-none"></div>
+
+            <div class="relative z-10">
+                {% if user.is_authenticated %}
+                {% if messages %}
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                <div class="text-center py-12">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center animate-bounce">
+                        <i class="fas fa-check text-4xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold font-heading text-slate-900 mb-2">Submission Received!</h3>
+                    <p class="text-slate-600 mb-8 max-w-md mx-auto">{{ message }}</p>
+
+                    <a href="{% url 'submit_tool' %}" class="neon-button-cyan py-3 px-8 rounded-lg font-bold">
+                        Submit Another Tool
+                    </a>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% else %}
+                <div x-data="{ submitting: false }">
+                    <!-- Loading State -->
+                    <div x-show="submitting" class="text-center py-12" style="display: none;">
+                        <div class="w-16 h-16 mx-auto mb-6 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+                        <h3 class="text-xl font-bold font-heading text-slate-900 mb-2">Submitting Tool...</h3>
+                        <p class="text-slate-500">Please wait while we process your request.</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form method="post" class="space-y-6" @submit="submitting = true" x-show="!submitting">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-lg">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Name -->
+                        <div>
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-bold uppercase tracking-wider text-slate-700 mb-2 font-heading">Tool Name</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Website URL -->
+                        <div>
+                            <label for="{{ form.website_url.id_for_label }}" class="block text-sm font-bold uppercase tracking-wider text-slate-700 mb-2 font-heading">Website URL</label>
+                            {{ form.website_url }}
+                            {% if form.website_url.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.website_url.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Recommended Profession -->
+                        <div>
+                            <label for="{{ form.recommended_profession.id_for_label }}" class="block text-sm font-bold uppercase tracking-wider text-slate-700 mb-2 font-heading">
+                                Recommended Profession <span class="text-slate-400 text-xs ml-1 normal-case font-body">(Optional)</span>
+                            </label>
+                            {{ form.recommended_profession }}
+                            {% if form.recommended_profession.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.recommended_profession.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-slate-500">Which profession would get the most value from this tool?</p>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-bold uppercase tracking-wider text-slate-700 mb-2 font-heading">
+                                Description <span class="text-slate-400 text-xs ml-1 normal-case font-body">(Optional)</span>
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <p class="mt-1 text-sm text-red-500">{{ form.description.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-slate-500">Briefly describe what this tool does.</p>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" class="w-full neon-button-cyan py-3 px-6 rounded-lg font-bold text-lg shadow-lg hover:shadow-cyan-500/20 transition-all">
+                                Submit Tool
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-8">
+                    <div class="mb-6">
+                        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand-100 flex items-center justify-center">
+                            <i class="fas fa-lock text-4xl text-brand-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold font-heading text-slate-900 mb-2">Login Required</h3>
+                        <p class="text-slate-600">You must be logged in to submit a tool. This helps us ensure the quality of submissions.</p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="{% url 'account_login' %}?next={% url 'submit_tool' %}" class="neon-button-cyan py-3 px-8 rounded-lg font-bold text-center">
+                            Log In
+                        </a>
+                        <a href="{% url 'account_signup' %}?next={% url 'submit_tool' %}" class="neon-button-filled py-3 px-8 rounded-lg font-bold text-center">
+                            Sign Up
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="mt-12 text-center">
+            <h3 class="text-xl font-bold font-heading text-slate-900 mb-6 uppercase tracking-wider">How to submit</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="neon-card p-6 rounded-xl hover:translate-y-[-5px] transition-transform">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
+                        <i class="fas fa-paper-plane text-xl"></i>
+                    </div>
+                    <h4 class="font-bold font-heading text-slate-900 mb-2">1. Submit</h4>
+                    <p class="text-sm text-slate-600">Fill out the basic details about the tool.</p>
+                </div>
+                <div class="neon-card p-6 rounded-xl hover:translate-y-[-5px] transition-transform">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-600">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                    <h4 class="font-bold font-heading text-slate-900 mb-2">2. Review</h4>
+                    <p class="text-sm text-slate-600">Our team will verify the tool and enrich the data.</p>
+                </div>
+                <div class="neon-card p-6 rounded-xl hover:translate-y-[-5px] transition-transform">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                        <i class="fas fa-rocket text-xl"></i>
+                    </div>
+                    <h4 class="font-bold font-heading text-slate-900 mb-2">3. Publish</h4>
+                    <p class="text-sm text-slate-600">The tool goes live for everyone to discover!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

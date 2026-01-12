@@ -55,6 +55,11 @@
 
             <!-- UX Enhancement Buttons -->
             <div class="flex items-center gap-2">
+                <!-- Submit Tool Button -->
+                <a href="{% url 'submit_tool' %}" class="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-neon-magenta/10 text-neon-magenta border border-neon-magenta/30 rounded-lg hover:bg-neon-magenta hover:text-white transition-all font-bold text-sm uppercase tracking-wider">
+                    <i class="fa-solid fa-plus"></i> Submit Tool
+                </a>
+
                 <!-- Back to Top -->
                 <button @click="scrollToTop()"
                         class="ux-button"
