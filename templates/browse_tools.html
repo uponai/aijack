@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
+
 {% block title %}Browse All AI Tools | AIJACK{% endblock %}
 {% block meta_description %}Explore our complete collection of {{ total_count }} AI tools. Filter by category, profession, or pricing. Find the perfect AI tool for your workflow.{% endblock %}
 
@@ -11,7 +12,7 @@
     "@type": "CollectionPage",
     "name": "All AI Tools",
     "description": "Browse and filter our complete collection of AI tools for professionals.",
-    "url": "{{ request.build_absolute_uri }}"
+    "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'browse_tools' %}"
 }
 </script>
 <script type="application/ld+json">
