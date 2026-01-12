@@ -803,6 +803,54 @@
             </div>
         </nav>
 
+        <!-- Promotional Banner (Anonymous users only) -->
+        {% if not user.is_authenticated %}
+        <div x-data="promoBanner()" x-show="isVisible" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-y-full" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-full" x-init="init()" class="relative z-40" style="display: none;">
+            <a href="{% url 'account_signup' %}" class="block w-full bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white text-center py-3 hover:from-red-500 hover:via-red-400 hover:to-orange-400 transition-all duration-300 group">
+                <span class="font-heading font-bold text-sm tracking-wider uppercase flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-sparkles text-yellow-300 group-hover:animate-pulse"></i>
+                    Click here for personalised experience
+                    <i class="fa-solid fa-arrow-right ml-1 group-hover:translate-x-1 transition-transform duration-200"></i>
+                </span>
+            </a>
+            <button @click.prevent.stop="dismiss()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition-colors p-1" title="Dismiss for 3 days">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <script>
+            function promoBanner ()
+            {
+                return {
+                    isVisible: false,
+                    storageKey: 'promoBannerDismissed',
+                    dismissDays: 3,
+
+                    init ()
+                    {
+                        const dismissedUntil = localStorage.getItem( this.storageKey );
+                        if ( dismissedUntil && new Date().getTime() < parseInt( dismissedUntil ) )
+                        {
+                            this.isVisible = false;
+                            return;
+                        }
+                        // Fade in after a short delay for smoother experience
+                        setTimeout( () =>
+                        {
+                            this.isVisible = true;
+                        }, 500 );
+                    },
+
+                    dismiss ()
+                    {
+                        this.isVisible = false;
+                        const expiryTime = new Date().getTime() + ( this.dismissDays * 24 * 60 * 60 * 1000 );
+                        localStorage.setItem( this.storageKey, expiryTime.toString() );
+                    }
+                };
+            }
+        </script>
+        {% endif %}
+
         <!-- Main Content -->
         <main>
             {% block content %}{% endblock %}
