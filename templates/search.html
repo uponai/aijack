@@ -56,6 +56,35 @@
 
         {% if query %}
 
+        <!-- Professions Results -->
+        {% if professions %}
+        <div class="mb-12">
+            <h2 class="text-2xl font-heading font-black text-slate-900 mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-user-tie text-cyan-500"></i>
+                Matching Professions
+            </h2>
+            <div class="flex flex-wrap gap-4">
+                {% for profession in professions %}
+                <a href="{% url 'profession_detail' profession.slug %}" class="flex items-center gap-3 px-5 py-3 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-brand-300 transition-all group">
+                    {% if profession.icon %}
+                    <span class="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+                        <i class="{{ profession.icon }}"></i>
+                    </span>
+                    {% else %}
+                    <span class="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-600 font-bold group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+                        {{ profession.name|slice:":2"|upper }}
+                    </span>
+                    {% endif %}
+                    <div>
+                        <div class="font-heading font-bold text-slate-800 group-hover:text-brand-600 transition-colors">{{ profession.name }}</div>
+                        <div class="text-xs text-slate-500">{{ profession.tools.count }} tools</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Stacks Results -->
         {% if stacks %}
         <div class="mb-12">

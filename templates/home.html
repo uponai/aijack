@@ -78,11 +78,42 @@
             </form>
 
             <!-- Search Suggestions -->
-            <div class="flex flex-wrap justify-center gap-3 text-sm text-slate-500">
+            <div class="flex flex-wrap justify-center gap-3 text-sm text-slate-500 mb-8">
                 <span>Try:</span>
                 <a href="{% url 'search' %}?q=AI+for+architects" class="text-brand-600 hover:underline">"AI for architects"</a>
                 <a href="{% url 'search' %}?q=automate+emails" class="text-brand-600 hover:underline">"automate client emails"</a>
                 <a href="{% url 'search' %}?q=design+faster" class="text-brand-600 hover:underline">"design faster"</a>
+            </div>
+
+            <!-- Counter Bar -->
+            <div class="flex flex-wrap justify-center gap-6 md:gap-12">
+                <div class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
+                    <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center">
+                        <i class="fa-solid fa-cube text-brand-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-heading font-black text-brand-600">{{ tool_count }}</div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">AI Tools</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                        <i class="fa-solid fa-layer-group text-purple-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-heading font-black text-purple-600">{{ stack_count }}</div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Stacks</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                        <i class="fa-solid fa-user-tie text-cyan-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-heading font-black text-cyan-600">{{ profession_count }}</div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Professions</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

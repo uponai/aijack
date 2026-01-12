@@ -9,11 +9,16 @@
             <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4">
                 AI <span class="text-brand-600 glow-text">TOOLKIT STACKS</span>
             </h1>
-            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto mb-4">
                 Curated combinations of AI tools that work together to solve complex workflows
             </p>
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 border border-purple-100 mb-6">
+                <i class="fa-solid fa-layer-group text-purple-600"></i>
+                <span class="font-heading font-bold text-purple-600">{{ stacks|length }}</span>
+                <span class="text-slate-500 text-sm">Stacks Available</span>
+            </div>
             {% if not request.user.is_authenticated %}
-            <div class="mt-8">
+            <div class="mt-4">
                 <a href="{% url 'account_signup' %}" class="neon-button-cyan text-lg px-8 py-4 inline-flex items-center gap-3 group">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     <span>Create Your Own Toolkit with AI</span>

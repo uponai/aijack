@@ -9,9 +9,14 @@
             <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4">
                 EXPLORE BY <span class="text-brand-600 glow-text">PROFESSION</span>
             </h1>
-            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto mb-4">
                 Find AI tools curated specifically for your role and workflow
             </p>
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-50 border border-cyan-100">
+                <i class="fa-solid fa-user-tie text-cyan-600"></i>
+                <span class="font-heading font-bold text-cyan-600">{{ professions|length }}</span>
+                <span class="text-slate-500 text-sm">Professions Available</span>
+            </div>
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

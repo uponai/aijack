@@ -26,6 +26,11 @@ def home(request):
     featured_stacks = ToolStack.objects.filter(is_featured=True, visibility='public')[:4]
     featured_tools = Tool.objects.filter(status='published', is_featured=True)[:6]
     
+    # Global counts
+    tool_count = Tool.objects.filter(status='published').count()
+    stack_count = ToolStack.objects.filter(visibility='public').count()
+    profession_count = Profession.objects.count()
+    
     # Highlighted items (within highlight date range)
     highlighted_stacks = ToolStack.objects.filter(
         visibility='public',
@@ -58,6 +63,9 @@ def home(request):
         'highlighted_tools': highlighted_tools,
         'stack_newbies': stack_newbies,
         'app_newbies': app_newbies,
+        'tool_count': tool_count,
+        'stack_count': stack_count,
+        'profession_count': profession_count,
     })
 
 
@@ -163,6 +171,7 @@ def search(request):
     """Search tools page."""
     query = request.GET.get('q', '')
     tools = []
+    professions_results = []
     
     if query:
         # Semantic Search using ChromaDB
@@ -185,22 +194,20 @@ def search(request):
             where_clause = {"owner_id": ""}
             
             if include_community:
-                # If community checked: Public stacks (System OR (User & Public))
-                # ChromaDB 'where' with $or is supported in newer versions, but if not:
-                # We can query visibility="public". System stacks shd be public too?
-                # System stacks usually public.
                 where_clause = {"visibility": "public"}
-            
-            # If user wants ONLY their own? No, request was "search in other users' public stacks".
             
             stack_ids = SearchService.search(query, collection_name='stacks', where=where_clause)
             
             if stack_ids:
-                # Preserved order for stacks
                 preserved_stacks = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(stack_ids)])
                 stacks_results = ToolStack.objects.filter(id__in=stack_ids).order_by(preserved_stacks)[:4]
             else:
                 stacks_results = []
+            
+            # 3. Search Professions (keyword match on name/description)
+            professions_results = Profession.objects.filter(
+                Q(name__icontains=query) | Q(description__icontains=query)
+            )[:6]
                 
         except Exception as e:
             # Fallback to simple keyword search
@@ -213,6 +220,11 @@ def search(request):
                 Q(translations__use_cases__icontains=query)
             ).distinct().prefetch_related('translations', 'tags')[:20]
             stacks_results = []
+            
+            # Fallback profession search
+            professions_results = Profession.objects.filter(
+                Q(name__icontains=query) | Q(description__icontains=query)
+            )[:6]
     else:
         # No query
         stacks_results = []
@@ -232,6 +244,7 @@ def search(request):
         'query': query,
         'tools': tools,
         'stacks': stacks_results,
+        'professions': professions_results,
     })
 
 
