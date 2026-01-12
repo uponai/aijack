@@ -710,9 +710,9 @@
                     <!-- Desktop Nav -->
                     <div class="hidden md:flex items-center gap-4">
                         <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+                        <a href="{% url 'browse_tools' %}" class="nav-link {% if request.resolver_match.url_name == 'browse_tools' %}active{% endif %}">Tools</a>
                         <a href="{% url 'professions' %}" class="nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                         <a href="{% url 'stacks' %}" class="nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
-                        <a href="{% url 'search' %}" class="nav-link {% if request.resolver_match.url_name == 'search' %}active{% endif %}">Search</a>
 
                         <div class="h-6 w-px bg-slate-200 mx-2"></div>
 
@@ -777,9 +777,9 @@
             <div x-data="{ open: false }" x-on:toggle-mobile-menu.window="open = !open" x-show="open" x-transition class="md:hidden border-t border-brand-100">
                 <div class="px-4 py-4 space-y-2 bg-white/90 backdrop-blur-lg">
                     <a href="{% url 'home' %}" class="block nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+                    <a href="{% url 'browse_tools' %}" class="block nav-link {% if request.resolver_match.url_name == 'browse_tools' %}active{% endif %}">Tools</a>
                     <a href="{% url 'professions' %}" class="block nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                     <a href="{% url 'stacks' %}" class="block nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
-                    <a href="{% url 'search' %}" class="block nav-link {% if request.resolver_match.url_name == 'search' %}active{% endif %}">Search</a>
 
                     <div class="border-t border-slate-100 my-2 pt-2"></div>
 

@@ -78,6 +78,154 @@ def professions(request):
     })
 
 
+def browse_tools(request):
+    """Public tools browse page with filters and infinite scroll."""
+    tools = Tool.objects.filter(status='published').prefetch_related('translations', 'tags', 'categories', 'professions')
+    
+    # Get filter options for dropdowns
+    categories = Category.objects.all().order_by('name')
+    all_professions = Profession.objects.all().order_by('name')
+    tags = Tag.objects.all().order_by('name')
+    
+    # Apply filters
+    category_slug = request.GET.get('category', '')
+    profession_slug = request.GET.get('profession', '')
+    pricing = request.GET.get('pricing', '')
+    tag_slug = request.GET.get('tag', '')
+    
+    if category_slug:
+        tools = tools.filter(categories__slug=category_slug)
+    if profession_slug:
+        tools = tools.filter(professions__slug=profession_slug)
+    if pricing:
+        tools = tools.filter(pricing_type=pricing)
+    if tag_slug:
+        tools = tools.filter(tags__slug=tag_slug)
+    
+    # Apply sorting
+    sort = request.GET.get('sort', 'newest')
+    if sort == 'newest':
+        tools = tools.order_by('-created_at')
+    elif sort == 'oldest':
+        tools = tools.order_by('created_at')
+    elif sort == 'featured':
+        tools = tools.order_by('-is_featured', '-created_at')
+    elif sort == 'name_asc':
+        tools = tools.order_by('name')
+    elif sort == 'name_desc':
+        tools = tools.order_by('-name')
+    else:
+        tools = tools.order_by('-created_at')
+    
+    # Remove duplicates that might occur from multiple M2M joins
+    tools = tools.distinct()
+    
+    # Pagination
+    page = int(request.GET.get('page', 1))
+    per_page = 20
+    paginator = Paginator(tools, per_page)
+    tools_page = paginator.get_page(page)
+    
+    total_count = paginator.count
+    has_more = tools_page.has_next()
+    next_page = tools_page.next_page_number() if has_more else None
+    
+    # Build active filters for display
+    active_filters = []
+    if category_slug:
+        cat = Category.objects.filter(slug=category_slug).first()
+        if cat:
+            active_filters.append({'type': 'category', 'slug': category_slug, 'name': cat.name})
+    if profession_slug:
+        prof = Profession.objects.filter(slug=profession_slug).first()
+        if prof:
+            active_filters.append({'type': 'profession', 'slug': profession_slug, 'name': prof.name})
+    if pricing:
+        pricing_display = dict(Tool.PRICING_CHOICES).get(pricing, pricing)
+        active_filters.append({'type': 'pricing', 'slug': pricing, 'name': pricing_display})
+    if tag_slug:
+        tag_obj = Tag.objects.filter(slug=tag_slug).first()
+        if tag_obj:
+            active_filters.append({'type': 'tag', 'slug': tag_slug, 'name': tag_obj.name})
+    
+    context = {
+        'tools': tools_page,
+        'categories': categories,
+        'professions': all_professions,
+        'tags': tags,
+        'total_count': total_count,
+        'has_more': has_more,
+        'next_page': next_page,
+        'current_page': page,
+        'active_filters': active_filters,
+        'current_sort': sort,
+        'filter_category': category_slug,
+        'filter_profession': profession_slug,
+        'filter_pricing': pricing,
+        'filter_tag': tag_slug,
+    }
+    
+    return render(request, 'browse_tools.html', context)
+
+
+def browse_tools_api(request):
+    """API endpoint for infinite scroll - returns JSON or HTML partial."""
+    tools = Tool.objects.filter(status='published').prefetch_related('translations', 'tags', 'categories', 'professions')
+    
+    # Apply filters
+    category_slug = request.GET.get('category', '')
+    profession_slug = request.GET.get('profession', '')
+    pricing = request.GET.get('pricing', '')
+    tag_slug = request.GET.get('tag', '')
+    
+    if category_slug:
+        tools = tools.filter(categories__slug=category_slug)
+    if profession_slug:
+        tools = tools.filter(professions__slug=profession_slug)
+    if pricing:
+        tools = tools.filter(pricing_type=pricing)
+    if tag_slug:
+        tools = tools.filter(tags__slug=tag_slug)
+    
+    # Apply sorting
+    sort = request.GET.get('sort', 'newest')
+    if sort == 'newest':
+        tools = tools.order_by('-created_at')
+    elif sort == 'oldest':
+        tools = tools.order_by('created_at')
+    elif sort == 'featured':
+        tools = tools.order_by('-is_featured', '-created_at')
+    elif sort == 'name_asc':
+        tools = tools.order_by('name')
+    elif sort == 'name_desc':
+        tools = tools.order_by('-name')
+    else:
+        tools = tools.order_by('-created_at')
+    
+    tools = tools.distinct()
+    
+    # Pagination
+    try:
+        page = int(request.GET.get('page', 1))
+    except (ValueError, TypeError):
+        page = 1
+        
+    per_page = 20
+    paginator = Paginator(tools, per_page)
+    tools_page = paginator.get_page(page)
+    
+    has_more = tools_page.has_next()
+    next_page = tools_page.next_page_number() if has_more else None
+    
+    # Return HTML partial for HTMX/infinite scroll
+    return render(request, 'partials/_tools_grid_items.html', {
+        'tools': tools_page,
+        'has_more': has_more,
+        'next_page': next_page,
+    })
+
+
+
 def profession_detail(request, slug, pricing=None):
     """Profession landing page with filtered tools."""
     profession = get_object_or_404(Profession, slug=slug)
