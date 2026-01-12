@@ -17,18 +17,18 @@
 
 {% block content %}
 <!-- Hero -->
-<section class="py-16 relative overflow-hidden">
+<section class="py-4 relative overflow-hidden">
     <div class="absolute top-0 right-0 w-96 h-96 bg-brand-200 rounded-full filter blur-3xl opacity-30"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div class="max-w-3xl">
-            <div class="flex items-center gap-3 mb-6">
-                <a href="{% url 'professions' %}" class="text-brand-600 hover:underline font-medium">Professions</a>
+            <div class="flex items-center gap-1.5 mb-2">
+                <a href="{% url 'professions' %}" class="text-brand-600 hover:underline font-medium text-sm">Professions</a>
                 <span class="text-slate-400">/</span>
-                <span class="text-slate-600">{{ profession.name }}</span>
+                <span class="text-slate-600 text-sm">{{ profession.name }}</span>
             </div>
 
-            <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4 flex items-center gap-4">
+            <h1 class="text-xl md:text-2xl font-heading font-black text-slate-900 mb-2 flex items-center gap-2">
                 {% if profession.icon %}
                 <span class="text-brand-600"><i class="{{ profession.icon }}"></i></span>
                 {% endif %}
@@ -36,11 +36,11 @@
             </h1>
 
             {% if profession.hero_tagline %}
-            <p class="text-xl text-slate-600 mb-6">{{ profession.hero_tagline }}</p>
+            <p class="text-sm text-slate-600 mb-2">{{ profession.hero_tagline }}</p>
             {% endif %}
 
             {% if profession.description %}
-            <p class="text-slate-600">{{ profession.description }}</p>
+            <p class="text-slate-600 text-sm">{{ profession.description }}</p>
             {% endif %}
         </div>
     </div>
@@ -48,13 +48,13 @@
 
 <!-- Recommended Stacks -->
 {% if stacks %}
-<section class="py-8">
+<section class="py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-xl font-heading font-bold text-slate-900 mb-6">
+        <h2 class="text-base font-heading font-bold text-slate-900 mb-3">
             <span class="text-brand-600">RECOMMENDED</span> TOOLKIT STACKS
         </h2>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-2">
             {% for stack in stacks %}
             {% include 'includes/_stack_card.html' with stack=stack compact=True %}
             {% endfor %}
@@ -66,11 +66,11 @@
 <div class="neon-divider max-w-7xl mx-auto"></div>
 
 <!-- Filters & Tools -->
-<section class="py-8">
+<section class="py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Filters -->
-        <div class="flex flex-wrap items-center gap-4 mb-8">
-            <span class="font-heading font-semibold text-slate-700">FILTER:</span>
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span class="font-heading font-semibold text-slate-700 text-sm">FILTER:</span>
             <a href="{% url 'profession_detail' profession.slug %}"
                class="profession-chip {% if not request.resolver_match.kwargs.pricing %}active{% endif %}">
                 All ({{ counts.all }})
@@ -90,11 +90,11 @@
         </div>
 
         <!-- Tools Grid -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-2">
             {% for tool in tools %}
             {% include 'includes/_tool_card.html' with tool=tool %}
             {% empty %}
-            <div class="col-span-full text-center py-16">
+            <div class="col-span-full text-center py-12">
                 <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand-100 flex items-center justify-center">
                     <svg class="w-10 h-10 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
