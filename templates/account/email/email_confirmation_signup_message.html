@@ -1,9 +1,10 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 
     <head>
         <meta charset="utf-8">
-        <title>Welcome to AIJACK</title>
+        <title>Confirm Your Email</title>
         <style>
             body {
                 margin: 0;
@@ -48,6 +49,7 @@
                 padding: 40px 30px;
                 color: #334155;
                 line-height: 1.6;
+                text-align: center;
             }
 
             .heading {
@@ -55,7 +57,6 @@
                 font-weight: 800;
                 margin-bottom: 16px;
                 color: #0f172a;
-                text-align: center;
             }
 
             .button {
@@ -82,8 +83,13 @@
                 border-top: 1px solid #e2e8f0;
             }
 
+            .link {
+                color: #0ea5e9;
+                word-break: break-all;
+            }
+
             .icon {
-                display: block;
+                display: inline-block;
                 width: 64px;
                 height: 64px;
                 line-height: 64px;
@@ -91,24 +97,8 @@
                 background-color: #f0f9ff;
                 color: #0284c7;
                 font-size: 32px;
-                margin: 0 auto 20px auto;
+                margin-bottom: 20px;
                 border: 1px solid #e0f2fe;
-                text-align: center;
-            }
-
-            ul {
-                list-style: none;
-                padding: 0;
-                margin: 20px 0;
-            }
-
-            li {
-                margin-bottom: 10px;
-                padding-left: 0;
-            }
-
-            strong {
-                color: #0f172a;
             }
         </style>
     </head>
@@ -119,23 +109,17 @@
                 <div class="logo">AI<span>JACK</span></div>
             </div>
             <div class="content">
-                <div class="icon">🚀</div>
-                <h1 class="heading">Welcome to the Future of Work!</h1>
-                <p>Hey there,</p>
-                <p>Thanks for joining the <strong>AIJACK Intelligence Network</strong>. You're now part of a community of professionals staying ahead of the AI curve.</p>
-
-                <p>Every week, you'll get:</p>
-                <ul>
-                    <li>🔥 <strong>Curated Tools</strong> specific to your profession</li>
-                    <li>⚡ <strong>Power Stacks</strong> to automate complex workflows</li>
-                    <li>💡 <strong>Actionable Intelligence</strong> (no fluff, just value)</li>
-                </ul>
-
-                <p>We're thrilled to have you on board. If you ever need a custom recommendation, just hit reply!</p>
+                <div class="icon">✉️</div>
+                <h1 class="heading">Please Confirm Your Email</h1>
+                <p>Hello,</p>
+                <p>Thanks for joining AIJACK! To start exploring the best AI tools and building your personalized stacks, please verify your email address.</p>
 
                 <center>
-                    <a href="http://127.0.0.1:8000" class="button">Explore the Platform</a>
+                    <a href="{{ activate_url }}" class="button">Confirm Email Address</a>
                 </center>
+
+                <p style="margin-top: 30px; font-size: 14px; color: #64748b;">If the button above doesn't work, verify by copying the link below:</p>
+                <p><a href="{{ activate_url }}" class="link">{{ activate_url }}</a></p>
             </div>
             <div class="footer">
                 <p>© 2026 AIJACK. All rights reserved.</p>

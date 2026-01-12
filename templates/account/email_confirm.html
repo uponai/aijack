@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load account %}
+
+{% block title %}{% trans "Confirm E-mail Address" %}{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex justify-center relative overflow-hidden pt-20 pb-16">
+    <div class="max-w-md w-full px-4 relative z-10">
+        <div class="neon-card p-8 md:p-10 text-center relative z-10">
+            <!-- Icon -->
+            <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-brand-50/50 flex items-center justify-center border border-brand-200">
+                <i class="fa-solid fa-envelope-circle-check text-3xl text-brand-600"></i>
+            </div>
+
+            <h1 class="text-3xl font-heading font-black text-slate-900 mb-4 tracking-tight uppercase">
+                {% trans "Confirm E-mail Address" %}
+            </h1>
+
+            {% if confirmation %}
+            {% user_display confirmation.email_address.user as user_display %}
+
+            <p class="text-slate-600 text-lg mb-8 leading-relaxed">
+                {% blocktrans with confirmation.email_address.email as email %}Please confirm that <span class="font-bold text-slate-800">{{ email }}</span> is an e-mail address for user {{ user_display }}.{% endblocktrans %}
+            </p>
+
+            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full neon-button-cyan py-3 rounded-xl text-lg shadow-lg">
+                    {% trans "Confirm" %}
+                </button>
+            </form>
+            {% else %}
+            {% url 'account_email' as email_url %}
+
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-8">
+                <p class="text-red-600 font-medium">
+                    {% blocktrans %}This e-mail confirmation link expired or is invalid. Please <a href="{{ email_url }}" class="underline hover:text-red-700">issue a new e-mail confirmation request</a>.{% endblocktrans %}
+                </p>
+            </div>
+
+            <div class="flex justify-center">
+                <a href="{% url 'account_login' %}" class="neon-button-cyan inline-flex items-center gap-2 !py-3 !px-6">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    {% trans "Return to Login" %}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
