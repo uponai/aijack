@@ -1,0 +1,110 @@
+<!-- Reusable Neonpunk Modal System -->
+<div x-data="{ 
+    open: false, 
+    title: '', 
+    message: '', 
+    type: 'alert', // 'alert' or 'confirm'
+    confirmCallback: null,
+    cancelCallback: null,
+    
+    trigger(options) {
+        this.title = options.title || 'Notification';
+        this.message = options.message || '';
+        this.type = options.type || 'alert';
+        this.confirmCallback = options.onConfirm || null;
+        this.cancelCallback = options.onCancel || null;
+        this.open = true;
+    },
+    
+    close() {
+        this.open = false;
+        setTimeout(() => {
+            this.confirmCallback = null;
+            this.cancelCallback = null;
+        }, 300);
+    },
+
+    confirm() {
+        if (this.confirmCallback) {
+            this.confirmCallback();
+        }
+        this.close();
+    },
+
+    cancel() {
+        if (this.cancelCallback) {
+            this.cancelCallback();
+        }
+        this.close();
+    }
+}"
+     @keydown.escape.window="close()"
+     @show-modal.window="trigger($event.detail)"
+     class="relative z-[100]"
+     style="display: none;"
+     x-show="open"
+     x-init="$watch('open', value => { if(value) { $el.style.display = 'block' } else { setTimeout(() => $el.style.display = 'none', 300) } })">
+
+    <!-- Backdrop -->
+    <div x-show="open"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+
+    <!-- Modal Container -->
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <!-- Modal Card -->
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="opacity-0 scale-90 translate-y-4"
+             @click.outside="if(type === 'alert') close()"
+             class="neon-card w-full max-w-md bg-white/90 p-0 overflow-hidden shadow-2xl ring-1 ring-white/20">
+
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-slate-100/50 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                     :class="type === 'confirm' ? 'bg-red-50 text-red-500' : 'bg-brand-50 text-brand-500'">
+                    <i class="fa-solid text-lg"
+                       :class="type === 'confirm' ? 'fa-triangle-exclamation' : 'fa-info-circle'"></i>
+                </div>
+                <h3 class="font-heading font-bold text-lg text-slate-800 tracking-wide" x-text="title"></h3>
+            </div>
+
+            <!-- Body -->
+            <div class="px-6 py-6">
+                <p class="text-slate-600 leading-relaxed font-body text-lg" x-text="message"></p>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100/50 flex justify-end gap-3">
+                <!-- Cancel Button -->
+                <button @click="cancel()"
+                        class="px-5 py-2.5 rounded-lg font-heading font-semibold text-sm tracking-wider text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors uppercase">
+                    <span x-text="type === 'confirm' ? 'Cancel' : 'Close'"></span>
+                </button>
+
+                <!-- Confirm/Action Button -->
+                <button x-show="type === 'confirm'"
+                        @click="confirm()"
+                        class="px-5 py-2.5 rounded-lg font-heading font-bold text-sm tracking-wider text-white shadow-lg shadow-red-200 hover:shadow-red-300 hover:-translate-y-0.5 transition-all uppercase bg-gradient-to-r from-red-500 to-rose-500">
+                    Confirm
+                </button>
+
+                <!-- OK Button for Alerts -->
+                <button x-show="type === 'alert'"
+                        @click="close()"
+                        class="px-5 py-2.5 rounded-lg font-heading font-bold text-sm tracking-wider text-white shadow-lg shadow-brand-200 hover:shadow-brand-300 hover:-translate-y-0.5 transition-all uppercase bg-gradient-to-r from-brand-500 to-cyan-500">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

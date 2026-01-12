@@ -647,6 +647,35 @@
         }
     }" @notify.window="addNotification($event.detail.message, $event.detail.type)">
 
+        {% include '_modals.html' %}
+
+        <script>
+            // Global Helpers for Modals
+            window.vis_confirm = function ( message, onConfirm, onCancel, title = 'Confirm Action' )
+            {
+                window.dispatchEvent( new CustomEvent( 'show-modal', {
+                    detail: {
+                        type: 'confirm',
+                        title: title,
+                        message: message,
+                        onConfirm: onConfirm,
+                        onCancel: onCancel
+                    }
+                } ) );
+            };
+
+            window.vis_alert = function ( message, title = 'Notification' )
+            {
+                window.dispatchEvent( new CustomEvent( 'show-modal', {
+                    detail: {
+                        type: 'alert',
+                        title: title,
+                        message: message
+                    }
+                } ) );
+            };
+        </script>
+
         <!-- Toast Notifications -->
         <div class="fixed top-24 right-4 z-[60] flex flex-col gap-2 pointer-events-none">
             <template x-for="note in notifications" :key="note.id">
