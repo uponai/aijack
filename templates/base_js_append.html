@@ -1,0 +1,39 @@
+// Newsletter Subscription
+function subscribeNewsletter(event) {
+event.preventDefault();
+const form = event.target;
+const email = form.email.value;
+const messageEl = document.getElementById('newsletter-message');
+const button = form.querySelector('button');
+
+button.disabled = true;
+button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+fetch('/api/subscribe/', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'X-CSRFToken': getCookie('csrftoken')
+},
+body: JSON.stringify({ email: email })
+})
+.then(response => response.json())
+.then(data => {
+messageEl.textContent = data.message;
+messageEl.classList.remove('hidden', 'text-red-400', 'text-green-400');
+messageEl.classList.add('text-green-400');
+form.reset();
+})
+.catch(error => {
+messageEl.textContent = "Something went wrong. Please try again.";
+messageEl.classList.remove('hidden', 'text-green-400');
+messageEl.classList.add('text-red-400');
+})
+.finally(() => {
+button.disabled = false;
+button.textContent = 'Subscribe';
+setTimeout(() => {
+messageEl.classList.add('hidden');
+}, 5000);
+});
+}

@@ -22,7 +22,7 @@ def home(request):
     today = date.today()
     thirty_days_ago = today - timedelta(days=30)
     
-    professions = Profession.objects.all()[:8]
+    professions = Profession.objects.all()[:16]
     featured_stacks = ToolStack.objects.filter(is_featured=True, visibility='public')[:4]
     featured_tools = Tool.objects.filter(status='published', is_featured=True)[:6]
     
@@ -791,3 +791,51 @@ class PrivacyView(TemplateView):
 class CookieView(TemplateView):
     template_name = "cookies.html"
 
+
+
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from .models import NewsletterSubscriber
+import json
+
+@require_POST
+def subscribe_newsletter(request):
+    try:
+        data = json.loads(request.body)
+        email = data.get('email')
+        
+        if not email:
+            return JsonResponse({'message': 'Email is required.'}, status=400)
+            
+        if NewsletterSubscriber.objects.filter(email=email).exists():
+            return JsonResponse({'message': 'You are already subscribed!'})
+            
+        subscriber = NewsletterSubscriber.objects.create(email=email)
+        
+        # Send Welcome Email
+        try:
+            from django.core.mail import EmailMultiAlternatives
+            from django.template.loader import get_template
+            from django.conf import settings
+            
+            subject = "Welcome to AIJACK! 🚀"
+            text_content = "Welcome to AIJACK! Thanks for joining our intelligence network. You'll receive weekly curated AI tools and workflows."
+            html_content = get_template('emails/welcome_email.html').render({'email': email})
+            
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[email],
+                bcc=["support@growiumagent.com"]
+            )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+        except Exception as e:
+            # Log error but don't fail the subscription response
+            print(f"Email error: {e}")
+            
+        return JsonResponse({'message': 'Thanks for subscribing!'})
+    except Exception as e:
+        return JsonResponse({'message': str(e)}, status=400)

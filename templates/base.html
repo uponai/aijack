@@ -808,6 +808,66 @@
             {% block content %}{% endblock %}
         </main>
 
+        <!-- Newsletter Section (Anonymous only) -->
+        {% if not request.user.is_authenticated %}
+        <section class="relative py-24 bg-[#0B1120] border-t border-slate-800 overflow-hidden">
+            <!-- Background Image -->
+            <div class="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-screen" style="background-image: url('{% static 'img/newsletter-bg.png' %}');"></div>
+            <!-- Overlay Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0B1120] via-transparent to-[#0B1120]"></div>
+
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="relative bg-slate-900/40 backdrop-blur-xl border border-white/10 p-8 md:p-16 rounded-3xl shadow-2xl overflow-hidden group">
+                    <!-- Glowing Border Effect -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-brand-500/20 via-transparent to-brand-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"></div>
+
+                    <div class="relative z-10 text-center">
+                        <div class="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(2,132,199,0.2)]">
+                            <i class="fa-solid fa-bolt text-brand-400"></i> Weekly Intel
+                        </div>
+
+                        <h2 class="text-4xl md:text-5xl font-heading font-black text-white mb-6 tracking-tight">
+                            STAY AHEAD OF THE <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-400 to-cyan-400 glow-text-cyan">AI CURVE</span>
+                        </h2>
+
+                        <p class="text-slate-400 mb-10 max-w-xl mx-auto text-lg leading-relaxed">
+                            Join 10,000+ professionals getting curated AI tool recommendations.
+                            <span class="text-slate-300 font-medium">No fluff, just actionable value.</span>
+                        </p>
+
+                        <div x-data="{ showForm: false }" class="max-w-lg mx-auto min-h-[80px]">
+                            <!-- Trigger Button -->
+                            <button x-show="!showForm"
+                                    @click="showForm = true; $nextTick(() => $refs.emailInput.focus())"
+                                    x-transition:enter="transition ease-out duration-300"
+                                    x-transition:enter-start="opacity-0 scale-95"
+                                    x-transition:enter-end="opacity-100 scale-100"
+                                    class="bg-gradient-to-r from-brand-600 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white font-bold py-4 px-12 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:-translate-y-0.5 transition-all duration-300 border border-white/10 uppercase tracking-wider text-sm">
+                                Join the Notification List
+                            </button>
+
+                            <!-- Form -->
+                            <div x-show="showForm"
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 translate-y-4"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 style="display: none;">
+                                <form id="newsletter-form" onsubmit="subscribeNewsletter(event)" class="flex flex-col sm:flex-row gap-4">
+                                    <input x-ref="emailInput" type="email" name="email" placeholder="Enter your work email" required
+                                           class="flex-1 bg-slate-950/60 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-inner text-base">
+                                    <button type="submit" class="bg-gradient-to-r from-brand-600 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white font-bold py-4 px-8 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:-translate-y-0.5 transition-all duration-300 border border-white/10 uppercase tracking-wider text-sm whitespace-nowrap">
+                                        Subscribe
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <p id="newsletter-message" class="mt-6 text-sm font-bold tracking-wide hidden"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
         <!-- Footer -->
         <footer class="mt-20 py-12 border-t border-brand-100" style="background: rgba(255,255,255,0.5);">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -855,13 +915,22 @@
             }
 
             // AJAX Toggle Stack Save
-            function toggleStackSave ( event, stackSlug )
+            // AJAX Toggle Stack Save
+            function toggleStackSave ( event, stackSlug, btnElement )
             {
                 event.preventDefault();
                 event.stopPropagation();
 
                 const url = `/api/save-stack/${ stackSlug }/`;
-                const heartIcon = document.getElementById( `stack-heart-${ stackSlug }` );
+                let heartIcon = null;
+
+                if ( btnElement )
+                {
+                    heartIcon = btnElement.querySelector( 'i' );
+                } else
+                {
+                    heartIcon = document.getElementById( `stack-heart-${ stackSlug }` );
+                }
 
                 if ( !heartIcon ) return;
 
@@ -895,13 +964,21 @@
             }
 
             // AJAX Toggle Tool Save
-            function toggleToolSave ( event, toolId )
+            function toggleToolSave ( event, toolId, btnElement )
             {
                 event.preventDefault();
                 event.stopPropagation();
 
                 const url = `/api/save-tool/${ toolId }/`;
-                const heartIcon = document.getElementById( `tool-heart-${ toolId }` );
+                let heartIcon = null;
+
+                if ( btnElement )
+                {
+                    heartIcon = btnElement.querySelector( 'i' );
+                } else
+                {
+                    heartIcon = document.getElementById( `tool-heart-${ toolId }` );
+                }
 
                 if ( !heartIcon ) return;
 
@@ -932,6 +1009,57 @@
                         } ) );
                     } )
                     .catch( error => console.error( 'Error:', error ) );
+            }
+            // Newsletter Subscription
+            function subscribeNewsletter ( event )
+            {
+                event.preventDefault();
+                const form = event.target;
+                const email = form.email.value;
+                const messageEl = document.getElementById( 'newsletter-message' );
+                const button = form.querySelector( 'button' );
+
+                button.disabled = true;
+                const originalText = button.textContent;
+                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+                fetch( '/api/subscribe/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie( 'csrftoken' )
+                    },
+                    body: JSON.stringify( { email: email } )
+                } )
+                    .then( response => response.json() )
+                    .then( data =>
+                    {
+                        messageEl.textContent = data.message;
+                        messageEl.classList.remove( 'hidden', 'text-red-400', 'text-green-400' );
+                        if ( data.message.includes( 'Thanks' ) || data.message.includes( 'already' ) )
+                        {
+                            messageEl.classList.add( 'text-green-400' );
+                            if ( data.message.includes( 'Thanks' ) ) form.reset();
+                        } else
+                        {
+                            messageEl.classList.add( 'text-red-400' );
+                        }
+                    } )
+                    .catch( error =>
+                    {
+                        messageEl.textContent = "Something went wrong. Please try again.";
+                        messageEl.classList.remove( 'hidden', 'text-green-400' );
+                        messageEl.classList.add( 'text-red-400' );
+                    } )
+                    .finally( () =>
+                    {
+                        button.disabled = false;
+                        button.textContent = originalText;
+                        setTimeout( () =>
+                        {
+                            messageEl.classList.add( 'hidden' );
+                        }, 5000 );
+                    } );
             }
         </script>
         <!-- Cookie Consent Banner -->

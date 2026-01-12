@@ -109,6 +109,9 @@
             {% empty %}
             <p class="text-slate-500">No professions added yet. Visit the admin panel to add some!</p>
             {% endfor %}
+            <a href="{% url 'professions' %}" class="profession-chip !bg-slate-900 !text-white hover:!bg-slate-800 hover:!shadow-lg hover:-translate-y-0.5 transition-all">
+                Show All <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+            </a>
         </div>
     </div>
 </section>
@@ -211,34 +214,6 @@
 <div class="neon-divider max-w-7xl mx-auto"></div>
 {% endif %}
 
-<!-- Featured Tool Stacks -->
-{% if featured_stacks %}
-<section class="py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900 mb-4">
-                AI <span class="text-brand-600">TOOLKITS</span>
-            </h2>
-            <p class="text-slate-600">Curated tool combinations that work together</p>
-        </div>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
-            {% for stack in featured_stacks %}
-            {% include 'includes/_stack_card.html' with stack=stack %}
-            {% endfor %}
-        </div>
-
-        <div class="text-center mt-10">
-            <a href="{% url 'stacks' %}" class="neon-button-cyan">
-                View All Stacks
-            </a>
-        </div>
-    </div>
-</section>
-{% endif %}
-
-<div class="neon-divider max-w-7xl mx-auto"></div>
-
 <!-- Featured Tools -->
 {% if featured_tools %}
 <section class="py-16">
@@ -259,24 +234,31 @@
 </section>
 {% endif %}
 
-<!-- Newsletter CTA -->
-<section class="py-20">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="neon-card p-8 md:p-12 text-center glow-pulse">
+<div class="neon-divider max-w-7xl mx-auto"></div>
+<!-- Featured Tool Stacks -->
+{% if featured_stacks %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
             <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900 mb-4">
-                STAY <span class="text-brand-600">UPDATED</span>
+                AI <span class="text-brand-600">Toolkit Stacks</span>
             </h2>
-            <p class="text-slate-600 mb-8 max-w-xl mx-auto">
-                Get weekly AI tool recommendations curated for your profession. No spam, just value.
-            </p>
+            <p class="text-slate-600">Curated tool combinations that work together</p>
+        </div>
 
-            <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input type="email" placeholder="Enter your email" class="neon-input flex-1">
-                <button type="submit" class="neon-button-filled whitespace-nowrap">
-                    Subscribe
-                </button>
-            </form>
+        <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+            {% for stack in featured_stacks %}
+            {% include 'includes/_stack_card.html' with stack=stack %}
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-10">
+            <a href="{% url 'stacks' %}" class="neon-button-cyan">
+                View All Stacks
+            </a>
         </div>
     </div>
 </section>
+{% endif %}
+
 {% endblock %}

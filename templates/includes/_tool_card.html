@@ -59,7 +59,7 @@
     {# Favorite Button (Absolute - Top Right) #}
     <div class="absolute top-3 right-3 z-10">
         {% if request.user.is_authenticated %}
-        <button onclick="toggleToolSave(event, {{ tool.id }})"
+        <button onclick="toggleToolSave(event, {{ tool.id }}, this)"
                 class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center transition-colors group/btn"
                 title="{% if tool|is_saved_by:request.user %}Remove from favorites{% else %}Add to favorites{% endif %}">
             <i class="fa-solid fa-heart transition-colors {% if tool|is_saved_by:request.user %}text-red-500{% else %}text-slate-300 group-hover/btn:text-red-500{% endif %}" id="tool-heart-{{ tool.id }}"></i>

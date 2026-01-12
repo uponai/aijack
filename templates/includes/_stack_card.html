@@ -86,7 +86,7 @@
     {% if request.user != stack.owner %}
     <div class="absolute bottom-4 right-4 z-10">
         {% if request.user.is_authenticated %}
-        <button onclick="toggleStackSave(event, '{{ stack.slug }}')"
+        <button onclick="toggleStackSave(event, '{{ stack.slug }}', this)"
                 class="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center transition-colors group/btn"
                 title="{% if stack|is_saved_by:request.user %}Remove from favorites{% else %}Add to favorites{% endif %}">
             <i class="fa-solid fa-heart text-lg transition-colors {% if stack|is_saved_by:request.user %}text-red-500{% else %}text-slate-300 group-hover/btn:text-red-500{% endif %}" id="stack-heart-{{ stack.slug }}"></i>

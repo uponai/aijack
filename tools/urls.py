@@ -46,4 +46,5 @@ urlpatterns = [
     path('terms/', views.TermsView.as_view(), name='terms'),
     path('privacy/', views.PrivacyView.as_view(), name='privacy'),
     path('cookies/', views.CookieView.as_view(), name='cookies'),
+    path('api/subscribe/', views.subscribe_newsletter, name='subscribe_newsletter'),
 ]

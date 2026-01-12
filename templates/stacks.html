@@ -7,11 +7,21 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
             <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4">
-                AI <span class="text-brand-600 glow-text">TOOLKITS</span>
+                AI <span class="text-brand-600 glow-text">TOOLKIT STACKS</span>
             </h1>
             <p class="text-xl text-slate-600 max-w-2xl mx-auto">
                 Curated combinations of AI tools that work together to solve complex workflows
             </p>
+            {% if not request.user.is_authenticated %}
+            <div class="mt-8">
+                <a href="{% url 'account_signup' %}" class="neon-button-cyan text-lg px-8 py-4 inline-flex items-center gap-3 group">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Create Your Own Toolkit with AI</span>
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                </a>
+                <p class="text-sm text-slate-500 mt-3">Get a custom stack built for you by our AI agent</p>
+            </div>
+            {% endif %}
         </div>
 
         <div class="grid md:grid-cols-2 gap-8">

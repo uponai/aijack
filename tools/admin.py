@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick
+from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick, NewsletterSubscriber
 
 
 class ToolTranslationInline(admin.TabularInline):
@@ -145,3 +145,10 @@ class SavedStackAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'stack__name']
     raw_id_fields = ['user', 'stack']
 
+
+@admin.register(NewsletterSubscriber)
+class NewsletterSubscriberAdmin(admin.ModelAdmin):
+    list_display = ['email', 'created_at', 'is_active']
+    list_filter = ['created_at', 'is_active']
+    search_fields = ['email']
+    readonly_fields = ['created_at']

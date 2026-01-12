@@ -369,3 +369,15 @@ class AffiliateClick(models.Model):
         status = "✓" if self.converted else "○"
         return f"{status} {self.tool.name} click @ {self.clicked_at.strftime('%Y-%m-%d %H:%M')}"
 
+
+class NewsletterSubscriber(models.Model):
+    """Newsletter subscriber email."""
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.email
