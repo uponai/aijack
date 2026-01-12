@@ -504,15 +504,52 @@ def admin_dashboard(request):
     page_number = request.GET.get('page')
     recent_searches = paginator.get_page(page_number)
 
-    if request.headers.get('HX-Request'):
-         return render(request, 'partials/search_rows.html', {
-            'recent_searches': recent_searches,
-             'days': days
-         })
-    
+
     search_stats = AnalyticsService.get_search_stats(days=days)
     click_stats = AnalyticsService.get_click_stats(days=days)
     
+    # Newsletter Subscribers
+    q_sub = request.GET.get('q_sub', '')
+    sub_page = int(request.GET.get('sub_page', 1))
+    
+    sub_qs = NewsletterSubscriber.objects.all().order_by('-created_at')
+    if q_sub:
+        sub_qs = sub_qs.filter(email__icontains=q_sub)
+        
+    total_subs = sub_qs.count()
+    
+    if sub_page == 1:
+        start = 0
+        end = 10
+    else:
+        start = 10 + (sub_page - 2) * 20
+        end = start + 20
+        
+    newsletter_subscribers = sub_qs[start:end]
+    has_more = end < total_subs
+    next_page = sub_page + 1 if has_more else None
+    
+    # Handle AJAX Requests
+    if request.headers.get('HX-Request'):
+        # Check if this is a newsletter request (search or pagination)
+        if 'q_sub' in request.GET or 'sub_page' in request.GET:
+             return render(request, 'partials/newsletter_rows.html', {
+                 'subscribers': newsletter_subscribers,
+                 'has_more': has_more,
+                 'next_page': next_page,
+                 'days': days,
+                 'q_sub': q_sub
+             })
+        
+        # Otherwise assume it's the recent searches infinite scroll
+        # (This block was previously simpler, but now we need to be strict)
+        # However, the previous code just rendered 'partials/search_rows.html' directly.
+        # We'll preserve that behavior for non-newsletter AJAX requests.
+        return render(request, 'partials/search_rows.html', {
+            'recent_searches': recent_searches,
+             'days': days
+        })
+
     return render(request, 'admin_dashboard.html', {
         'top_tools': top_tools,
         'top_stacks': top_stacks,
@@ -520,6 +557,11 @@ def admin_dashboard(request):
         'search_stats': search_stats,
         'click_stats': click_stats,
         'days': days,
+        'newsletter_subscribers': newsletter_subscribers,
+        'newsletter_has_more': has_more,
+        'newsletter_next_page': next_page,
+        'newsletter_total': total_subs,
+        'q_sub': q_sub,
         'active_tab': 'analytics'
     })
 

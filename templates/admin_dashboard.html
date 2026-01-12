@@ -29,7 +29,7 @@
     </div>
 
     <!-- Stats Cards Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
         <!-- Total Searches -->
         <div class="neon-card p-6 text-center">
             <div class="text-4xl font-heading font-black text-brand-600 mb-2">{{ search_stats.total_searches|default:"0" }}</div>
@@ -59,8 +59,57 @@
         </div>
     </div>
 
+    <!-- Newsletter Subscribers -->
+    <div class="neon-card p-8 mt-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-heading font-bold text-brand-600">
+                <i class="fa-solid fa-envelope text-pink-500 mr-2"></i>Newsletter Subscribers
+            </h2>
+            <div class="flex items-center gap-4">
+                <!-- Search Input -->
+                <div class="relative">
+                    <input type="search"
+                           name="q_sub"
+                           placeholder="Search emails..."
+                           value="{{ q_sub }}"
+                           class="pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-sm"
+                           hx-get="{% url 'admin_dashboard' %}?days={{ days }}"
+                           hx-trigger="keyup changed delay:500ms, search"
+                           hx-target="#newsletter-rows"
+                           hx-indicator="#newsletter-spinner">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <div id="newsletter-spinner" class="htmx-indicator absolute right-3 top-1/2 -translate-y-1/2">
+                        <i class="fa-solid fa-spinner fa-spin text-brand-600"></i>
+                    </div>
+                </div>
+
+                <span class="text-sm text-slate-500">
+                    Total: <strong class="text-brand-600">{{ newsletter_total }}</strong>
+                </span>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-brand-200">
+                        <th class="text-left py-3 px-4 font-heading text-brand-600 uppercase text-sm tracking-wider">Email</th>
+                        <th class="text-center py-3 px-4 font-heading text-brand-600 uppercase text-sm tracking-wider">Status</th>
+                        <th class="text-right py-3 px-4 font-heading text-brand-600 uppercase text-sm tracking-wider">Subscribed Date</th>
+                    </tr>
+                </thead>
+                <tbody id="newsletter-rows" class="divide-y divide-brand-100">
+                    {% include 'partials/newsletter_rows.html' with subscribers=newsletter_subscribers has_more=newsletter_has_more next_page=newsletter_next_page q_sub=q_sub days=days %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls (Managed via Row) -->
+    </div>
+
+
     <!-- Main Content Grid -->
-    <div class="grid lg:grid-cols-2 gap-8">
+    <div class="grid lg:grid-cols-2 gap-8 mt-8">
 
         <!-- Top Tools -->
         <div class="neon-card p-8">
