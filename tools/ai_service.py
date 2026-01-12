@@ -148,3 +148,131 @@ class AIService:
         except Exception as e:
             print(f"AI Workflow Gen Error: {e}")
             return "Could not generate workflow description at this time."
+
+    @staticmethod
+    def generate_tool_metadata(tool_name, website_url, short_description, long_description, 
+                                pricing_text, existing_categories, existing_professions, existing_tags):
+        """
+        Uses Gemini to generate complete tool metadata for bulk import.
+        Returns a dictionary with all required fields.
+        """
+        if not settings.GEMINI_API_KEY:
+            return {
+                'error': 'No API key configured',
+                'pricing_type': 'freemium',
+                'category_names': [],
+                'profession_names': [],
+                'tag_names': [],
+                'meta_title': tool_name,
+                'meta_description': short_description[:160] if short_description else '',
+                'use_cases': '',
+                'pros': '',
+                'cons': ''
+            }
+        
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        # Build context with existing entities
+        categories_list = ", ".join(existing_categories) if existing_categories else "None yet"
+        professions_list = ", ".join(existing_professions) if existing_professions else "None yet"
+        tags_list = ", ".join(existing_tags) if existing_tags else "None yet"
+        
+        system_instruction = """
+You are an expert AI tools curator and SEO specialist.
+You will receive information about an AI tool and must generate comprehensive metadata.
+
+Your task is to analyze the tool and produce:
+1. pricing_type: Exactly one of: "free", "freemium", or "paid"
+   - "free" = completely free, no paid tiers
+   - "freemium" = has free tier plus paid options
+   - "paid" = requires payment, may have trial
+
+2. category_names: 1-3 relevant categories. Prefer existing ones, but suggest new if needed.
+
+3. profession_names: 1-4 target professions who would use this tool. Prefer existing ones.
+
+4. tag_names: 3-6 feature tags (e.g., "AI-powered", "automation", "cloud-based"). Prefer existing ones.
+
+5. meta_title: SEO title, 50-60 characters. Include tool name and key benefit.
+
+6. meta_description: SEO description, 150-160 characters. Compelling summary with call to action.
+
+7. use_cases: 3-5 specific use cases, comma-separated. Be practical and specific.
+
+8. pros: 3-5 advantages of this tool, comma-separated. Be specific and value-focused.
+
+9. cons: 2-3 potential downsides or limitations, comma-separated. Be honest but fair.
+
+Output MUST be valid JSON only. No markdown, no explanation.
+"""
+
+        prompt = f"""
+TOOL INFORMATION:
+- Name: {tool_name}
+- Website: {website_url}
+- Short Description: {short_description}
+- Detailed Description: {long_description}
+- Pricing Info from CSV: {pricing_text}
+
+EXISTING SYSTEM DATA (prefer these when applicable):
+- Categories: {categories_list}
+- Professions: {professions_list}
+- Tags: {tags_list}
+
+Generate the complete metadata JSON for this tool.
+"""
+
+        try:
+            response = client.models.generate_content(
+                model="gemini-flash-latest",
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    response_mime_type="application/json"
+                ),
+                contents=[prompt]
+            )
+            
+            data = json.loads(response.text)
+            
+            # Validate and normalize response
+            result = {
+                'pricing_type': data.get('pricing_type', 'freemium'),
+                'category_names': data.get('category_names', []),
+                'profession_names': data.get('profession_names', []),
+                'tag_names': data.get('tag_names', []),
+                'meta_title': data.get('meta_title', tool_name)[:200],
+                'meta_description': data.get('meta_description', short_description[:160] if short_description else ''),
+                'use_cases': data.get('use_cases', ''),
+                'pros': data.get('pros', ''),
+                'cons': data.get('cons', '')
+            }
+            
+            # Ensure pricing_type is valid
+            if result['pricing_type'] not in ['free', 'freemium', 'paid']:
+                result['pricing_type'] = 'freemium'
+            
+            # Convert lists to comma-separated if needed
+            if isinstance(result['use_cases'], list):
+                result['use_cases'] = ', '.join(result['use_cases'])
+            if isinstance(result['pros'], list):
+                result['pros'] = ', '.join(result['pros'])
+            if isinstance(result['cons'], list):
+                result['cons'] = ', '.join(result['cons'])
+            
+            return result
+            
+        except Exception as e:
+            print(f"AI Metadata Gen Error: {e}")
+            # Return sensible defaults
+            return {
+                'error': str(e),
+                'pricing_type': 'freemium',
+                'category_names': [],
+                'profession_names': [],
+                'tag_names': [],
+                'meta_title': tool_name,
+                'meta_description': short_description[:160] if short_description else '',
+                'use_cases': '',
+                'pros': '',
+                'cons': ''
+            }

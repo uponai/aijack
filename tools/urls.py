@@ -41,6 +41,8 @@ urlpatterns = [
     path('admin-dashboard/professions/<slug:slug>/edit/', views.admin_profession_edit, name='admin_profession_edit'),
     path('admin-dashboard/professions/<slug:slug>/delete/', views.admin_profession_delete, name='admin_profession_delete'),
 
+    # Bulk Upload
+    path('admin-dashboard/bulk-upload/', views.bulk_upload_tools, name='bulk_upload_tools'),
 
     # Legal
     path('terms/', views.TermsView.as_view(), name='terms'),

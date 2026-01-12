@@ -894,3 +894,236 @@ def subscribe_newsletter(request):
         return JsonResponse({'message': 'Thanks for subscribing!'})
     except Exception as e:
         return JsonResponse({'message': str(e)}, status=400)
+
+
+# --- Bulk Tool Upload ---
+import csv
+import io
+from urllib.parse import urlparse
+from django.utils.text import slugify
+from .models import ToolTranslation
+
+@staff_member_required
+def bulk_upload_tools(request):
+    """Handle CSV bulk upload of tools with AI-powered metadata generation."""
+    if not request.user.is_superuser:
+        messages.error(request, "Access denied. Superuser required.")
+        return redirect('home')
+    
+    context = {
+        'active_tab': 'bulk_upload',
+        'step': 'upload'  # upload, validate, importing, complete
+    }
+    
+    if request.method == 'POST':
+        action = request.POST.get('action', 'upload')
+        
+        if action == 'upload':
+            # Step 1: Parse and validate CSV
+            csv_file = request.FILES.get('csv_file')
+            if not csv_file:
+                messages.error(request, "Please select a CSV file.")
+                return render(request, 'admin_bulk_upload.html', context)
+            
+            if not csv_file.name.endswith('.csv'):
+                messages.error(request, "File must be a CSV file.")
+                return render(request, 'admin_bulk_upload.html', context)
+            
+            try:
+                # Read and decode file
+                decoded = csv_file.read().decode('utf-8-sig')
+                
+                # Auto-detect delimiter (semicolon or comma)
+                try:
+                    dialect = csv.Sniffer().sniff(decoded[:2048], delimiters=';,')
+                    delimiter = dialect.delimiter
+                except csv.Error:
+                    # Default to semicolon if detection fails
+                    delimiter = ';'
+                
+                reader = csv.DictReader(io.StringIO(decoded), delimiter=delimiter)
+                
+                rows = []
+                errors = []
+                row_num = 1
+                
+                for row in reader:
+                    row_num += 1
+                    row_data = {
+                        'row_num': row_num,
+                        'tool_name': row.get('Tool Name', '').strip(),
+                        'website_url': row.get('Website URL', '').strip(),
+                        'short_description': row.get('Short Description', '').strip(),
+                        'long_description': row.get('Detailed Description', '').strip(),
+                        'pricing_text': row.get('Pricing Strategy', '').strip(),
+                        'status': 'pending',
+                        'error': None
+                    }
+                    
+                    # Validation
+                    missing = []
+                    if not row_data['tool_name']:
+                        missing.append('Tool Name')
+                    if not row_data['website_url']:
+                        missing.append('Website URL')
+                    if not row_data['short_description']:
+                        missing.append('Short Description')
+                    
+                    if missing:
+                        row_data['status'] = 'error'
+                        row_data['error'] = f"Missing: {', '.join(missing)}"
+                        errors.append(row_data)
+                    else:
+                        # Check for duplicates
+                        domain = urlparse(row_data['website_url']).netloc.replace('www.', '')
+                        name_slug = slugify(row_data['tool_name'])
+                        
+                        exists_by_name = Tool.objects.filter(slug=name_slug).exists()
+                        exists_by_domain = Tool.objects.filter(website_url__icontains=domain).exists()
+                        
+                        if exists_by_name or exists_by_domain:
+                            row_data['status'] = 'skipped'
+                            row_data['error'] = 'Tool already exists (by name or domain)'
+                        
+                    rows.append(row_data)
+                
+                # Store in session for next step
+                request.session['bulk_upload_rows'] = rows
+                
+                context['step'] = 'validate'
+                context['rows'] = rows
+                context['total'] = len(rows)
+                context['valid'] = sum(1 for r in rows if r['status'] == 'pending')
+                context['skipped'] = sum(1 for r in rows if r['status'] == 'skipped')
+                context['errors'] = sum(1 for r in rows if r['status'] == 'error')
+                
+            except Exception as e:
+                messages.error(request, f"Error parsing CSV: {str(e)}")
+                return render(request, 'admin_bulk_upload.html', context)
+        
+        elif action == 'import':
+            # Step 2: Process the import
+            rows = request.session.get('bulk_upload_rows', [])
+            if not rows:
+                messages.error(request, "No data to import. Please upload a CSV first.")
+                return render(request, 'admin_bulk_upload.html', context)
+            
+            # Get existing entities for AI context
+            existing_categories = list(Category.objects.values_list('name', flat=True))
+            existing_professions = list(Profession.objects.values_list('name', flat=True))
+            existing_tags = list(Tag.objects.values_list('name', flat=True))
+            
+            results = []
+            created_count = 0
+            skipped_count = 0
+            error_count = 0
+            
+            for row in rows:
+                if row['status'] != 'pending':
+                    if row['status'] == 'skipped':
+                        skipped_count += 1
+                    elif row['status'] == 'error':
+                        error_count += 1
+                    results.append(row)
+                    continue
+                
+                try:
+                    # Generate metadata via AI
+                    metadata = AIService.generate_tool_metadata(
+                        tool_name=row['tool_name'],
+                        website_url=row['website_url'],
+                        short_description=row['short_description'],
+                        long_description=row['long_description'],
+                        pricing_text=row['pricing_text'],
+                        existing_categories=existing_categories,
+                        existing_professions=existing_professions,
+                        existing_tags=existing_tags
+                    )
+                    
+                    # Create slug
+                    base_slug = slugify(row['tool_name'])
+                    slug = base_slug
+                    counter = 1
+                    while Tool.objects.filter(slug=slug).exists():
+                        slug = f"{base_slug}-{counter}"
+                        counter += 1
+                    
+                    # Create Tool
+                    tool = Tool.objects.create(
+                        name=row['tool_name'],
+                        slug=slug,
+                        website_url=row['website_url'],
+                        pricing_type=metadata.get('pricing_type', 'freemium'),
+                        status='published',
+                        is_featured=True,
+                        meta_title=metadata.get('meta_title', ''),
+                        meta_description=metadata.get('meta_description', '')
+                    )
+                    
+                    # Create ToolTranslation
+                    ToolTranslation.objects.create(
+                        tool=tool,
+                        language='en',
+                        short_description=row['short_description'],
+                        long_description=row['long_description'],
+                        use_cases=metadata.get('use_cases', ''),
+                        pros=metadata.get('pros', ''),
+                        cons=metadata.get('cons', '')
+                    )
+                    
+                    # Handle Categories
+                    for cat_name in metadata.get('category_names', []):
+                        cat_slug = slugify(cat_name)
+                        category, created = Category.objects.get_or_create(
+                            slug=cat_slug,
+                            defaults={'name': cat_name}
+                        )
+                        tool.categories.add(category)
+                        if created and cat_name not in existing_categories:
+                            existing_categories.append(cat_name)
+                    
+                    # Handle Professions  
+                    for prof_name in metadata.get('profession_names', []):
+                        prof_slug = slugify(prof_name)
+                        profession, created = Profession.objects.get_or_create(
+                            slug=prof_slug,
+                            defaults={'name': prof_name}
+                        )
+                        tool.professions.add(profession)
+                        if created and prof_name not in existing_professions:
+                            existing_professions.append(prof_name)
+                    
+                    # Handle Tags
+                    for tag_name in metadata.get('tag_names', []):
+                        tag_slug = slugify(tag_name)
+                        tag, created = Tag.objects.get_or_create(
+                            slug=tag_slug,
+                            defaults={'name': tag_name}
+                        )
+                        tool.tags.add(tag)
+                        if created and tag_name not in existing_tags:
+                            existing_tags.append(tag_name)
+                    
+                    row['status'] = 'success'
+                    row['tool_id'] = tool.id
+                    row['tool_slug'] = tool.slug
+                    created_count += 1
+                    
+                except Exception as e:
+                    row['status'] = 'error'
+                    row['error'] = str(e)
+                    error_count += 1
+                
+                results.append(row)
+            
+            # Clear session
+            if 'bulk_upload_rows' in request.session:
+                del request.session['bulk_upload_rows']
+            
+            context['step'] = 'complete'
+            context['results'] = results
+            context['created'] = created_count
+            context['skipped'] = skipped_count
+            context['errors'] = error_count
+    
+    return render(request, 'admin_bulk_upload.html', context)

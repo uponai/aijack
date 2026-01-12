@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Bulk Upload Tools | Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+
+    <!-- Admin Navigation -->
+    {% include 'partials/admin_nav.html' %}
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-heading font-black text-brand-600 glow-text">
+                <i class="fa-solid fa-cloud-arrow-up mr-3"></i>Bulk Upload Tools
+            </h1>
+            <p class="text-lg text-slate-600 mt-2">Import AI tools from CSV with AI-powered metadata generation</p>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Step 1: Upload -->
+    {% if step == 'upload' %}
+    <div class="neon-card p-8">
+        <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">
+            <i class="fa-solid fa-file-csv text-green-500 mr-2"></i>Upload CSV File
+        </h2>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="upload">
+
+            <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-brand-500 transition-colors">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-100 flex items-center justify-center">
+                    <i class="fa-solid fa-file-arrow-up text-2xl text-brand-600"></i>
+                </div>
+                <label class="block cursor-pointer">
+                    <span class="text-lg font-semibold text-slate-700">Choose a CSV file</span>
+                    <input type="file" name="csv_file" accept=".csv" class="hidden" onchange="updateFileName(this)">
+                </label>
+                <p class="text-sm text-slate-500 mt-2" id="file-name">No file selected</p>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-6">
+                <h3 class="font-heading font-bold text-slate-800 mb-3">Expected CSV Format (semicolon-separated):</h3>
+                <code class="text-sm text-brand-600 block bg-white p-3 rounded-lg border border-slate-200">
+                    Tool Name;Website URL;Short Description;Detailed Description;Pricing Strategy
+                </code>
+                <ul class="text-sm text-slate-600 mt-4 space-y-1">
+                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Required: Tool Name, Website URL, Short Description</li>
+                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Detailed Description and Pricing are optional but recommended</li>
+                    <li><i class="fa-solid fa-wand-magic-sparkles text-purple-500 mr-2"></i>AI will generate: Categories, Professions, Tags, SEO metadata, Pros/Cons</li>
+                </ul>
+            </div>
+
+            <button type="submit" class="neon-button-cyan px-6 py-3">
+                <i class="fa-solid fa-upload mr-2"></i>Upload & Validate
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Step 2: Validate -->
+    {% if step == 'validate' %}
+    <div class="neon-card p-8 mb-6">
+        <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">
+            <i class="fa-solid fa-clipboard-check text-blue-500 mr-2"></i>Validation Results
+        </h2>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-green-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-heading font-black text-green-600">{{ valid }}</div>
+                <div class="text-sm text-green-700 font-semibold">Ready to Import</div>
+            </div>
+            <div class="bg-yellow-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-heading font-black text-yellow-600">{{ skipped }}</div>
+                <div class="text-sm text-yellow-700 font-semibold">Duplicates (Skipped)</div>
+            </div>
+            <div class="bg-red-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-heading font-black text-red-600">{{ errors }}</div>
+                <div class="text-sm text-red-700 font-semibold">Validation Errors</div>
+            </div>
+        </div>
+
+        {% if valid > 0 %}
+        <form method="POST" class="mb-6">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="import">
+            <div class="bg-brand-50 border border-brand-200 rounded-xl p-4 mb-4">
+                <p class="text-brand-700">
+                    <i class="fa-solid fa-info-circle mr-2"></i>
+                    <strong>{{ valid }} tools</strong> will be imported. AI will generate metadata for each tool. This may take a few minutes.
+                </p>
+            </div>
+            <button type="submit" class="neon-button-magenta px-6 py-3">
+                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Start AI-Powered Import
+            </button>
+            <a href="{% url 'bulk_upload_tools' %}" class="ml-4 text-slate-600 hover:text-slate-800">Cancel</a>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="neon-card p-8">
+        <h3 class="font-heading font-bold text-slate-800 mb-4">Preview ({{ total }} rows)</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b-2 border-brand-200">
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">#</th>
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">Status</th>
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">Tool Name</th>
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">Website</th>
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr class="border-b border-slate-100 {% if row.status == 'error' %}bg-red-50{% elif row.status == 'skipped' %}bg-yellow-50{% else %}bg-green-50{% endif %}">
+                        <td class="py-2 px-3">{{ row.row_num }}</td>
+                        <td class="py-2 px-3">
+                            {% if row.status == 'pending' %}
+                            <span class="text-green-600"><i class="fa-solid fa-circle-check"></i> Ready</span>
+                            {% elif row.status == 'skipped' %}
+                            <span class="text-yellow-600"><i class="fa-solid fa-forward"></i> Skip</span>
+                            {% else %}
+                            <span class="text-red-600"><i class="fa-solid fa-circle-xmark"></i> Error</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-2 px-3 font-medium">{{ row.tool_name|truncatechars:40 }}</td>
+                        <td class="py-2 px-3 text-slate-500">{{ row.website_url|truncatechars:30 }}</td>
+                        <td class="py-2 px-3 text-xs">{{ row.error|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Step 3: Complete -->
+    {% if step == 'complete' %}
+    <div class="neon-card p-8 mb-6">
+        <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">
+            <i class="fa-solid fa-circle-check text-green-500 mr-2"></i>Import Complete!
+        </h2>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-green-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-heading font-black text-green-600">{{ created }}</div>
+                <div class="text-sm text-green-700 font-semibold">Tools Created</div>
+            </div>
+            <div class="bg-yellow-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-heading font-black text-yellow-600">{{ skipped }}</div>
+                <div class="text-sm text-yellow-700 font-semibold">Skipped (Duplicates)</div>
+            </div>
+            <div class="bg-red-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-heading font-black text-red-600">{{ errors }}</div>
+                <div class="text-sm text-red-700 font-semibold">Errors</div>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <a href="{% url 'admin_tools' %}" class="neon-button-cyan px-6 py-3">
+                <i class="fa-solid fa-cube mr-2"></i>View All Tools
+            </a>
+            <a href="{% url 'bulk_upload_tools' %}" class="neon-button-outline px-6 py-3">
+                <i class="fa-solid fa-plus mr-2"></i>Upload More
+            </a>
+        </div>
+    </div>
+
+    <div class="neon-card p-8">
+        <h3 class="font-heading font-bold text-slate-800 mb-4">Import Results</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b-2 border-brand-200">
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">#</th>
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">Status</th>
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">Tool Name</th>
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results %}
+                    <tr class="border-b border-slate-100 {% if row.status == 'success' %}bg-green-50{% elif row.status == 'skipped' %}bg-yellow-50{% else %}bg-red-50{% endif %}">
+                        <td class="py-2 px-3">{{ row.row_num }}</td>
+                        <td class="py-2 px-3">
+                            {% if row.status == 'success' %}
+                            <span class="text-green-600"><i class="fa-solid fa-circle-check"></i> Created</span>
+                            {% elif row.status == 'skipped' %}
+                            <span class="text-yellow-600"><i class="fa-solid fa-forward"></i> Skipped</span>
+                            {% else %}
+                            <span class="text-red-600"><i class="fa-solid fa-circle-xmark"></i> Error</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-2 px-3 font-medium">{{ row.tool_name|truncatechars:50 }}</td>
+                        <td class="py-2 px-3">
+                            {% if row.tool_slug %}
+                            <a href="{% url 'tool_detail' row.tool_slug %}" class="text-brand-600 hover:underline" target="_blank">
+                                <i class="fa-solid fa-external-link"></i> View
+                            </a>
+                            {% else %}
+                            <span class="text-xs text-slate-500">{{ row.error|default:"-" }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    function updateFileName ( input )
+    {
+        const fileName = input.files[ 0 ]?.name || 'No file selected';
+        document.getElementById( 'file-name' ).textContent = fileName;
+    }
+</script>
+{% endblock %}
