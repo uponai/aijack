@@ -3,23 +3,23 @@
 {% block title %}AI Tool Stacks{% endblock %}
 
 {% block content %}
-<section class="py-16">
+<section class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-heading font-black text-slate-900 mb-2">
                 AI <span class="text-brand-600 glow-text">TOOLKIT STACKS</span>
             </h1>
-            <p class="text-xl text-slate-600 max-w-2xl mx-auto mb-4">
+            <p class="text-base text-slate-600 max-w-2xl mx-auto mb-2">
                 Curated combinations of AI tools that work together to solve complex workflows
             </p>
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 border border-purple-100 mb-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-50 border border-purple-100 mb-4">
                 <i class="fa-solid fa-layer-group text-purple-600"></i>
                 <span class="font-heading font-bold text-purple-600">{{ stacks|length }}</span>
                 <span class="text-slate-500 text-sm">Stacks Available</span>
             </div>
             {% if not request.user.is_authenticated %}
-            <div class="mt-4">
-                <a href="{% url 'account_signup' %}" class="neon-button-cyan text-lg px-8 py-4 inline-flex items-center gap-3 group">
+            <div class="mt-2">
+                <a href="{% url 'account_signup' %}" class="neon-button-cyan text-base px-6 py-3 inline-flex items-center gap-2 group">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     <span>Create Your Own Toolkit with AI</span>
                     <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
@@ -29,11 +29,11 @@
             {% endif %}
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for stack in stacks %}
             {% include 'includes/_stack_card.html' with stack=stack %}
             {% empty %}
-            <div class="col-span-full text-center py-16">
+            <div class="col-span-full text-center py-12">
                 <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand-100 flex items-center justify-center">
                     <svg class="w-10 h-10 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />

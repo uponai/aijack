@@ -36,26 +36,26 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="relative py-20 lg:py-32 overflow-hidden bg-cover bg-center" style="background-image: url('{% static 'img/hero-bg-light.png' %}');">
+<section class="relative py-10 lg:py-16 overflow-hidden bg-cover bg-center" style="background-image: url('{% static 'img/hero-bg-light.png' %}');">
     <!-- Overlay -->
     <div class="absolute inset-0 bg-white/40 backdrop-blur-[1px]"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div class="text-center max-w-4xl mx-auto">
             <!-- Main Headline -->
-            <h1 class="text-4xl md:text-6xl lg:text-7xl font-heading font-black text-slate-900 mb-6 leading-tight">
+            <h1 class="text-3xl md:text-5xl lg:text-6xl font-heading font-black text-slate-900 mb-4 leading-tight">
                 <span class="text-brand-600 glow-text">AI TOOLS</span>
                 <br>
-                <span class="text-3xl md:text-5xl lg:text-6xl">INTELLIGENCE PLATFORM</span>
+                <span class="text-2xl md:text-4xl lg:text-5xl">INTELLIGENCE PLATFORM</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-slate-600 mb-12 font-medium max-w-2xl mx-auto">
+            <p class="text-base md:text-lg text-slate-600 mb-6 font-medium max-w-2xl mx-auto">
                 Discover the perfect AI tools for your profession.
                 <span class="text-brand-600 font-semibold">Search by intent, not keywords.</span>
             </p>
 
             <!-- Hero Search -->
-            <form action="{% url 'search' %}" method="GET" class="max-w-3xl mx-auto mb-8">
+            <form action="{% url 'search' %}" method="GET" class="max-w-3xl mx-auto mb-4">
                 <div class="relative">
                     <input
                            type="text"
@@ -69,7 +69,7 @@
                         </svg>
                     </button>
                 </div>
-                <div class="mt-4 flex justify-center">
+                <div class="mt-3 flex justify-center">
                     <label class="inline-flex items-center cursor-pointer group">
                         <input type="checkbox" name="community" class="form-checkbox w-5 h-5 text-brand-600 rounded bg-white/50 border-white/60 focus:ring-brand-500 transition-all group-hover:scale-110">
                         <span class="ml-2 text-slate-700 font-medium group-hover:text-brand-700 transition-colors">Search in other users' public stacks too</span>
@@ -78,7 +78,7 @@
             </form>
 
             <!-- Search Suggestions -->
-            <div class="flex flex-wrap justify-center gap-3 text-sm text-slate-500 mb-8">
+            <div class="flex flex-wrap justify-center gap-2 text-sm text-slate-500 mb-4">
                 <span>Try:</span>
                 <a href="{% url 'search' %}?q=AI+for+architects" class="text-brand-600 hover:underline">"AI for architects"</a>
                 <a href="{% url 'search' %}?q=automate+emails" class="text-brand-600 hover:underline">"automate client emails"</a>
@@ -86,31 +86,31 @@
             </div>
 
             <!-- Counter Bar -->
-            <div class="flex flex-wrap justify-center gap-6 md:gap-12">
-                <div class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
-                    <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center">
+            <div class="flex flex-wrap justify-center gap-3 md:gap-6">
+                <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
+                    <div class="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center">
                         <i class="fa-solid fa-cube text-brand-600"></i>
                     </div>
                     <div>
-                        <div class="text-2xl font-heading font-black text-brand-600">{{ tool_count }}</div>
+                        <div class="text-xl font-heading font-black text-brand-600">{{ tool_count }}</div>
                         <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">AI Tools</div>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
-                    <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
+                    <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
                         <i class="fa-solid fa-layer-group text-purple-600"></i>
                     </div>
                     <div>
-                        <div class="text-2xl font-heading font-black text-purple-600">{{ stack_count }}</div>
+                        <div class="text-xl font-heading font-black text-purple-600">{{ stack_count }}</div>
                         <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Stacks</div>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
-                    <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/70 backdrop-blur-sm shadow-sm border border-white/60">
+                    <div class="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
                         <i class="fa-solid fa-user-tie text-cyan-600"></i>
                     </div>
                     <div>
-                        <div class="text-2xl font-heading font-black text-cyan-600">{{ profession_count }}</div>
+                        <div class="text-xl font-heading font-black text-cyan-600">{{ profession_count }}</div>
                         <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Professions</div>
                     </div>
                 </div>
@@ -120,16 +120,16 @@
 </section>
 
 <!-- Professions Section -->
-<section class="py-16 relative">
+<section class="py-8 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900 mb-4">
+        <div class="text-center mb-4">
+            <h2 class="text-xl md:text-2xl font-heading font-bold text-slate-900 mb-2">
                 EXPLORE BY <span class="text-brand-600">PROFESSION</span>
             </h2>
             <p class="text-slate-600">Find AI tools curated for your role</p>
         </div>
 
-        <div class="flex flex-wrap justify-center gap-4">
+        <div class="flex flex-wrap justify-center gap-3">
             {% for profession in professions %}
             <a href="{% url 'profession_detail' profession.slug %}" class="profession-chip">
                 {% if profession.icon %}
@@ -151,19 +151,19 @@
 
 <!-- HIGHLIGHTED APPS Section -->
 {% if highlighted_tools %}
-<section class="py-16 relative">
+<section class="py-8 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center gap-3 mb-4">
-                <span class="star-badge"><i class="fa-solid fa-star mr-2"></i> SPOTLIGHT</span>
-                <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900">
+        <div class="text-center mb-4">
+            <div class="inline-flex items-center gap-2 mb-2">
+                <span class="star-badge"><i class="fa-solid fa-star mr-1"></i> SPOTLIGHT</span>
+                <h2 class="text-xl md:text-2xl font-heading font-bold text-slate-900">
                     HIGHLIGHTED <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">APPS</span>
                 </h2>
             </div>
             <p class="text-slate-600">Featured AI tools making waves right now</p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for tool in highlighted_tools %}
             {% include 'includes/_tool_card.html' with tool=tool %}
             {% endfor %}
@@ -176,19 +176,19 @@
 
 <!-- HIGHLIGHTED STACKS Section -->
 {% if highlighted_stacks %}
-<section class="py-16 relative">
+<section class="py-8 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center gap-3 mb-4">
-                <span class="pulse-badge"><i class="fa-solid fa-fire mr-2"></i> HOT</span>
-                <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900">
+        <div class="text-center mb-4">
+            <div class="inline-flex items-center gap-2 mb-2">
+                <span class="pulse-badge"><i class="fa-solid fa-fire mr-1"></i> HOT</span>
+                <h2 class="text-xl md:text-2xl font-heading font-bold text-slate-900">
                     HIGHLIGHTED <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-fuchsia-600">STACKS</span>
                 </h2>
             </div>
             <p class="text-slate-600">This week's spotlight - Don't miss these power combos</p>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-6">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for stack in highlighted_stacks %}
             {% include 'includes/_stack_card.html' with stack=stack %}
             {% endfor %}
@@ -199,19 +199,19 @@
 
 <!-- APP NEWBIES Section -->
 {% if app_newbies %}
-<section class="py-16 relative">
+<section class="py-8 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center gap-3 mb-4">
-                <span class="new-badge"><i class="fa-solid fa-bolt mr-2"></i> FRESH</span>
-                <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900">
+        <div class="text-center mb-4">
+            <div class="inline-flex items-center gap-2 mb-2">
+                <span class="new-badge"><i class="fa-solid fa-bolt mr-1"></i> FRESH</span>
+                <h2 class="text-xl md:text-2xl font-heading font-bold text-slate-900">
                     APP <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600">NEWBIES</span>
                 </h2>
             </div>
             <p class="text-slate-600">Just landed - Be the first to try these new AI tools</p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for tool in app_newbies %}
             {% include 'includes/_tool_card.html' with tool=tool show_created_at=True %}
             {% endfor %}
@@ -222,19 +222,19 @@
 
 <!-- STACK NEWBIES Section -->
 {% if stack_newbies %}
-<section class="py-16 relative">
+<section class="py-8 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center gap-3 mb-4">
-                <span class="added-badge"><i class="fa-solid fa-box-open mr-2"></i> JUST ADDED</span>
-                <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900">
+        <div class="text-center mb-4">
+            <div class="inline-flex items-center gap-2 mb-2">
+                <span class="added-badge"><i class="fa-solid fa-box-open mr-1"></i> JUST ADDED</span>
+                <h2 class="text-xl md:text-2xl font-heading font-bold text-slate-900">
                     STACK <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-purple-600">NEWBIES</span>
                 </h2>
             </div>
             <p class="text-slate-600">Fresh toolkit combinations ready to supercharge your workflow</p>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-6">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for stack in stack_newbies %}
             {% include 'includes/_stack_card.html' with stack=stack show_created_at=True %}
             {% endfor %}
@@ -247,16 +247,16 @@
 
 <!-- Featured Tools -->
 {% if featured_tools %}
-<section class="py-16">
+<section class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900 mb-4">
+        <div class="text-center mb-4">
+            <h2 class="text-xl md:text-2xl font-heading font-bold text-slate-900 mb-2">
                 <span class="text-brand-600">FEATURED</span> AI TOOLS
             </h2>
             <p class="text-slate-600">Hand-picked tools that professionals love</p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for tool in featured_tools %}
             {% include 'includes/_tool_card.html' with tool=tool %}
             {% endfor %}
@@ -268,22 +268,22 @@
 <div class="neon-divider max-w-7xl mx-auto"></div>
 <!-- Featured Tool Stacks -->
 {% if featured_stacks %}
-<section class="py-16">
+<section class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-2xl md:text-3xl font-heading font-bold text-slate-900 mb-4">
+        <div class="text-center mb-4">
+            <h2 class="text-xl md:text-2xl font-heading font-bold text-slate-900 mb-2">
                 AI <span class="text-brand-600">Toolkit Stacks</span>
             </h2>
             <p class="text-slate-600">Curated tool combinations that work together</p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for stack in featured_stacks %}
             {% include 'includes/_stack_card.html' with stack=stack %}
             {% endfor %}
         </div>
 
-        <div class="text-center mt-10">
+        <div class="text-center mt-6">
             <a href="{% url 'stacks' %}" class="neon-button-cyan">
                 View All Stacks
             </a>

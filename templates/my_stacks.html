@@ -3,31 +3,31 @@
 {% block title %}My Stacks{% endblock %}
 
 {% block content %}
-<section class="py-16 min-h-screen relative overflow-hidden flex justify-center">
+<section class="py-8 min-h-screen relative overflow-hidden flex justify-center">
 
     <!-- Background Glow -->
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
     <div class="max-w-6xl w-full px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="flex justify-between items-center mb-12">
+        <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-3xl font-heading font-black text-slate-900">
+                <h1 class="text-2xl font-heading font-black text-slate-900">
                     MY <span class="text-brand-600 glow-text">STACKS</span>
                 </h1>
-                <p class="text-slate-600 mt-2">Manage your custom tool collections.</p>
+                <p class="text-slate-600 mt-1 text-sm">Manage your custom tool collections.</p>
             </div>
-            <a href="{% url 'ai_stack_builder' %}" class="neon-button-magenta px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg">
+            <a href="{% url 'ai_stack_builder' %}" class="neon-button-magenta px-5 py-2 rounded-lg flex items-center gap-2 shadow-md text-sm">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> Create New Stack (AI)
             </a>
         </div>
 
         {% if stacks %}
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for stack in stacks %}
             <div class="flex flex-col">
                 {% include 'includes/_stack_card.html' with stack=stack show_visibility=True show_created_at=True %}
 
-                <div class="flex justify-end gap-3 mt-3 px-1">
+                <div class="flex justify-end gap-3 mt-2 px-1">
                     <a href="{% url 'edit_custom_stack' stack.slug %}" class="text-sm font-bold text-slate-500 hover:text-brand-600 flex items-center gap-1 transition-colors">
                         <i class="fa-solid fa-pen"></i> Edit
                     </a>
@@ -45,13 +45,13 @@
 
 
         {% else %}
-        <div class="text-center py-24 neon-card bg-white/80">
-            <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                <i class="fa-solid fa-layer-group text-3xl"></i>
+        <div class="text-center py-12 neon-card bg-white/80">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                <i class="fa-solid fa-layer-group text-2xl"></i>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 mb-2 uppercase tracking-wide">No Stacks Created Yet</h3>
-            <p class="text-slate-600 mb-8">Start by building your first stack using our AI assistant.</p>
-            <a href="{% url 'ai_stack_builder' %}" class="neon-button-cyan px-8 py-4 rounded-xl inline-flex items-center gap-2 shadow-lg uppercase text-sm tracking-wider font-bold">
+            <h3 class="text-lg font-bold text-slate-900 mb-2 uppercase tracking-wide">No Stacks Created Yet</h3>
+            <p class="text-slate-600 mb-6 text-sm">Start by building your first stack using our AI assistant.</p>
+            <a href="{% url 'ai_stack_builder' %}" class="neon-button-cyan px-6 py-3 rounded-lg inline-flex items-center gap-2 shadow-md uppercase text-sm tracking-wider font-bold">
                 <i class="fa-solid fa-plus"></i> Build a Stack
             </a>
         </div>
@@ -66,7 +66,7 @@
             <div class="h-0.5 flex-1 bg-slate-200"></div>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for stack in saved_stacks %}
             {% include 'includes/_stack_card.html' with stack=stack %}
             {% endfor %}
@@ -82,7 +82,7 @@
             <div class="h-0.5 flex-1 bg-slate-200"></div>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-3 gap-3">
             {% for tool in saved_tools %}
             {% include 'includes/_tool_card.html' with tool=tool %}
             {% endfor %}

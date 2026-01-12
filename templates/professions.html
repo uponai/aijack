@@ -3,13 +3,13 @@
 {% block title %}Professions{% endblock %}
 
 {% block content %}
-<section class="py-16">
+<section class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-heading font-black text-slate-900 mb-2">
                 EXPLORE BY <span class="text-brand-600 glow-text">PROFESSION</span>
             </h1>
-            <p class="text-xl text-slate-600 max-w-2xl mx-auto mb-4">
+            <p class="text-base text-slate-600 max-w-2xl mx-auto mb-2">
                 Find AI tools curated specifically for your role and workflow
             </p>
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-50 border border-cyan-100">
@@ -19,21 +19,21 @@
             </div>
         </div>
 
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {% for profession in professions %}
-            <a href="{% url 'profession_detail' profession.slug %}" class="neon-card p-6 group text-center">
+            <a href="{% url 'profession_detail' profession.slug %}" class="neon-card p-4 group text-center">
                 {% if profession.icon %}
-                <div class="text-4xl mb-4 text-brand-600"><i class="{{ profession.icon }}"></i></div>
+                <div class="text-2xl mb-2 text-brand-600"><i class="{{ profession.icon }}"></i></div>
                 {% else %}
-                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold text-xl group-hover:scale-110 transition-transform">
+                <div class="w-12 h-12 mx-auto mb-2 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold text-base group-hover:scale-110 transition-transform">
                     {{ profession.name|slice:":2"|upper }}
                 </div>
                 {% endif %}
 
-                <h3 class="font-heading font-bold text-xl text-slate-900 mb-2">{{ profession.name }}</h3>
+                <h3 class="font-heading font-bold text-lg text-slate-900 mb-1">{{ profession.name }}</h3>
 
                 {% if profession.hero_tagline %}
-                <p class="text-slate-600 text-sm mb-4">{{ profession.hero_tagline }}</p>
+                <p class="text-slate-600 text-sm mb-3">{{ profession.hero_tagline }}</p>
                 {% endif %}
 
                 <span class="neon-badge neon-badge-cyan">
