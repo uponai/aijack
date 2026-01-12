@@ -1127,3 +1127,8 @@ def bulk_upload_tools(request):
             context['errors'] = error_count
     
     return render(request, 'admin_bulk_upload.html', context)
+
+
+def custom_404(request, exception):
+    """Custom 404 error handler."""
+    return render(request, '404.html', status=404)

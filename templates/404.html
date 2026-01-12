@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found | AIJACK{% endblock %}
+{% block meta_description %}The page you're looking for doesn't exist. Discover AI tools for your profession or use our search.{% endblock %}
+
+{% block content %}
+<section class="py-20 min-h-[60vh] flex items-center">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <!-- Error Icon -->
+        <div class="w-32 h-32 mx-auto mb-8 rounded-3xl bg-brand-100 flex items-center justify-center">
+            <span class="text-6xl font-heading font-black text-brand-600">404</span>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-heading font-black text-slate-900 mb-4">
+            PAGE <span class="text-brand-600">NOT FOUND</span>
+        </h1>
+
+        <p class="text-xl text-slate-600 mb-8 max-w-xl mx-auto">
+            Oops! The page you're looking for has moved or doesn't exist. Let's get you back on track.
+        </p>
+
+        <!-- Search Box -->
+        <form action="{% url 'search' %}" method="GET" class="max-w-lg mx-auto mb-8">
+            <div class="relative">
+                <input type="text"
+                       name="q"
+                       class="w-full px-6 py-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 transition-all text-lg"
+                       placeholder="Search for AI tools..."
+                       aria-label="Search for AI tools">
+                <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 rounded-lg bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700 transition" aria-label="Search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- Quick Links -->
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'home' %}" class="neon-button-filled">
+                <i class="fa-solid fa-home mr-2"></i> Back to Home
+            </a>
+            <a href="{% url 'professions' %}" class="neon-button-cyan">
+                <i class="fa-solid fa-user-tie mr-2"></i> Browse Professions
+            </a>
+            <a href="{% url 'stacks' %}" class="neon-button-cyan">
+                <i class="fa-solid fa-layer-group mr-2"></i> View Stacks
+            </a>
+        </div>
+
+        <!-- Popular Tools Suggestion -->
+        <div class="mt-12 pt-8 border-t border-brand-100">
+            <p class="text-sm text-slate-500 mb-4 font-semibold uppercase tracking-wider">Popular Searches</p>
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="{% url 'search' %}?q=AI+for+architects" class="profession-chip">AI for Architects</a>
+                <a href="{% url 'search' %}?q=automation+tools" class="profession-chip">Automation Tools</a>
+                <a href="{% url 'search' %}?q=image+generation" class="profession-chip">Image Generation</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

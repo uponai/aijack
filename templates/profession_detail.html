@@ -13,6 +13,9 @@
 <script type="application/ld+json">
 {{ profession.get_schema_json|safe }}
 </script>
+<script type="application/ld+json">
+{{ profession.get_breadcrumb_json|safe }}
+</script>
 {% endblock %}
 
 {% block content %}

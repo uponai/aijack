@@ -4,7 +4,7 @@
         {# Header: Logo, Name, Pricing #}
         <div class="flex items-start gap-3 mb-3">
             {% if tool.logo %}
-            <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-12 h-12 rounded-lg object-cover shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
+            <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" loading="lazy" width="48" height="48" class="w-12 h-12 rounded-lg object-cover shadow-sm group-hover:shadow-md transition-shadow flex-shrink-0">
             {% else %}
             <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold text-base flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
                 {{ tool.name|slice:":2"|upper }}

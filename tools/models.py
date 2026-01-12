@@ -84,13 +84,46 @@ class Profession(SEOModel):
     def get_seo_description(self):
         return self.meta_description or self.description[:160]
 
-    def get_schema_json(self):
+    def get_schema_json(self, tools=None):
+        """Generate CollectionPage + ItemList schema for profession."""
         data = {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
             "name": f"AI Tools for {self.name}",
             "description": self.get_seo_description(),
             "url": f"/profession/{self.slug}/"
+        }
+        
+        # Add ItemList if tools provided
+        if tools:
+            item_list = {
+                "@type": "ItemList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": i,
+                        "name": t.name,
+                        "url": f"/tool/{t.slug}/"
+                    }
+                    for i, t in enumerate(tools[:10], 1)  # Limit to 10 for schema
+                ]
+            }
+            data["mainEntity"] = item_list
+        
+        return json.dumps(data)
+
+    def get_breadcrumb_json(self):
+        """Generate BreadcrumbList schema for this profession."""
+        items = [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "/"},
+            {"@type": "ListItem", "position": 2, "name": "Professions", "item": "/professions/"},
+            {"@type": "ListItem", "position": 3, "name": self.name, "item": f"/profession/{self.slug}/"}
+        ]
+        
+        data = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": items
         }
         return json.dumps(data)
 
@@ -160,6 +193,7 @@ class Tool(SEOModel):
         return trans.short_description[:160] if trans else ""
 
     def get_schema_json(self):
+        """Generate SoftwareApplication schema with enhanced fields."""
         trans = self.get_translation('en')
         description = self.get_seo_description()
         
@@ -171,17 +205,48 @@ class Tool(SEOModel):
             "operatingSystem": "Web",
             "offers": {
                 "@type": "Offer",
-                "price": "0" if self.pricing_type == 'free' else "0", # Simplified
-                "priceCurrency": "USD"
+                "price": "0" if self.pricing_type == 'free' else "0",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock"
             },
             "description": description,
             "url": f"/tool/{self.slug}/",
-            "image": self.logo.url if self.logo else ""
+            "datePublished": self.created_at.isoformat(),
+            "dateModified": self.updated_at.isoformat(),
         }
         
-        if self.pricing_type == 'paid':
-             data["offers"]["price"] = "10.00" # Placeholder, implies paid
+        if self.logo:
+            data["image"] = self.logo.url
         
+        if self.pricing_type == 'paid':
+            data["offers"]["price"] = "10.00"
+        elif self.pricing_type == 'freemium':
+            data["offers"]["price"] = "0"
+            data["offers"]["priceValidUntil"] = "2099-12-31"
+        
+        # Add categories as keywords
+        if self.categories.exists():
+            data["keywords"] = ", ".join([c.name for c in self.categories.all()])
+        
+        return json.dumps(data)
+
+    def get_breadcrumb_json(self, profession=None):
+        """Generate BreadcrumbList schema for this tool."""
+        items = [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "/"},
+        ]
+        
+        if profession:
+            items.append({"@type": "ListItem", "position": 2, "name": profession.name, "item": f"/profession/{profession.slug}/"})
+            items.append({"@type": "ListItem", "position": 3, "name": self.name, "item": f"/tool/{self.slug}/"})
+        else:
+            items.append({"@type": "ListItem", "position": 2, "name": self.name, "item": f"/tool/{self.slug}/"})
+        
+        data = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": items
+        }
         return json.dumps(data)
 
 
@@ -256,13 +321,48 @@ class ToolStack(SEOModel):
          return self.meta_description or self.description[:160]
 
     def get_schema_json(self):
+        """Generate HowTo schema for workflow stacks."""
+        tools_list = list(self.tools.all())
+        
+        # Build HowToStep from tools
+        steps = []
+        for i, tool in enumerate(tools_list, 1):
+            trans = tool.get_translation('en')
+            step = {
+                "@type": "HowToStep",
+                "position": i,
+                "name": f"Use {tool.name}",
+                "text": trans.short_description if trans else f"Integrate {tool.name} into your workflow.",
+                "url": f"/tool/{tool.slug}/"
+            }
+            if tool.logo:
+                step["image"] = tool.logo.url
+            steps.append(step)
+        
         data = {
             "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": self.name,
+            "@type": "HowTo",
+            "name": self.name,
             "description": self.get_seo_description(),
-            "url": f"/stacks/{self.slug}/",
+            "totalTime": "PT30M",
+            "step": steps,
+            "tool": [{"@type": "HowToTool", "name": t.name} for t in tools_list],
             "datePublished": self.created_at.isoformat()
+        }
+        return json.dumps(data)
+
+    def get_breadcrumb_json(self):
+        """Generate BreadcrumbList schema for this stack."""
+        items = [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "/"},
+            {"@type": "ListItem", "position": 2, "name": "Stacks", "item": "/stacks/"},
+            {"@type": "ListItem", "position": 3, "name": self.name, "item": f"/stack/{self.slug}/"}
+        ]
+        
+        data = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": items
         }
         return json.dumps(data)
 

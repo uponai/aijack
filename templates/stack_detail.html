@@ -13,6 +13,9 @@
 <script type="application/ld+json">
 {{ stack.get_schema_json|safe }}
 </script>
+<script type="application/ld+json">
+{{ stack.get_breadcrumb_json|safe }}
+</script>
 {% endblock %}
 
 {% block content %}

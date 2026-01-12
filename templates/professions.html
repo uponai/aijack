@@ -1,6 +1,29 @@
 {% extends 'base.html' %}
 
-{% block title %}Professions{% endblock %}
+{% block title %}Browse AI Tools by Profession | AIJACK{% endblock %}
+{% block meta_description %}Find the best AI tools curated for your profession. Browse tools specifically designed for architects, designers, marketers, developers and more.{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "AI Tools by Profession",
+    "description": "Find AI tools curated specifically for your role and workflow.",
+    "url": "/professions/"
+}
+</script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "/"},
+        {"@type": "ListItem", "position": 2, "name": "Professions", "item": "/professions/"}
+    ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="py-8">
