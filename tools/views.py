@@ -325,7 +325,8 @@ def submit_tool(request):
                     subject,
                     text_content,
                     settings.DEFAULT_FROM_EMAIL,
-                    [request.user.email]
+                    [request.user.email],
+                    bcc=[settings.EMAIL_HOST_USER]
                 )
                 msg.attach_alternative(html_content, "text/html")
                 msg.send(fail_silently=True)
