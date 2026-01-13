@@ -288,3 +288,229 @@ Generate the complete metadata JSON for this tool. Use search to verify details.
                 'pros': '',
                 'cons': ''
             }
+    @staticmethod
+    def complete_tool_fields(tool_data, existing_categories, existing_professions, existing_tags):
+        """
+        Complete missing fields for a tool using AI based on existing data.
+        tool_data: dict with current tool information
+        Returns: dict with completed fields
+        """
+        if not settings.GEMINI_API_KEY:
+            return {'error': 'No API key configured'}
+        
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        # Build context
+        categories_list = ", ".join(existing_categories) if existing_categories else "None yet"
+        professions_list = ", ".join(existing_professions) if existing_professions else "None yet"
+        tags_list = ", ".join(existing_tags) if existing_tags else "None yet"
+        
+        system_instruction = """
+You are an AI tools curator helping complete missing information.
+
+Complete ONLY missing/empty fields. Use Google Search to verify if needed.
+
+Fields to complete:
+- pricing_type, category_names, profession_names, tag_names
+- meta_title, meta_description
+- short_description, long_description
+- use_cases, pros, cons
+
+Output valid JSON only with completed fields.
+"""
+
+        prompt = f"""
+TOOL: {tool_data.get('name')}
+Website: {tool_data.get('website_url', '')}
+Short Desc: {tool_data.get('short_description', '(MISSING)')}
+Long Desc: {tool_data.get('long_description', '(MISSING)')}
+Pricing: {tool_data.get('pricing_type', '(MISSING)')}
+Categories: {tool_data.get('categories', '(MISSING)')}
+Professions: {tool_data.get('professions', '(MISSING)')}
+Tags: {tool_data.get('tags', '(MISSING)')}
+Meta Title: {tool_data.get('meta_title', '(MISSING)')}
+Meta Desc: {tool_data.get('meta_description', '(MISSING)')}
+Use Cases: {tool_data.get('use_cases', '(MISSING)')}
+Pros: {tool_data.get('pros', '(MISSING)')}
+Cons: {tool_data.get('cons', '(MISSING)')}
+
+EXISTING: Categories: {categories_list} | Professions: {professions_list} | Tags: {tags_list}
+
+Complete missing fields.
+"""
+
+        try:
+            response = client.models.generate_content(
+                model="gemini-flash-latest",
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    tools=[types.Tool(google_search=types.GoogleSearch())]
+                ),
+                contents=[prompt]
+            )
+            
+            response_text = response.text.strip()
+            import re
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            data = json.loads(json_match.group(0) if json_match else response_text)
+            
+            result = {}
+            for key in ['pricing_type', 'category_names', 'profession_names', 'tag_names',
+                       'meta_title', 'meta_description', 'short_description', 'long_description']:
+                if key in data:
+                    result[key] = data[key]
+            
+            for key in ['use_cases', 'pros', 'cons']:
+                if key in data:
+                    result[key] = data[key] if isinstance(data[key], str) else ', '.join(data[key])
+            
+            return result
+        except Exception as e:
+            print(f"AI Complete Tool Error: {e}")
+            return {'error': str(e)}
+
+    @staticmethod
+    def complete_stack_fields(stack_data, existing_professions, available_tools):
+        """
+        Complete missing fields for a stack using AI.
+        stack_data: dict with current stack information
+        available_tools: list of tool names available in system
+        Returns: dict with completed fields
+        """
+        if not settings.GEMINI_API_KEY:
+            return {'error': 'No API key configured'}
+        
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        professions_list = ", ".join(existing_professions) if existing_professions else "None yet"
+        tools_list = ", ".join(available_tools[:50]) if available_tools else "None yet"  # Limit to 50 for context
+        
+        system_instruction = """
+You are an AI workflow architect helping complete missing information for tool stack entries.
+
+A stack is a curated bundle of AI tools that work together to solve a specific workflow.
+
+Complete ONLY missing/empty fields. Use Google Search to find the best tools and verify details.
+
+Fields to complete:
+- tagline: Catchy one-liner (max 200 chars)
+- description: Detailed explanation of the stack's purpose and value
+- workflow_description: Step-by-step markdown guide on how the tools work together
+- tool_names: List of 3-8 tool names that should be in this stack (prefer existing tools)
+- profession_names: 1-3 target professions
+- meta_title: SEO title (50-60 chars)
+- meta_description: SEO description (150-160 chars)
+
+For workflow_description, create a professional step-by-step guide in markdown with:
+- Brief overview paragraph
+- Numbered steps (1., 2., 3., etc.)
+- Focus on integration and data flow between tools
+- Be specific about what each tool does in the workflow
+
+Output valid JSON only with completed fields.
+"""
+
+        prompt = f"""
+STACK: {stack_data.get('name')}
+Tagline: {stack_data.get('tagline', '(MISSING)')}
+Description: {stack_data.get('description', '(MISSING)')}
+Workflow: {stack_data.get('workflow_description', '(MISSING)')}
+Current Tools: {stack_data.get('tools', '(MISSING)')}
+Professions: {stack_data.get('professions', '(MISSING)')}
+Meta Title: {stack_data.get('meta_title', '(MISSING)')}
+Meta Desc: {stack_data.get('meta_description', '(MISSING)')}
+
+AVAILABLE TOOLS: {tools_list}
+EXISTING PROFESSIONS: {professions_list}
+
+Complete missing fields. For tools, suggest the most relevant ones from AVAILABLE TOOLS.
+"""
+
+        try:
+            response = client.models.generate_content(
+                model="gemini-flash-latest",
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    tools=[types.Tool(google_search=types.GoogleSearch())]
+                ),
+                contents=[prompt]
+            )
+            
+            response_text = response.text.strip()
+            import re
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            data = json.loads(json_match.group(0) if json_match else response_text)
+            
+            result = {}
+            for key in ['tagline', 'description', 'workflow_description', 'tool_names', 
+                       'profession_names', 'meta_title', 'meta_description']:
+                if key in data:
+                    result[key] = data[key]
+            
+            return result
+        except Exception as e:
+            print(f"AI Complete Stack Error: {e}")
+            return {'error': str(e)}
+
+    @staticmethod
+    def complete_profession_fields(profession_data):
+        """
+        Complete missing fields for a profession using AI.
+        profession_data: dict with current profession information
+        Returns: dict with completed fields
+        """
+        if not settings.GEMINI_API_KEY:
+            return {'error': 'No API key configured'}
+        
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        system_instruction = """
+You are an AI career expert helping complete missing information for profession entries.
+
+Complete ONLY missing/empty fields. Use Google Search to verify details.
+
+Fields to complete:
+- description: Detailed explanation of the profession (what they do, typical responsibilities)
+- hero_tagline: Catchy one-liner that captures the essence of this profession (max 100 chars)
+- icon: Font Awesome icon class (e.g., "fa-solid fa-code", "fa-solid fa-user-doctor")
+- meta_title: SEO title (50-60 chars)
+- meta_description: SEO description (150-160 chars)
+
+Output valid JSON only with completed fields.
+"""
+
+        prompt = f"""
+PROFESSION: {profession_data.get('name')}
+Description: {profession_data.get('description', '(MISSING)')}
+Tagline: {profession_data.get('hero_tagline', '(MISSING)')}
+Icon: {profession_data.get('icon', '(MISSING)')}
+Meta Title: {profession_data.get('meta_title', '(MISSING)')}
+Meta Desc: {profession_data.get('meta_description', '(MISSING)')}
+
+Complete missing fields. Make it professional and accurate.
+"""
+
+        try:
+            response = client.models.generate_content(
+                model="gemini-flash-latest",
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    tools=[types.Tool(google_search=types.GoogleSearch())]
+                ),
+                contents=[prompt]
+            )
+            
+            response_text = response.text.strip()
+            import re
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            data = json.loads(json_match.group(0) if json_match else response_text)
+            
+            result = {}
+            for key in ['description', 'hero_tagline', 'icon', 'meta_title', 'meta_description']:
+                if key in data:
+                    result[key] = data[key]
+            
+            return result
+        except Exception as e:
+            print(f"AI Complete Profession Error: {e}")
+            return {'error': str(e)}

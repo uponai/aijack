@@ -47,6 +47,9 @@ urlpatterns = [
 
     # Bulk Upload
     path('admin-dashboard/bulk-upload/', views.bulk_upload_tools, name='bulk_upload_tools'),
+    path('admin-dashboard/tools/<slug:slug>/ai-complete/', views.ai_complete_tool, name='ai_complete_tool'),
+    path('admin-dashboard/stacks/<slug:slug>/ai-complete/', views.ai_complete_stack, name='ai_complete_stack'),
+    path('admin-dashboard/professions/<slug:slug>/ai-complete/', views.ai_complete_profession, name='ai_complete_profession'),
 
     # Legal
     path('terms/', views.TermsView.as_view(), name='terms'),

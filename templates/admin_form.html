@@ -10,9 +10,55 @@
     <div class="neon-card p-8">
         <div class="flex items-center justify-between mb-8 text-slate-800">
             <h1 class="text-3xl font-heading font-black">{{ title }}</h1>
-            <a href="{% url back_url %}" class="text-slate-400 hover:text-brand-600 transition">
-                <i class="fa-solid fa-times text-2xl"></i>
-            </a>
+            <div class="flex items-center gap-3">
+                {% if 'Tool' in title or 'Stack' in title or 'Profession' in title %}
+                <button type="button"
+                        @click="aiComplete()"
+                        x-data="{ loading: false, async aiComplete() {
+                            if (this.loading) return;
+                            this.loading = true;
+                            try {
+                                const slug = '{{ form.instance.slug }}';
+                                const title = '{{ title }}';
+                                let url;
+                                if (title.includes('Tool')) {
+                                    url = `/admin-dashboard/tools/${slug}/ai-complete/`;
+                                } else if (title.includes('Stack')) {
+                                    url = `/admin-dashboard/stacks/${slug}/ai-complete/`;
+                                } else if (title.includes('Profession')) {
+                                    url = `/admin-dashboard/professions/${slug}/ai-complete/`;
+                                }
+                                const response = await fetch(url, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                    alert(data.message + '. Please review and save.');
+                                    window.location.reload();
+                                } else {
+                                    alert('Error: ' + (data.error || 'Unknown error'));
+                                }
+                            } catch (e) {
+                                alert('Network error: ' + e.message);
+                            } finally {
+                                this.loading = false;
+                            }
+                        }}"
+                        :disabled="loading"
+                        class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-heading font-bold hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-2" x-show="!loading"></i>
+                    <i class="fa-solid fa-spinner fa-spin mr-2" x-show="loading" style="display:none;"></i>
+                    <span x-text="loading ? 'Completing...' : 'Complete with AI'"></span>
+                </button>
+                {% endif %}
+                <a href="{% url back_url %}" class="text-slate-400 hover:text-brand-600 transition">
+                    <i class="fa-solid fa-times text-2xl"></i>
+                </a>
+            </div>
         </div>
 
         <form method="post" enctype="multipart/form-data" class="space-y-6">

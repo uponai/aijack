@@ -1446,3 +1446,305 @@ def bulk_upload_tools(request):
 def custom_404(request, exception):
     """Custom 404 error handler."""
     return render(request, '404.html', status=404)
+
+# --- AI Tool Completion ---
+@staff_member_required
+@require_POST
+def ai_complete_tool(request, slug):
+    """AJAX endpoint to AI-complete missing tool fields."""
+    tool = get_object_or_404(Tool, slug=slug)
+    translation = tool.get_translation('en')
+    
+    # Gather existing data
+    tool_data = {
+        'name': tool.name,
+        'slug': tool.slug,
+        'website_url': tool.website_url or '',
+        'pricing_type': tool.pricing_type if tool.pricing_type else '(MISSING)',
+        'categories': ', '.join(tool.categories.values_list('name', flat=True)) or '(MISSING)',
+        'professions': ', '.join(tool.professions.values_list('name', flat=True)) or '(MISSING)',
+        'tags': ', '.join(tool.tags.values_list('name', flat=True)) or '(MISSING)',
+        'meta_title': tool.meta_title or '(MISSING)',
+        'meta_description': tool.meta_description or '( MISSING)',
+    }
+    
+    if translation:
+        tool_data.update({
+            'short_description': translation.short_description or '(MISSING)',
+            'long_description': translation.long_description or '(MISSING)',
+            'use_cases': translation.use_cases or '(MISSING)',
+            'pros': translation.pros or '(MISSING)',
+            'cons': translation.cons or '(MISSING)',
+        })
+    else:
+        tool_data.update({
+            'short_description': '(MISSING)',
+            'long_description': '(MISSING)',
+            'use_cases': '(MISSING)',
+            'pros': '(MISSING)',
+            'cons': '(MISSING)',
+        })
+    
+    # Get existing entities for context
+    existing_categories = list(Category.objects.values_list('name', flat=True))
+    existing_professions = list(Profession.objects.values_list('name', flat=True))
+    existing_tags = list(Tag.objects.values_list('name', flat=True))
+    
+    # Call AI
+    completed_data = AIService.complete_tool_fields(
+        tool_data, existing_categories, existing_professions, existing_tags
+    )
+    
+    if 'error' in completed_data:
+        return JsonResponse({'success': False, 'error': completed_data['error']})
+    
+    # Apply completed fields to tool
+    updated_fields = []
+    
+    if 'pricing_type' in completed_data:
+        tool.pricing_type = completed_data['pricing_type']
+        updated_fields.append('pricing_type')
+    
+    if 'meta_title' in completed_data:
+        tool.meta_title = completed_data['meta_title']
+        updated_fields.append('meta_title')
+    
+    if 'meta_description' in completed_data:
+        tool.meta_description = completed_data['meta_description']
+        updated_fields.append('meta_description')
+    
+    # Handle categories
+    if 'category_names' in completed_data:
+        for cat_name in completed_data['category_names']:
+            cat_slug = slugify(cat_name)
+            category, _ = Category.objects.get_or_create(slug=cat_slug, defaults={'name': cat_name})
+            tool.categories.add(category)
+        updated_fields.append('categories')
+    
+    # Handle professions
+    if 'profession_names' in completed_data:
+        for prof_name in completed_data['profession_names']:
+            prof_slug = slugify(prof_name)
+            profession, _ = Profession.objects.get_or_create(slug=prof_slug, defaults={'name': prof_name})
+            tool.professions.add(profession)
+        updated_fields.append('professions')
+    
+    # Handle tags
+    if 'tag_names' in completed_data:
+        for tag_name in completed_data['tag_names']:
+            tag_slug = slugify(tag_name)
+            tag, _ = Tag.objects.get_or_create(slug=tag_slug, defaults={'name': tag_name})
+            tool.tags.add(tag)
+        updated_fields.append('tags')
+    
+    tool.save()
+    
+    # Update translation
+    if any(k in completed_data for k in ['short_description', 'long_description', 'use_cases', 'pros', 'cons']):
+        ToolTranslation.objects.update_or_create(
+            tool=tool,
+            language='en',
+            defaults={
+                'short_description': completed_data.get('short_description', translation.short_description if translation else ''),
+                'long_description': completed_data.get('long_description', translation.long_description if translation else ''),
+                'use_cases': completed_data.get('use_cases', translation.use_cases if translation else ''),
+                'pros': completed_data.get('pros', translation.pros if translation else ''),
+                'cons': completed_data.get('cons', translation.cons if translation else ''),
+            }
+        )
+        updated_fields.extend([k for k in ['short_description', 'long_description', 'use_cases', 'pros', 'cons'] if k in completed_data])
+    
+    # Refresh translation from DB
+    translation = tool.get_translation('en')
+    
+    # Check if tool is now complete and set as featured
+    is_complete = all([
+        tool.pricing_type,
+        tool.categories.exists(),
+        tool.professions.exists(),
+        tool.tags.exists(),
+        tool.meta_title,
+        tool.meta_description,
+        translation and translation.short_description,
+        translation and translation.long_description,
+        translation and translation.use_cases,
+        translation and translation.pros,
+        translation and translation.cons
+    ])
+    
+    if is_complete and not tool.is_featured:
+        tool.is_featured = True
+        tool.save()
+        updated_fields.append('is_featured')
+    
+    return JsonResponse({
+        'success': True,
+        'updated_fields': updated_fields,
+        'is_featured': tool.is_featured,
+        'message': f'Completed {len(updated_fields)} fields with AI' + (' - marked as featured!' if is_complete else '')
+    })
+
+# --- AI Stack Completion ---
+@staff_member_required
+@require_POST
+def ai_complete_stack(request, slug):
+    """AJAX endpoint to AI-complete missing stack fields."""
+    stack = get_object_or_404(ToolStack, slug=slug)
+    
+    # Gather existing data
+    stack_data = {
+        'name': stack.name,
+        'slug': stack.slug,
+        'tagline': stack.tagline or '(MISSING)',
+        'description': stack.description or '(MISSING)',
+        'workflow_description': stack.workflow_description or '(MISSING)',
+        'tools': ', '.join(stack.tools.values_list('name', flat=True)) or '(MISSING)',
+        'professions': ', '.join(stack.professions.values_list('name', flat=True)) or '(MISSING)',
+        'meta_title': stack.meta_title or '(MISSING)',
+        'meta_description': stack.meta_description or '(MISSING)',
+    }
+    
+    # Get context
+    existing_professions = list(Profession.objects.values_list('name', flat=True))
+    available_tools = list(Tool.objects.filter(status='published').values_list('name', flat=True))
+    
+    # Call AI
+    completed_data = AIService.complete_stack_fields(
+        stack_data, existing_professions, available_tools
+    )
+    
+    if 'error' in completed_data:
+        return JsonResponse({'success': False, 'error': completed_data['error']})
+    
+    # Apply completed fields
+    updated_fields = []
+    
+    if 'tagline' in completed_data:
+        stack.tagline = completed_data['tagline']
+        updated_fields.append('tagline')
+    
+    if 'description' in completed_data:
+        stack.description = completed_data['description']
+        updated_fields.append('description')
+    
+    if 'workflow_description' in completed_data:
+        stack.workflow_description = completed_data['workflow_description']
+        updated_fields.append('workflow_description')
+    
+    if 'meta_title' in completed_data:
+        stack.meta_title = completed_data['meta_title']
+        updated_fields.append('meta_title')
+    
+    if 'meta_description' in completed_data:
+        stack.meta_description = completed_data['meta_description']
+        updated_fields.append('meta_description')
+    
+    # Handle tool suggestions
+    if 'tool_names' in completed_data:
+        for tool_name in completed_data['tool_names']:
+            try:
+                tool = Tool.objects.filter(name__iexact=tool_name, status='published').first()
+                if tool and tool not in stack.tools.all():
+                    stack.tools.add(tool)
+            except Tool.DoesNotExist:
+                continue
+        updated_fields.append('tools')
+    
+    # Handle professions
+    if 'profession_names' in completed_data:
+        for prof_name in completed_data['profession_names']:
+            prof_slug = slugify(prof_name)
+            profession, _ = Profession.objects.get_or_create(slug=prof_slug, defaults={'name': prof_name})
+            if profession not in stack.professions.all():
+                stack.professions.add(profession)
+        updated_fields.append('professions')
+    
+    stack.save()
+    
+    # Check completeness and mark as featured
+    is_complete = all([
+        stack.tagline,
+        stack.description,
+        stack.workflow_description,
+        stack.tools.exists(),
+        stack.professions.exists(),
+        stack.meta_title,
+        stack.meta_description
+    ])
+    
+    if is_complete and not stack.is_featured:
+        stack.is_featured = True
+        stack.save()
+        updated_fields.append('is_featured')
+    
+    return JsonResponse({
+        'success': True,
+        'updated_fields': updated_fields,
+        'is_featured': stack.is_featured,
+        'message': f'Completed {len(updated_fields)} fields with AI' + (' - marked as featured!' if is_complete else '')
+    })
+
+# --- AI Profession Completion ---
+@staff_member_required
+@require_POST
+def ai_complete_profession(request, slug):
+    """AJAX endpoint to AI-complete missing profession fields."""
+    profession = get_object_or_404(Profession, slug=slug)
+    
+    # Gather existing data
+    profession_data = {
+        'name': profession.name,
+        'slug': profession.slug,
+        'description': profession.description or '(MISSING)',
+        'hero_tagline': profession.hero_tagline or '(MISSING)',
+        'icon': profession.icon or '(MISSING)',
+        'meta_title': profession.meta_title or '(MISSING)',
+        'meta_description': profession.meta_description or '(MISSING)',
+    }
+    
+    # Call AI
+    completed_data = AIService.complete_profession_fields(profession_data)
+    
+    if 'error' in completed_data:
+        return JsonResponse({'success': False, 'error': completed_data['error']})
+    
+    # Apply completed fields
+    updated_fields = []
+    
+    if 'description' in completed_data:
+        profession.description = completed_data['description']
+        updated_fields.append('description')
+    
+    if 'hero_tagline' in completed_data:
+        profession.hero_tagline = completed_data['hero_tagline']
+        updated_fields.append('hero_tagline')
+    
+    if 'icon' in completed_data:
+        profession.icon = completed_data['icon']
+        updated_fields.append('icon')
+    
+    if 'meta_title' in completed_data:
+        profession.meta_title = completed_data['meta_title']
+        updated_fields.append('meta_title')
+    
+    if 'meta_description' in completed_data:
+        profession.meta_description = completed_data['meta_description']
+        updated_fields.append('meta_description')
+    
+    profession.save()
+    
+    # Check completeness (all important fields filled)
+    is_complete = all([
+        profession.description,
+        profession.hero_tagline,
+        profession.icon,
+        profession.meta_title,
+        profession.meta_description
+    ])
+    
+    return JsonResponse({
+        'success': True,
+        'updated_fields': updated_fields,
+        'is_complete': is_complete,
+        'message': f'Completed {len(updated_fields)} fields with AI' + (' - profession is now complete!' if is_complete else '')
+    })
