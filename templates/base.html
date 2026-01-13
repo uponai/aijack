@@ -7,8 +7,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <!-- SEO Identity -->
-        <title>{% block title %}{{ seo_title|default:"AI Tools Intelligence | AIJACK" }}{% endblock %}</title>
-        <meta name="description" content="{% block meta_description %}{{ seo_description|default:"Discover the best AI tools for your profession. Semantic search, curated stacks, and expert recommendations." }}{% endblock %}">
+        <title>{% block title %}{{ seo_title|default:"AIJACK | Don't just find AI tools. Build solutions." }}{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}{{ seo_description|default:"AIJACK is the intelligence layer for the AI era. We curate, test, and stack the best AI tools so you can focus on doing your best work." }}{% endblock %}">
         {% if canonical_url %}
         <link rel="canonical" href="{{ canonical_url }}">
         {% else %}
@@ -714,7 +714,11 @@
                         <a href="{% url 'professions' %}" class="nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                         <a href="{% url 'stacks' %}" class="nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
                         <a href="{% url 'submit_tool' %}" class="nav-link text-neon-magenta font-bold {% if request.resolver_match.url_name == 'submit_tool' %}active{% endif %}">
-                            <i class="fa-solid fa-plus-circle mr-1"></i> Submit Tool
+                            <i class="fa-solid fa-plus-circle mr-1"></i>Tool
+                        </a>
+
+                        <a href="{% url 'search' %}" class="nav-link text-slate-500 hover:text-brand-600 transition-colors" title="Search">
+                            <i class="fa-solid fa-magnifying-glass text-lg"></i>
                         </a>
 
                         <div class="h-6 w-px bg-slate-200 mx-2"></div>
@@ -784,6 +788,9 @@
                     <a href="{% url 'professions' %}" class="block nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                     <a href="{% url 'stacks' %}" class="block nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
                     <a href="{% url 'submit_tool' %}" class="block nav-link text-neon-magenta {% if request.resolver_match.url_name == 'submit_tool' %}active{% endif %}">Submit Tool</a>
+                    <a href="{% url 'search' %}" class="block nav-link text-slate-600 font-bold {% if request.resolver_match.url_name == 'search' %}active{% endif %}">
+                        <i class="fa-solid fa-magnifying-glass mr-2"></i> Search
+                    </a>
 
                     <div class="border-t border-slate-100 my-2 pt-2"></div>
 
@@ -935,8 +942,9 @@
                         <a href="{% url 'cookies' %}" class="text-slate-500 hover:text-brand-600 transition">Cookies</a>
                     </div>
 
-                    <p class="text-slate-500 text-sm">
-                        © 2026 AIJACK. Find the best AI tools for your profession.
+                    <p class="text-slate-500 text-sm max-w-md text-right">
+                        © 2026 AIJACK. The intelligence layer for the AI era.<br>
+                        We curate, test, and stack the best AI tools so you can focus on doing your best work.
                     </p>
                 </div>
             </div>
