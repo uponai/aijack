@@ -187,6 +187,7 @@
                         <th class="text-left py-2 px-3 font-heading text-brand-600">#</th>
                         <th class="text-left py-2 px-3 font-heading text-brand-600">Status</th>
                         <th class="text-left py-2 px-3 font-heading text-brand-600">Tool Name</th>
+                        <th class="text-left py-2 px-3 font-heading text-brand-600">Similar Tools</th>
                         <th class="text-left py-2 px-3 font-heading text-brand-600">Action</th>
                     </tr>
                 </thead>
@@ -204,6 +205,16 @@
                             {% endif %}
                         </td>
                         <td class="py-2 px-3 font-medium">{{ row.tool_name|truncatechars:50 }}</td>
+                        <td class="py-2 px-3">
+                            {% if row.similar_tools %}
+                            <div class="text-xs text-purple-600">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
+                                {{ row.similar_tools|join:", " }}
+                            </div>
+                            {% else %}
+                            <span class="text-xs text-slate-400">-</span>
+                            {% endif %}
+                        </td>
                         <td class="py-2 px-3">
                             {% if row.tool_slug %}
                             <a href="{% url 'tool_detail' row.tool_slug %}" class="text-brand-600 hover:underline" target="_blank">

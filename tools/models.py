@@ -127,6 +127,22 @@ class Profession(SEOModel):
         }
         return json.dumps(data)
 
+    def get_missing_fields(self):
+        """Return a list of missing important fields."""
+        missing = []
+        if not self.description:
+            missing.append('Description')
+        if not self.icon:
+            missing.append('Icon')
+        if not self.hero_tagline:
+            missing.append('Hero Tagline')
+        if not self.meta_title:
+            missing.append('Meta Title')
+        if not self.meta_description:
+            missing.append('Meta Description')
+        
+        return missing
+
 
 class Tag(models.Model):
     """Feature tags (e.g., 'generative', 'automation', 'free')."""
@@ -249,6 +265,30 @@ class Tool(SEOModel):
         }
         return json.dumps(data)
 
+    def get_missing_fields(self):
+        """Return a list of missing important fields."""
+        missing = []
+        
+        # Check for English translation with description
+        trans = self.get_translation('en')
+        if not trans or not trans.short_description:
+            missing.append('Description')
+            
+        if not self.logo:
+            missing.append('Logo')
+        if not self.categories.exists():
+            missing.append('Categories')
+        if not self.professions.exists():
+            missing.append('Professions')
+        if not self.tags.exists():
+            missing.append('Tags')
+        if not self.meta_title:
+            missing.append('Meta Title')
+        if not self.meta_description:
+            missing.append('Meta Description')
+        
+        return missing
+
 
 class ToolTranslation(models.Model):
     """Multilingual content for Tool."""
@@ -365,6 +405,24 @@ class ToolStack(SEOModel):
             "itemListElement": items
         }
         return json.dumps(data)
+
+    def get_missing_fields(self):
+        """Return a list of missing important fields."""
+        missing = []
+        if not self.description:
+            missing.append('Description')
+        if not self.tagline:
+            missing.append('Tagline')
+        if not self.tools.exists():
+            missing.append('Tools')
+        if not self.professions.exists():
+            missing.append('Professions')
+        if not self.meta_title:
+            missing.append('Meta Title')
+        if not self.meta_description:
+            missing.append('Meta Description')
+        
+        return missing
 
 
 class ToolMedia(models.Model):

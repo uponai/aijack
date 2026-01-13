@@ -810,22 +810,43 @@ def admin_dashboard(request):
 
 @staff_member_required
 def admin_tools(request):
-    """Admin: List and manage tools."""
+    """Admin tool management list."""
     query = request.GET.get('q', '')
-    if query:
-        tools_list = Tool.objects.filter(
-            Q(name__icontains=query) | Q(slug__icontains=query)
-        ).order_by('-created_at')
-    else:
-        tools_list = Tool.objects.all().order_by('-created_at')
-        
-    paginator = Paginator(tools_list, 20)
-    page_number = request.GET.get('page')
-    tools = paginator.get_page(page_number)
+    filter_type = request.GET.get('filter', 'all')
     
+    tools = Tool.objects.all().order_by('-created_at')
+    
+    if query:
+        tools = tools.filter(
+            Q(name__icontains=query) | 
+            Q(slug__icontains=query) |
+            Q(categories__name__icontains=query)
+        ).distinct()
+    
+    if filter_type == 'incomplete':
+        # Filter for tools missing critical fields that can be checked at DB level
+        # Description is checked via translations in get_missing_fields()
+        tools = tools.filter(
+            Q(logo="") |
+            Q(categories__isnull=True) |
+            Q(professions__isnull=True) |
+            Q(tags__isnull=True) |
+            Q(meta_title="") |
+            Q(meta_description="")
+        ).distinct()
+
+    paginator = Paginator(tools, 20)
+    page_number = request.GET.get('page')
+    tools_page = paginator.get_page(page_number)
+    
+    # Calculate missing fields for each tool in the current page
+    for tool in tools_page:
+        tool.missing_fields = tool.get_missing_fields()
+        
     return render(request, 'admin_tools_list.html', {
-        'tools': tools,
+        'tools': tools_page,
         'query': query,
+        'filter_type': filter_type,
         'active_tab': 'tools'
     })
 
@@ -892,20 +913,39 @@ def admin_tool_delete(request, slug):
 def admin_stacks(request):
     """Admin: List and manage stacks."""
     query = request.GET.get('q', '')
+    filter_type = request.GET.get('filter', 'all')
+    
+    stacks = ToolStack.objects.all().order_by('-created_at')
+    
     if query:
-        stacks_list = ToolStack.objects.filter(
-            Q(name__icontains=query) | Q(slug__icontains=query)
-        ).order_by('-created_at')
-    else:
-        stacks_list = ToolStack.objects.all().order_by('-created_at')
+        stacks = stacks.filter(
+            Q(name__icontains=query) | 
+            Q(slug__icontains=query)
+        ).distinct()
+    
+    if filter_type == 'incomplete':
+        # Filter for stacks missing critical fields
+        stacks = stacks.filter(
+            Q(description="") |
+            Q(tagline="") |
+            Q(tools__isnull=True) |
+            Q(professions__isnull=True) |
+            Q(meta_title="") |
+            Q(meta_description="")
+        ).distinct()
         
-    paginator = Paginator(stacks_list, 20)
+    paginator = Paginator(stacks, 20)
     page_number = request.GET.get('page')
-    stacks = paginator.get_page(page_number)
+    stacks_page = paginator.get_page(page_number)
+    
+    # Calculate missing fields for each stack in the current page
+    for stack in stacks_page:
+        stack.missing_fields = stack.get_missing_fields()
     
     return render(request, 'admin_stacks_list.html', {
-        'stacks': stacks,
+        'stacks': stacks_page,
         'query': query,
+        'filter_type': filter_type,
         'active_tab': 'stacks'
     })
 
@@ -990,20 +1030,38 @@ def admin_stack_delete(request, slug):
 def admin_professions(request):
     """Admin: List and manage professions."""
     query = request.GET.get('q', '')
+    filter_type = request.GET.get('filter', 'all')
+    
+    professions = Profession.objects.all().order_by('name')
+    
     if query:
-        professions_list = Profession.objects.filter(
-            Q(name__icontains=query) | Q(slug__icontains=query)
-        ).order_by('name')
-    else:
-        professions_list = Profession.objects.all().order_by('name')
+        professions = professions.filter(
+            Q(name__icontains=query) | 
+            Q(slug__icontains=query)
+        ).distinct()
+    
+    if filter_type == 'incomplete':
+        # Filter for professions missing critical fields
+        professions = professions.filter(
+            Q(description="") |
+            Q(icon="") |
+            Q(hero_tagline="") |
+            Q(meta_title="") |
+            Q(meta_description="")
+        ).distinct()
         
-    paginator = Paginator(professions_list, 20)
+    paginator = Paginator(professions, 20)
     page_number = request.GET.get('page')
-    professions = paginator.get_page(page_number)
+    professions_page = paginator.get_page(page_number)
+    
+    # Calculate missing fields for each profession in the current page
+    for profession in professions_page:
+        profession.missing_fields = profession.get_missing_fields()
     
     return render(request, 'admin_professions_list.html', {
-        'professions': professions,
+        'professions': professions_page,
         'query': query,
+        'filter_type': filter_type,
         'active_tab': 'professions'
     })
 
@@ -1331,9 +1389,38 @@ def bulk_upload_tools(request):
                         if created and tag_name not in existing_tags:
                             existing_tags.append(tag_name)
                     
+                    # Find similar existing tools using vector search
+                    similar_tool_ids = []
+                    similar_tool_names = []
+                    try:
+                        # Create search query from tool description
+                        search_query = f"{row['tool_name']} {row['short_description']}"
+                        similar_ids = SearchService.search(search_query, n_results=4, collection_name="tools")
+                        
+                        # Filter out the newly created tool itself and get top 3
+                        for similar_id in similar_ids:
+                            if str(tool.id) != similar_id:
+                                try:
+                                    similar_tool = Tool.objects.get(id=int(similar_id))
+                                    similar_tool_ids.append(similar_tool.id)
+                                    similar_tool_names.append(similar_tool.name)
+                                    if len(similar_tool_ids) >= 3:
+                                        break
+                                except Tool.DoesNotExist:
+                                    continue
+                    except Exception as e:
+                        print(f"Similarity search error for {row['tool_name']}: {e}")
+                    
+                    # Add tool to vector database for future similarity searches
+                    try:
+                        SearchService.add_tools([tool])
+                    except Exception as e:
+                        print(f"Vector DB add error for {row['tool_name']}: {e}")
+                    
                     row['status'] = 'success'
                     row['tool_id'] = tool.id
                     row['tool_slug'] = tool.slug
+                    row['similar_tools'] = similar_tool_names  # Store for display
                     created_count += 1
                     
                 except Exception as e:

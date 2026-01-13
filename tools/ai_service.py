@@ -179,7 +179,7 @@ class AIService:
         
         system_instruction = """
 You are an expert AI tools curator and SEO specialist.
-You will receive information about an AI tool and must generate comprehensive metadata.
+You have access to Google Search. Use it to verify the tool's existence, latest pricing, and features if the provided info is sparse.
 
 Your task is to analyze the tool and produce:
 1. pricing_type: Exactly one of: "free", "freemium", or "paid"
@@ -219,7 +219,7 @@ EXISTING SYSTEM DATA (prefer these when applicable):
 - Professions: {professions_list}
 - Tags: {tags_list}
 
-Generate the complete metadata JSON for this tool.
+Generate the complete metadata JSON for this tool. Use search to verify details.
 """
 
         try:
@@ -227,12 +227,24 @@ Generate the complete metadata JSON for this tool.
                 model="gemini-flash-latest",
                 config=types.GenerateContentConfig(
                     system_instruction=system_instruction,
-                    response_mime_type="application/json"
+                    # Note: response_mime_type cannot be used with tools
+                    tools=[types.Tool(google_search=types.GoogleSearch())]
                 ),
                 contents=[prompt]
             )
             
-            data = json.loads(response.text)
+            # Extract JSON from response text (API returns text when using tools)
+            response_text = response.text.strip()
+            
+            # Try to find JSON in the response (may be wrapped in markdown or extra text)
+            import re
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(0)
+                data = json.loads(json_str)
+            else:
+                # If no JSON found, try parsing the entire response
+                data = json.loads(response_text)
             
             # Validate and normalize response
             result = {

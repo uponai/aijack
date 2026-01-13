@@ -26,14 +26,24 @@
 
     <!-- Stacks List -->
     <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+        <!-- Filter Tabs -->
+        <div class="border-b border-slate-200 bg-slate-50/50 px-6 py-3 flex gap-4">
+            <a href="?filter=all{% if query %}&q={{ query }}{% endif %}" class="text-sm font-bold {% if filter_type == 'all' %}text-brand-600 border-b-2 border-brand-600 pb-3 -mb-3.5{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+                All Stacks
+            </a>
+            <a href="?filter=incomplete{% if query %}&q={{ query }}{% endif %}" class="text-sm font-bold {% if filter_type == 'incomplete' %}text-brand-600 border-b-2 border-brand-600 pb-3 -mb-3.5{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+                Incomplete <span class="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded ml-1">Action Needed</span>
+            </a>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/50">
                         <th class="p-4 font-heading font-bold text-slate-600 text-sm">Stack</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Completeness</th>
                         <th class="p-4 font-heading font-bold text-slate-600 text-sm">Visibility</th>
                         <th class="p-4 font-heading font-bold text-slate-600 text-sm">Tools</th>
-                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Owner</th>
                         <th class="p-4 font-heading font-bold text-slate-600 text-sm text-right">Actions</th>
                     </tr>
                 </thead>
@@ -50,6 +60,27 @@
                                     <div class="text-xs text-slate-500">{{ stack.slug }}</div>
                                 </div>
                             </div>
+                        </td>
+                        <td class="p-4">
+                            {% if stack.missing_fields %}
+                            <div class="flex flex-col gap-1">
+                                <span class="text-xs font-bold text-orange-600 flex items-center">
+                                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Missing Info
+                                </span>
+                                <div class="flex flex-wrap gap-1">
+                                    {% for field in stack.missing_fields|slice:":3" %}
+                                    <span class="text-[10px] bg-orange-50 text-orange-600 border border-orange-100 px-1.5 py-0.5 rounded">{{ field }}</span>
+                                    {% endfor %}
+                                    {% if stack.missing_fields|length > 3 %}
+                                    <span class="text-[10px] text-slate-400">+{{ stack.missing_fields|length|add:"-3" }} more</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="text-xs font-bold text-green-600 flex items-center">
+                                <i class="fa-solid fa-check mr-1"></i> Complete
+                            </span>
+                            {% endif %}
                         </td>
                         <td class="p-4">
                             {% if stack.visibility == 'public' %}
@@ -69,18 +100,6 @@
                         </td>
                         <td class="p-4 text-sm text-slate-600">
                             {{ stack.tools.count }} tools
-                        </td>
-                        <td class="p-4 text-sm text-slate-600">
-                            {% if stack.owner %}
-                            <div class="flex items-center gap-1">
-                                <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">
-                                    {{ stack.owner.username|slice:":1"|upper }}
-                                </div>
-                                <span>{{ stack.owner.username }}</span>
-                            </div>
-                            {% else %}
-                            <span class="text-slate-400 italic">System</span>
-                            {% endif %}
                         </td>
                         <td class="p-4 text-right">
                             <div class="flex items-center justify-end gap-2">
@@ -113,13 +132,13 @@
         <div class="border-t border-slate-200 p-4 bg-slate-50/50 flex justify-center">
             <div class="flex gap-2">
                 {% if stacks.has_previous %}
-                <a href="?page={{ stacks.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Previous</a>
+                <a href="?page={{ stacks.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Previous</a>
                 {% endif %}
 
                 <span class="px-3 py-1 text-slate-500 text-sm">Page {{ stacks.number }} of {{ stacks.paginator.num_pages }}</span>
 
                 {% if stacks.has_next %}
-                <a href="?page={{ stacks.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Next</a>
+                <a href="?page={{ stacks.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Next</a>
                 {% endif %}
             </div>
         </div>
