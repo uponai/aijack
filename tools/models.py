@@ -421,6 +421,54 @@ class SavedStack(models.Model):
         return f"{self.user.username} saved {self.stack.name}"
 
 
+class ToolView(models.Model):
+    """Analytics: Tracking tool page views."""
+    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, related_name='views')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session_key = models.CharField(max_length=40, blank=True)
+    source_page = models.CharField(max_length=100, default='tool_detail')
+    ip_hash = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"View: {self.tool.name} @ {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class StackView(models.Model):
+    """Analytics: Tracking stack page views."""
+    stack = models.ForeignKey(ToolStack, on_delete=models.CASCADE, related_name='views')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session_key = models.CharField(max_length=40, blank=True)
+    source_page = models.CharField(max_length=100, default='stack_detail')
+    ip_hash = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"View: {self.stack.name} @ {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class ProfessionView(models.Model):
+    """Analytics: Tracking profession page views."""
+    profession = models.ForeignKey(Profession, on_delete=models.CASCADE, related_name='views')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session_key = models.CharField(max_length=40, blank=True)
+    source_page = models.CharField(max_length=100, default='profession_detail')
+    ip_hash = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"View: {self.profession.name} @ {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
 class SearchQuery(models.Model):
     """Analytics for search queries."""
     query = models.CharField(max_length=500)

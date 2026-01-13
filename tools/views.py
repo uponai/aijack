@@ -27,7 +27,7 @@ def home(request):
     professions = Profession.objects.all()[:16]
     featured_stacks = ToolStack.objects.filter(is_featured=True, visibility='public')[:4]
     featured_tools = Tool.objects.filter(status='published', is_featured=True)[:6]
-    
+
     # Global counts
     tool_count = Tool.objects.filter(status='published').count()
     stack_count = ToolStack.objects.filter(visibility='public').count()
@@ -242,6 +242,9 @@ def profession_detail(request, slug, pricing=None):
         professions=profession
     )
     
+    # Log view
+    AnalyticsService.log_profession_view(request, profession, source_page='profession_detail')
+    
     # Calculate counts
     counts = {
         'all': base_tools.count(),
@@ -285,13 +288,28 @@ def tool_detail(request, slug):
     ).exclude(id=tool.id).distinct()[:4]
     
     # Log tool view for analytics
-    AnalyticsService.log_tool_click(request, tool, source_page='tool_detail')
+    AnalyticsService.log_tool_view(request, tool, source_page='tool_detail')
     
     return render(request, 'tool_detail.html', {
         'tool': tool,
         'translation': translation,
         'related_tools': related_tools,
     })
+
+
+def visit_tool(request, slug):
+    """
+    Handle logic when user clicks 'Visit Website'.
+    Logs an AffiliateClick and redirects to external URL.
+    """
+    tool = get_object_or_404(Tool, slug=slug, status='published')
+    
+    # Log the click (AffiliateClick)
+    AnalyticsService.log_affiliate_click(request, tool, source_page='tool_detail')
+    
+    # Redirect to affiliate URL if exists, else website URL
+    target_url = tool.affiliate_url if tool.affiliate_url else tool.website_url
+    return redirect(target_url)
 
 
 def submit_tool(request):
@@ -694,25 +712,28 @@ def admin_dashboard(request):
     days = int(request.GET.get('days', 30))
     
     # Get analytics data
-    top_tools = AnalyticsService.get_top_clicked_tools(limit=10, days=days)
-    top_stacks = AnalyticsService.get_top_viewed_stacks(limit=10, days=days)
+    # Get analytics data
+    # "Clicked Tools" means outbound clicks now (AffiliateClick)
+    top_clicked_tools = AnalyticsService.get_top_clicked_tools(limit=10, days=days)
+    
+    # "Viewed Tools" (New metric)
+    top_viewed_tools = AnalyticsService.get_top_viewed_tools(limit=10, days=days)
+
+    # "Viewed Stacks" (New metric using StackView)
+    top_stacks = AnalyticsService.get_top_viewed_stacks_new(limit=10, days=days)
+    
+    # "Clicked Stacks" (Stacks with most tool citations/clicks)
+    top_clicked_stacks = AnalyticsService.get_top_clicked_stacks(limit=10, days=days)
+
+    # "Viewed Professions"
+    top_professions = AnalyticsService.get_top_viewed_professions(limit=10, days=days)
+
+    # "Clicked Professions"
+    top_clicked_professions = AnalyticsService.get_top_clicked_professions(limit=10, days=days)
     
     # Pagination for recent searches
-    # Fetch more results to allow for deep scrolling (e.g. 500 instead of 50)
-    # The AnalyticsService.get_recent_searches creates a slice, which returns a list/queryset. 
-    # We should probably modify get_recent_searches or just slice it larger here if it returned a queryset.
-    # Looking at likely implementation of get_recent_searches, it returns a sliced queryset.
-    # Let's see... it returns SearchQuery.objects.filter(...).order_by(...)[:limit]
-    # Pagination requires an unsliced queryset usually, OR we can just paginate the list, but for infinite scroll 
-    # and large datasets, better to paginate the queryset.
-    # For now, let's just ask for a larger limit from the service and paginate that, 
-    # or better, bypassing the limit in the service if we want true infinite scroll.
-    # But for this task, I will just call it with a large limit (e.g. 1000) and paginate locally, 
-    # or I should modify the service to return a queryset. 
-    # Let's check the service code again... 
-    # it does: return SearchQuery.objects.filter(...)...[:limit]
-    # So it returns a queryset but sliced. Sliced querysets cannot be filtered or re-ordered, but can be iterated.
-    # Paginator works on lists/tuples too.
+    # Fetch more results to allow for deep scrolling (e.g. 1000) and paginate locally
+    # AnalyticsService.get_recent_searches returns a sliced queryset/list, so we use a large limit.
     
     recent_searches_list = AnalyticsService.get_recent_searches(limit=1000, days=days)
     paginator = Paginator(recent_searches_list, 20) # Show 20 per page
@@ -766,8 +787,12 @@ def admin_dashboard(request):
         })
 
     return render(request, 'admin_dashboard.html', {
-        'top_tools': top_tools,
+        'top_clicked_tools': top_clicked_tools,
+        'top_viewed_tools': top_viewed_tools,
         'top_stacks': top_stacks,
+        'top_clicked_stacks': top_clicked_stacks,
+        'top_professions': top_professions,
+        'top_clicked_professions': top_clicked_professions,
         'recent_searches': recent_searches,
         'search_stats': search_stats,
         'click_stats': click_stats,

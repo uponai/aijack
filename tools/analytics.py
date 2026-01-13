@@ -4,7 +4,7 @@ Handles tracking of searches, tool clicks, and stack views.
 """
 import hashlib
 from django.utils import timezone
-from .models import SearchQuery, AffiliateClick, Tool, ToolStack
+from .models import SearchQuery, AffiliateClick, Tool, ToolStack, ToolView, StackView, ProfessionView, Profession
 
 
 class AnalyticsService:
@@ -47,14 +47,28 @@ class AnalyticsService:
             session_key=session_key,
             results_count=results_count,
             clicked_tool=clicked_tool,
-            source_page=source_page or 'U/N',
             filters_applied=filters or {}
         )
     
     @classmethod
-    def log_tool_click(cls, request, tool, source_page='tool_detail'):
+    def log_tool_view(cls, request, tool, source_page='tool_detail'):
+        """Log when a user views a tool page."""
+        user = request.user if request.user.is_authenticated else None
+        session_key = request.session.session_key or ''
+        ip_hash = cls.hash_ip(cls.get_client_ip(request))
+        
+        return ToolView.objects.create(
+            tool=tool,
+            user=user,
+            session_key=session_key,
+            source_page=source_page,
+            ip_hash=ip_hash
+        )
+
+    @classmethod
+    def log_affiliate_click(cls, request, tool, source_page='tool_detail'):
         """
-        Log when a user clicks on a tool (for affiliate/analytics).
+        Log when a user Clicks 'Visit Website' (Affiliate Click).
         
         Args:
             request: Django HTTP request
@@ -77,20 +91,32 @@ class AnalyticsService:
     
     @classmethod
     def log_stack_view(cls, request, stack, source_page='stack_detail'):
-        """
-        Log when a user views a stack.
-        We'll reuse SearchQuery with special source_page for simplicity.
-        """
+        """Log when a user views a stack."""
         user = request.user if request.user.is_authenticated else None
         session_key = request.session.session_key or ''
+        ip_hash = cls.hash_ip(cls.get_client_ip(request))
         
-        return SearchQuery.objects.create(
-            query=f"[STACK_VIEW] {stack.name}",
+        return StackView.objects.create(
+            stack=stack,
             user=user,
             session_key=session_key,
-            results_count=stack.tools.count(),
             source_page=source_page,
-            filters_applied={'stack_id': stack.id, 'stack_slug': stack.slug}
+            ip_hash=ip_hash
+        )
+
+    @classmethod
+    def log_profession_view(cls, request, profession, source_page='profession_detail'):
+        """Log when a user views a profession."""
+        user = request.user if request.user.is_authenticated else None
+        session_key = request.session.session_key or ''
+        ip_hash = cls.hash_ip(cls.get_client_ip(request))
+        
+        return ProfessionView.objects.create(
+            profession=profession,
+            user=user,
+            session_key=session_key,
+            source_page=source_page,
+            ip_hash=ip_hash
         )
     
     @classmethod
@@ -129,6 +155,70 @@ class AnalyticsService:
             stack.view_count = view_counts.get(stack.id, 0)
         
         return sorted(stacks, key=lambda x: x.view_count, reverse=True)
+
+    @classmethod
+    def get_top_viewed_tools(cls, limit=10, days=30):
+        """Get most viewed tools in the last N days."""
+        from django.db.models import Count
+        since = timezone.now() - timezone.timedelta(days=days)
+        
+        return Tool.objects.filter(
+            views__created_at__gte=since
+        ).annotate(
+            view_count=Count('views')
+        ).order_by('-view_count')[:limit]
+    
+    @classmethod
+    def get_top_viewed_stacks_new(cls, limit=10, days=30):
+        """Get most viewed stacks using new StackView model."""
+        from django.db.models import Count
+        since = timezone.now() - timezone.timedelta(days=days)
+        
+        return ToolStack.objects.filter(
+            views__created_at__gte=since
+        ).annotate(
+            view_count=Count('views')
+        ).order_by('-view_count')[:limit]
+
+    @classmethod
+    def get_top_clicked_stacks(cls, limit=10, days=30):
+        """Get stacks with most tool clicks."""
+        from django.db.models import Count, Sum, Q
+        since = timezone.now() - timezone.timedelta(days=days)
+        
+        # We need to sum the clicks of the tools belonging to the stack
+        # This is expensive if not careful. 
+        # Alternative: Count distinct AffiliateClick where tool__stacks=stack
+        
+        return ToolStack.objects.filter(
+            tools__affiliate_clicks__clicked_at__gte=since
+        ).annotate(
+            click_count=Count('tools__affiliate_clicks', filter=Q(tools__affiliate_clicks__clicked_at__gte=since))
+        ).order_by('-click_count')[:limit]
+
+    @classmethod
+    def get_top_viewed_professions(cls, limit=10, days=30):
+        """Get most viewed professions."""
+        from django.db.models import Count
+        since = timezone.now() - timezone.timedelta(days=days)
+        
+        return Profession.objects.filter(
+            views__created_at__gte=since
+        ).annotate(
+            view_count=Count('views')
+        ).order_by('-view_count')[:limit]
+
+    @classmethod
+    def get_top_clicked_professions(cls, limit=10, days=30):
+        """Get professions with most tool clicks."""
+        from django.db.models import Count, Q
+        since = timezone.now() - timezone.timedelta(days=days)
+        
+        return Profession.objects.filter(
+            tools__affiliate_clicks__clicked_at__gte=since
+        ).annotate(
+            click_count=Count('tools__affiliate_clicks', filter=Q(tools__affiliate_clicks__clicked_at__gte=since))
+        ).order_by('-click_count')[:limit]
     
     @classmethod
     def get_recent_searches(cls, limit=100, days=7):

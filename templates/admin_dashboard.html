@@ -109,87 +109,193 @@
 
 
     <!-- Main Content Grid -->
-    <div class="grid lg:grid-cols-2 gap-8 mt-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
 
-        <!-- Top Tools -->
-        <div class="neon-card p-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-heading font-bold text-brand-600">
-                    <i class="fa-solid fa-fire text-orange-500 mr-2"></i>Top 10 Clicked Tools
-                </h2>
-                <span class="neon-badge-cyan">Last {{ days }} days</span>
-            </div>
+        <!-- Column 1: Tools Analytics -->
+        <div class="space-y-6">
+            <h3 class="font-heading font-bold text-slate-800 text-lg border-b border-slate-200 pb-2">
+                <i class="fa-solid fa-cube text-blue-500 mr-2"></i>Tools
+            </h3>
 
-            {% if top_tools %}
-            <div class="space-y-4">
-                {% for tool in top_tools %}
-                <div class="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/50 to-transparent hover:from-brand-50/50 transition group">
-                    <div class="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center font-heading font-bold text-brand-600 group-hover:scale-110 transition">
-                        {{ forloop.counter }}
-                    </div>
-                    {% if tool.logo %}
-                    <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-12 h-12 rounded-lg object-cover border border-brand-100">
-                    {% else %}
-                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
-                        <i class="fa-solid fa-cube text-white"></i>
-                    </div>
-                    {% endif %}
-                    <div class="flex-1 min-w-0">
-                        <a href="{% url 'tool_detail' tool.slug %}" class="font-bold text-slate-800 hover:text-brand-600 truncate block">{{ tool.name }}</a>
-                        <span class="text-sm text-slate-500">{{ tool.pricing_type|title }}</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-2xl font-heading font-bold text-brand-600">{{ tool.click_count }}</div>
-                        <div class="text-xs text-slate-400 uppercase">clicks</div>
-                    </div>
+            <!-- Viewed Tools -->
+            <div class="neon-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Most Viewed</h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-600 font-bold border border-blue-100">{{ days }}d</span>
                 </div>
-                {% endfor %}
+                {% if top_viewed_tools %}
+                <div class="space-y-1">
+                    {% for tool in top_viewed_tools %}
+                    <div class="flex items-center gap-3 p-1.5 rounded hover:bg-slate-50 transition group">
+                        <div class="font-mono text-xs font-bold text-slate-400 w-4">{{ forloop.counter }}</div>
+                        {% if tool.logo %}
+                        <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-6 h-6 rounded object-cover border border-slate-200">
+                        {% else %}
+                        <div class="w-6 h-6 rounded bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                            <i class="fa-solid fa-cube text-white text-[8px]"></i>
+                        </div>
+                        {% endif %}
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'tool_detail' tool.slug %}" class="font-bold text-slate-700 text-xs hover:text-blue-600 truncate block">{{ tool.name }}</a>
+                        </div>
+                        <div class="font-bold text-blue-600 text-xs">{{ tool.view_count }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">No data.</p>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="text-center py-12 text-slate-400">
-                <i class="fa-solid fa-chart-simple text-4xl mb-4 opacity-50"></i>
-                <p>No click data yet. Tools will appear here once users start clicking.</p>
+
+            <!-- Clicked Tools -->
+            <div class="neon-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Best Converting</h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-orange-50 text-orange-600 font-bold border border-orange-100">{{ days }}d</span>
+                </div>
+                {% if top_clicked_tools %}
+                <div class="space-y-1">
+                    {% for tool in top_clicked_tools %}
+                    <div class="flex items-center gap-3 p-1.5 rounded hover:bg-slate-50 transition group">
+                        <div class="font-mono text-xs font-bold text-slate-400 w-4">{{ forloop.counter }}</div>
+                        {% if tool.logo %}
+                        <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-6 h-6 rounded object-cover border border-slate-200">
+                        {% else %}
+                        <div class="w-6 h-6 rounded bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                            <i class="fa-solid fa-fire text-white text-[8px]"></i>
+                        </div>
+                        {% endif %}
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'tool_detail' tool.slug %}" class="font-bold text-slate-700 text-xs hover:text-orange-600 truncate block">{{ tool.name }}</a>
+                        </div>
+                        <div class="font-bold text-orange-600 text-xs">{{ tool.click_count }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">No data.</p>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
 
-        <!-- Top Stacks -->
-        <div class="neon-card p-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-heading font-bold text-brand-600">
-                    <i class="fa-solid fa-layer-group text-purple-500 mr-2"></i>Top 10 Viewed Stacks
-                </h2>
-                <span class="neon-badge-cyan">Last {{ days }} days</span>
+        <!-- Column 2: Stacks Analytics -->
+        <div class="space-y-6">
+            <h3 class="font-heading font-bold text-slate-800 text-lg border-b border-slate-200 pb-2">
+                <i class="fa-solid fa-layer-group text-purple-500 mr-2"></i>Stacks
+            </h3>
+
+            <!-- Viewed Stacks -->
+            <div class="neon-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Most Viewed</h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-purple-50 text-purple-600 font-bold border border-purple-100">{{ days }}d</span>
+                </div>
+                {% if top_stacks %}
+                <div class="space-y-1">
+                    {% for stack in top_stacks %}
+                    <div class="flex items-center gap-3 p-1.5 rounded hover:bg-slate-50 transition group">
+                        <div class="font-mono text-xs font-bold text-slate-400 w-4">{{ forloop.counter }}</div>
+                        <div class="w-6 h-6 rounded bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                            <i class="fa-solid fa-boxes-stacked text-white text-[8px]"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'stack_detail' stack.slug %}" class="font-bold text-slate-700 text-xs hover:text-purple-600 truncate block">{{ stack.name }}</a>
+                        </div>
+                        <div class="font-bold text-purple-600 text-xs">{{ stack.view_count }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">No data.</p>
+                {% endif %}
             </div>
 
-            {% if top_stacks %}
-            <div class="space-y-4">
-                {% for stack in top_stacks %}
-                <div class="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/50 to-transparent hover:from-purple-50/50 transition group">
-                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center font-heading font-bold text-purple-600 group-hover:scale-110 transition">
-                        {{ forloop.counter }}
-                    </div>
-                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                        <i class="fa-solid fa-boxes-stacked text-white"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <a href="{% url 'stack_detail' stack.slug %}" class="font-bold text-slate-800 hover:text-purple-600 truncate block">{{ stack.name }}</a>
-                        <span class="text-sm text-slate-500">{{ stack.tools.count }} tools</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-2xl font-heading font-bold text-purple-600">{{ stack.view_count }}</div>
-                        <div class="text-xs text-slate-400 uppercase">views</div>
-                    </div>
+            <!-- Clicked Stacks -->
+            <div class="neon-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Best Converting</h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-pink-50 text-pink-600 font-bold border border-pink-100">{{ days }}d</span>
                 </div>
-                {% endfor %}
+                {% if top_clicked_stacks %}
+                <div class="space-y-1">
+                    {% for stack in top_clicked_stacks %}
+                    <div class="flex items-center gap-3 p-1.5 rounded hover:bg-slate-50 transition group">
+                        <div class="font-mono text-xs font-bold text-slate-400 w-4">{{ forloop.counter }}</div>
+                        <div class="w-6 h-6 rounded bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center">
+                            <i class="fa-solid fa-trophy text-white text-[8px]"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'stack_detail' stack.slug %}" class="font-bold text-slate-700 text-xs hover:text-pink-600 truncate block">{{ stack.name }}</a>
+                        </div>
+                        <div class="font-bold text-pink-600 text-xs">{{ stack.click_count }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">No data.</p>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="text-center py-12 text-slate-400">
-                <i class="fa-solid fa-layer-group text-4xl mb-4 opacity-50"></i>
-                <p>No stack views yet. Stacks will appear here once users start exploring.</p>
-            </div>
-            {% endif %}
         </div>
+
+        <!-- Column 3: Professions Analytics -->
+        <div class="space-y-6">
+            <h3 class="font-heading font-bold text-slate-800 text-lg border-b border-slate-200 pb-2">
+                <i class="fa-solid fa-briefcase text-teal-500 mr-2"></i>Professions
+            </h3>
+
+            <!-- Viewed Professions -->
+            <div class="neon-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Most Viewed</h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-teal-50 text-teal-600 font-bold border border-teal-100">{{ days }}d</span>
+                </div>
+                {% if top_professions %}
+                <div class="space-y-1">
+                    {% for prof in top_professions %}
+                    <div class="flex items-center gap-3 p-1.5 rounded hover:bg-slate-50 transition group">
+                        <div class="font-mono text-xs font-bold text-slate-400 w-4">{{ forloop.counter }}</div>
+                        <div class="w-6 h-6 rounded bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
+                            <i class="fa-solid fa-user-tie text-white text-[8px]"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'profession_detail' prof.slug %}" class="font-bold text-slate-700 text-xs hover:text-teal-600 truncate block">{{ prof.name }}</a>
+                        </div>
+                        <div class="font-bold text-teal-600 text-xs">{{ prof.view_count }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">No data.</p>
+                {% endif %}
+            </div>
+
+            <!-- Clicked Professions -->
+            <div class="neon-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wide">Best Converting</h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-50 text-indigo-600 font-bold border border-indigo-100">{{ days }}d</span>
+                </div>
+                {% if top_clicked_professions %}
+                <div class="space-y-1">
+                    {% for prof in top_clicked_professions %}
+                    <div class="flex items-center gap-3 p-1.5 rounded hover:bg-slate-50 transition group">
+                        <div class="font-mono text-xs font-bold text-slate-400 w-4">{{ forloop.counter }}</div>
+                        <div class="w-6 h-6 rounded bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-star text-white text-[8px]"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'profession_detail' prof.slug %}" class="font-bold text-slate-700 text-xs hover:text-indigo-600 truncate block">{{ prof.name }}</a>
+                        </div>
+                        <div class="font-bold text-indigo-600 text-xs">{{ prof.click_count }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-4">No data.</p>
+                {% endif %}
+            </div>
+        </div>
+
     </div>
 
     <!-- Recent Searches Table -->
