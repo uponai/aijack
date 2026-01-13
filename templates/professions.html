@@ -50,25 +50,7 @@
 
         <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {% for profession in professions %}
-            <a href="{% url 'profession_detail' profession.slug %}" class="neon-card p-4 group text-center">
-                {% if profession.icon %}
-                <div class="text-2xl mb-2 text-brand-600"><i class="{{ profession.icon }}"></i></div>
-                {% else %}
-                <div class="w-12 h-12 mx-auto mb-2 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-heading font-bold text-base group-hover:scale-110 transition-transform">
-                    {{ profession.name|slice:":2"|upper }}
-                </div>
-                {% endif %}
-
-                <h3 class="font-heading font-bold text-lg text-slate-900 mb-1">{{ profession.name }}</h3>
-
-                {% if profession.hero_tagline %}
-                <p class="text-slate-600 text-sm mb-3">{{ profession.hero_tagline }}</p>
-                {% endif %}
-
-                <span class="neon-badge neon-badge-cyan">
-                    {{ profession.tools.count }} Tools
-                </span>
-            </a>
+            {% include 'includes/_profession_card.html' with profession=profession %}
             {% empty %}
             <div class="col-span-full text-center py-12">
                 <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-brand-100 flex items-center justify-center">

@@ -63,23 +63,9 @@
                 <i class="fa-solid fa-user-tie text-cyan-500"></i>
                 Matching Professions
             </h2>
-            <div class="flex flex-wrap gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {% for profession in professions %}
-                <a href="{% url 'profession_detail' profession.slug %}" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-brand-300 transition-all group">
-                    {% if profession.icon %}
-                    <span class="w-8 h-8 rounded-md bg-cyan-100 flex items-center justify-center text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        <i class="{{ profession.icon }}"></i>
-                    </span>
-                    {% else %}
-                    <span class="w-8 h-8 rounded-md bg-cyan-100 flex items-center justify-center text-cyan-600 font-bold text-sm group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                        {{ profession.name|slice:":2"|upper }}
-                    </span>
-                    {% endif %}
-                    <div>
-                        <div class="font-heading font-bold text-slate-800 group-hover:text-brand-600 transition-colors">{{ profession.name }}</div>
-                        <div class="text-xs text-slate-500">{{ profession.tools.count }} tools</div>
-                    </div>
-                </a>
+                {% include 'includes/_profession_card.html' with profession=profession %}
                 {% endfor %}
             </div>
         </div>
