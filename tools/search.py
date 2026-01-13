@@ -79,6 +79,77 @@ class SearchService:
         return 0
 
     @classmethod
+    def remove_tools(cls, tools):
+        """
+        Remove tools from the vector database.
+        tools: List of Tool instances or IDs
+        """
+        collection = cls.get_collection("tools")
+        ids = [str(t.id) if hasattr(t, 'id') else str(t) for t in tools]
+        
+        if ids:
+            collection.delete(ids=ids)
+            return len(ids)
+        return 0
+    
+    @classmethod
+    def add_professions(cls, professions):
+        """
+        Add or update professions in the vector database.
+        professions: List of Profession instances
+        """
+        collection = cls.get_collection("professions")
+        model = cls.get_model()
+        
+        ids = []
+        documents = []
+        metadatas = []
+        embeddings = []
+        
+        for pro in professions:
+            # Construct rich text representation for embedding
+            text = f"Name: {pro.name}. Description: {pro.description}. Tagline: {pro.hero_tagline}"
+            
+            ids.append(str(pro.id))
+            documents.append(text)
+            metadatas.append({
+                "name": pro.name,
+                "slug": pro.slug
+            })
+            embeddings.append(model.encode(text).tolist())
+            
+        if ids:
+            collection.upsert(
+                ids=ids,
+                documents=documents,
+                metadatas=metadatas,
+                embeddings=embeddings
+            )
+        if ids:
+            collection.upsert(
+                ids=ids,
+                documents=documents,
+                metadatas=metadatas,
+                embeddings=embeddings
+            )
+            return len(ids)
+        return 0
+    
+    @classmethod
+    def remove_professions(cls, professions):
+        """
+        Remove professions from the vector database.
+        professions: List of Profession instances or IDs
+        """
+        collection = cls.get_collection("professions")
+        ids = [str(p.id) if hasattr(p, 'id') else str(p) for p in professions]
+        
+        if ids:
+            collection.delete(ids=ids)
+            return len(ids)
+        return 0
+
+    @classmethod
     def add_stacks(cls, stacks):
         """
         Add or update stacks in the vector database.
@@ -114,6 +185,20 @@ class SearchService:
                  metadatas=metadatas,
                  embeddings=embeddings
             )
+            return len(ids)
+        return 0
+
+    @classmethod
+    def remove_stacks(cls, stacks):
+        """
+        Remove stacks from the vector database.
+        stacks: List of ToolStack instances or IDs
+        """
+        collection = cls.get_collection("stacks")
+        ids = [str(s.id) if hasattr(s, 'id') else str(s) for s in stacks]
+        
+        if ids:
+            collection.delete(ids=ids)
             return len(ids)
         return 0
     

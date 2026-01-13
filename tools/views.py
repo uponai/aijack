@@ -399,14 +399,17 @@ def search(request):
             
             if stack_ids:
                 preserved_stacks = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(stack_ids)])
-                stacks_results = ToolStack.objects.filter(id__in=stack_ids).order_by(preserved_stacks)[:4]
+                stacks_results = ToolStack.objects.filter(id__in=stack_ids).order_by(preserved_stacks)[:6]
             else:
                 stacks_results = []
             
-            # 3. Search Professions (keyword match on name/description)
-            professions_results = Profession.objects.filter(
-                Q(name__icontains=query) | Q(description__icontains=query)
-            )[:6]
+            # 3. Search Professions
+            pro_ids = SearchService.search(query, collection_name='professions')
+            if pro_ids:
+                 preserved_pros = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pro_ids)])
+                 professions_results = Profession.objects.filter(id__in=pro_ids).order_by(preserved_pros)[:6]
+            else:
+                 professions_results = []
                 
         except Exception as e:
             # Fallback to simple keyword search
@@ -422,7 +425,7 @@ def search(request):
             
             # Fallback profession search
             professions_results = Profession.objects.filter(
-                Q(name__icontains=query) | Q(description__icontains=query)
+                Q(name__icontains=query) | Q(description__icontains=query) | Q(hero_tagline__icontains=query)
             )[:6]
     else:
         # No query

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from tools.models import Tool, ToolStack
+from tools.models import Tool, ToolStack, Profession
 from tools.search import SearchService
 
 class Command(BaseCommand):
@@ -15,3 +15,8 @@ class Command(BaseCommand):
         stacks = ToolStack.objects.all()
         count_stacks = SearchService.add_stacks(stacks)
         self.stdout.write(self.style.SUCCESS(f'Indexed {count_stacks} stacks.'))
+
+        self.stdout.write('Indexing professions...')
+        professions = Profession.objects.all()
+        count_professions = SearchService.add_professions(professions)
+        self.stdout.write(self.style.SUCCESS(f'Indexed {count_professions} professions.'))
