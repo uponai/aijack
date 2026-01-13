@@ -884,7 +884,8 @@ def admin_tool_edit(request, slug):
     
     return render(request, 'admin_form.html', {
         'form': form,
-        'title': f'Edit Tool: {tool.name}',
+        'title': tool.name,
+        'model_type': 'Tool',
         'back_url': 'admin_tools',
         'active_tab': 'tools'
     })
@@ -1001,7 +1002,8 @@ def admin_stack_edit(request, slug):
     
     return render(request, 'admin_form.html', {
         'form': form,
-        'title': f'Edit Stack: {stack.name}',
+        'title': stack.name,
+        'model_type': 'Stack',
         'back_url': 'admin_stacks',
         'active_tab': 'stacks'
     })
@@ -1099,7 +1101,8 @@ def admin_profession_edit(request, slug):
     
     return render(request, 'admin_form.html', {
         'form': form,
-        'title': f'Edit Profession: {profession.name}',
+        'title': profession.name,
+        'model_type': 'Profession',
         'back_url': 'admin_professions',
         'active_tab': 'professions'
     })

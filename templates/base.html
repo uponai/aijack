@@ -665,13 +665,14 @@
                 } ) );
             };
 
-            window.vis_alert = function ( message, title = 'Notification' )
+            window.vis_alert = function ( message, title = 'Notification', onClose = null )
             {
                 window.dispatchEvent( new CustomEvent( 'show-modal', {
                     detail: {
                         type: 'alert',
                         title: title,
-                        message: message
+                        message: message,
+                        onConfirm: onClose
                     }
                 } ) );
             };

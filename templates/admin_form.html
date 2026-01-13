@@ -11,7 +11,7 @@
         <div class="flex items-center justify-between mb-8 text-slate-800">
             <h1 class="text-3xl font-heading font-black">{{ title }}</h1>
             <div class="flex items-center gap-3">
-                {% if 'Tool' in title or 'Stack' in title or 'Profession' in title %}
+                {% if model_type %}
                 <button type="button"
                         @click="aiComplete()"
                         x-data="{ loading: false, async aiComplete() {
@@ -19,13 +19,13 @@
                             this.loading = true;
                             try {
                                 const slug = '{{ form.instance.slug }}';
-                                const title = '{{ title }}';
+                                const modelType = '{{ model_type }}';
                                 let url;
-                                if (title.includes('Tool')) {
+                                if (modelType === 'Tool') {
                                     url = `/admin-dashboard/tools/${slug}/ai-complete/`;
-                                } else if (title.includes('Stack')) {
+                                } else if (modelType === 'Stack') {
                                     url = `/admin-dashboard/stacks/${slug}/ai-complete/`;
-                                } else if (title.includes('Profession')) {
+                                } else if (modelType === 'Profession') {
                                     url = `/admin-dashboard/professions/${slug}/ai-complete/`;
                                 }
                                 const response = await fetch(url, {
@@ -37,13 +37,14 @@
                                 });
                                 const data = await response.json();
                                 if (data.success) {
-                                    alert(data.message + '. Please review and save.');
-                                    window.location.reload();
+                                    window.vis_alert(data.message + '. Please review and save.', 'AI Completion Success', () => {
+                                        window.location.reload();
+                                    });
                                 } else {
-                                    alert('Error: ' + (data.error || 'Unknown error'));
+                                    window.vis_alert('Error: ' + (data.error || 'Unknown error'), 'AI Completion Failed');
                                 }
                             } catch (e) {
-                                alert('Network error: ' + e.message);
+                                window.vis_alert('Network error: ' + e.message, 'Error');
                             } finally {
                                 this.loading = false;
                             }
