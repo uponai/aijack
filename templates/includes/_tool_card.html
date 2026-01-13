@@ -12,7 +12,7 @@
             {% endif %}
 
             <div class="flex-1 min-w-0">
-                <h3 class="font-heading font-bold text-base text-slate-900 truncate group-hover:text-brand-600 transition-colors">{{ tool.name }}</h3>
+                <h3 class="font-heading font-bold text-base text-slate-900 line-clamp-2 leading-tight group-hover:text-brand-600 transition-colors break-words">{{ tool.name }}</h3>
                 <div class="flex items-center gap-2 mt-1">
                     <span class="neon-badge neon-badge-{% if tool.pricing_type == 'free' %}green{% elif tool.pricing_type == 'freemium' %}yellow{% else %}magenta{% endif %}">
                         {{ tool.get_pricing_type_display }}
