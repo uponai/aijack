@@ -20,13 +20,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from django.views.generic import TemplateView
-from tools.sitemaps import StaticViewSitemap, ToolSitemap, ProfessionSitemap, StackSitemap
+from tools.sitemaps import StaticViewSitemap, ToolSitemap, ProfessionSitemap, StackSitemap, TagSitemap
 
 sitemaps = {
     'static': StaticViewSitemap,
     'tools': ToolSitemap,
     'professions': ProfessionSitemap,
     'stacks': StackSitemap,
+    'tags': TagSitemap,
 }
 
 urlpatterns = [

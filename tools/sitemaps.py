@@ -1,13 +1,18 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
-from .models import Tool, Profession, ToolStack, Category
+from .models import Tool, Profession, ToolStack, Category, Tag
 
 class StaticViewSitemap(Sitemap):
     priority = 0.5
     changefreq = 'daily'
 
     def items(self):
-        return ['home', 'browse_tools', 'submit_tool', 'professions', 'stacks', 'search']
+        return [
+            'home', 'browse_tools', 'submit_tool', 'professions', 'stacks', 'search',
+            'account_login', 'account_signup',
+            'terms', 'privacy', 'cookies',
+            'ai_stack_builder'
+        ]
 
     def location(self, item):
         return reverse(item)
@@ -51,3 +56,13 @@ class StackSitemap(Sitemap):
 
     def location(self, obj):
         return f"/stack/{obj.slug}/"
+
+class TagSitemap(Sitemap):
+    changefreq = 'weekly'
+    priority = 0.6
+
+    def items(self):
+        return Tag.objects.all()
+
+    def location(self, obj):
+        return f"/tag/{obj.slug}/"
