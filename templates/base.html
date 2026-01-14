@@ -20,6 +20,7 @@
         <!-- SEO Identity -->
         <title>{% block title %}{{ seo_title|default:"AIJACK | Don't just find AI tools. Build solutions." }}{% endblock %}</title>
         <meta name="description" content="{% block meta_description %}{{ seo_description|default:"AIJACK is the intelligence layer for the AI era. We curate, test, and stack the best AI tools so you can focus on doing your best work." }}{% endblock %}">
+        <meta name="keywords" content="{% block meta_keywords %}AI tools, artificial intelligence, software, productivity, best AI tools{% endblock %}">
         {% if canonical_url %}
         <link rel="canonical" href="{{ canonical_url }}">
         {% else %}

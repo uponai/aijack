@@ -2,6 +2,7 @@
 
 {% block title %}{{ tool.get_seo_title }}{% endblock %}
 {% block meta_description %}{{ tool.get_seo_description }}{% endblock %}
+{% block meta_keywords %}{{ tool.name }}, {{ tool.name }} AI, {% for tag in tool.tags.all %}{{ tag.name }}, {% endfor %}{% for cat in tool.categories.all %}{{ cat.name }}, {% endfor %}{% for prof in tool.professions.all %}{{ prof.name }} AI tools, {% endfor %}{{ tool.name }} review, {{ tool.name }} pricing, {{ tool.name }} alternatives, best AI tools{% endblock %}
 
 {% block extra_css %}
 <!-- Context for Base SEO -->
