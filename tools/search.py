@@ -21,6 +21,25 @@ class SearchService:
     def get_collection(cls, name="tools"):
         client = cls.get_client()
         return client.get_or_create_collection(name=name)
+        
+    @classmethod
+    def clear_index(cls, models=None):
+        """
+        Clear the search index for specified models.
+        :param models: List of model names ('tools', 'stacks', 'professions') or None for all.
+        """
+        client = cls.get_client()
+        all_models = ['tools', 'stacks', 'professions']
+        target_models = models if models else all_models
+        
+        for name in target_models:
+            if name in all_models:
+                try:
+                    client.delete_collection(name)
+                except ValueError:
+                    # Collection doesn't exist, which is fine
+                    pass
+
     
     @classmethod
     def get_model(cls):
