@@ -1,13 +1,11 @@
 import chromadb
-from chromadb.config import Settings
-from sentence_transformers import SentenceTransformer
+from chromadb.utils import embedding_functions
 import os
 from django.conf import settings
 
 class SearchService:
     _client = None
-    _collection = None
-    _model = None
+    _embedding_fn = None
     
     @classmethod
     def get_client(cls):
@@ -18,9 +16,24 @@ class SearchService:
         return cls._client
     
     @classmethod
+    def get_embedding_function(cls):
+        if cls._embedding_fn is None:
+            # Use a multilingual embedding model
+            # Using paraphrase-multilingual-MiniLM-L12-v2 which is excellent for semantic search in multiple languages including Hungarian
+            cls._embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+                model_name="paraphrase-multilingual-MiniLM-L12-v2"
+            )
+        return cls._embedding_fn
+    
+    @classmethod
     def get_collection(cls, name="tools"):
         client = cls.get_client()
-        return client.get_or_create_collection(name=name)
+        embedding_fn = cls.get_embedding_function()
+        return client.get_or_create_collection(
+            name=name,
+            embedding_function=embedding_fn,
+            metadata={"hnsw:space": "cosine"}
+        )
         
     @classmethod
     def clear_index(cls, models=None):
@@ -42,16 +55,12 @@ class SearchService:
 
     
     @classmethod
-    def get_model(cls):
-        if cls._model is None:
-            # Use a lightweight model for speed
-            cls._model = SentenceTransformer('all-MiniLM-L6-v2')
-        return cls._model
-    
-    @classmethod
     def generate_embedding(cls, text):
-        model = cls.get_model()
-        return model.encode(text).tolist()
+        """Generate embedding for a given text using the multilingual model."""
+        embedding_fn = cls.get_embedding_function()
+        # The embedding function expects a list of texts and returns a list of embeddings
+        embeddings = embedding_fn([text])
+        return embeddings[0]
     
     @classmethod
     def add_tools(cls, tools):
@@ -60,7 +69,7 @@ class SearchService:
         tools: List of Tool instances
         """
         collection = cls.get_collection("tools")
-        model = cls.get_model()
+        embedding_fn = cls.get_embedding_function()
         
         ids = []
         documents = []
@@ -85,7 +94,8 @@ class SearchService:
                 "pricing": tool.pricing_type,
                 "slug": tool.slug
             })
-            embeddings.append(model.encode(text).tolist())
+            # Generate embeddings using the embedding function
+            embeddings.append(embedding_fn([text])[0])
             
         if ids:
             collection.upsert(
@@ -118,7 +128,7 @@ class SearchService:
         professions: List of Profession instances
         """
         collection = cls.get_collection("professions")
-        model = cls.get_model()
+        embedding_fn = cls.get_embedding_function()
         
         ids = []
         documents = []
@@ -135,7 +145,8 @@ class SearchService:
                 "name": pro.name,
                 "slug": pro.slug
             })
-            embeddings.append(model.encode(text).tolist())
+            # Generate embeddings using the embedding function
+            embeddings.append(embedding_fn([text])[0])
             
         if ids:
             collection.upsert(
@@ -175,7 +186,7 @@ class SearchService:
         stacks: List of ToolStack instances
         """
         collection = cls.get_collection("stacks")
-        model = cls.get_model()
+        embedding_fn = cls.get_embedding_function()
         
         ids = []
         documents = []
@@ -195,7 +206,8 @@ class SearchService:
                 "visibility": stack.visibility,
                 "owner_id": str(stack.owner_id) if stack.owner_id else ""
             })
-            embeddings.append(model.encode(text).tolist())
+            # Generate embeddings using the embedding function
+            embeddings.append(embedding_fn([text])[0])
             
         if ids:
             collection.upsert(
@@ -231,9 +243,10 @@ class SearchService:
             return []
             
         collection = cls.get_collection(collection_name)
-        model = cls.get_model()
+        embedding_fn = cls.get_embedding_function()
         
-        query_embedding = model.encode(query).tolist()
+        # Generate query embedding using the embedding function
+        query_embedding = embedding_fn([query])[0]
         
         results = collection.query(
             query_embeddings=[query_embedding],

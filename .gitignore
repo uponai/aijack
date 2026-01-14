@@ -15,6 +15,7 @@ chroma_db/
 # IDE
 .vscode/
 .idea/
+.agent/
 .DS_Store
 
 # System
