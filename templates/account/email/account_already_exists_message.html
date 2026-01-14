@@ -118,11 +118,11 @@
                 <p>{% trans "However, an account using that email address already exists. In case you have forgotten about this, please use the password reset procedure to recover your account:" %}</p>
 
                 <center>
-                    <a href="{{ password_reset_url|default:'http://localhost:8000/accounts/password/reset/' }}" class="button">{% trans "Reset Password" %}</a>
+                    <a href="{{ password_reset_url|default:site_host|add:'/accounts/password/reset/' }}" class="button">{% trans "Reset Password" %}</a>
                 </center>
 
                 <p style="margin-top: 30px; font-size: 14px; color: #64748b;">{% trans "If the button above doesn't work, copy and paste this link into your browser:" %}</p>
-                <p><a href="{{ password_reset_url|default:'http://localhost:8000/accounts/password/reset/' }}" class="link">{{ password_reset_url|default:'http://localhost:8000/accounts/password/reset/' }}</a></p>
+                <p><a href="{{ password_reset_url|default:site_host|add:'/accounts/password/reset/' }}" class="link">{{ password_reset_url|default:site_host|add:'/accounts/password/reset/' }}</a></p>
             </div>
             <div class="footer">
                 <p>© 2026 AIJACK. All rights reserved.</p>

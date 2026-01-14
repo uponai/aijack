@@ -335,7 +335,8 @@ def submit_tool(request):
 
                 html_content = render_to_string('emails/tool_submission_received.html', {
                     'user': request.user,
-                    'tool': tool
+                    'tool': tool,
+                    'site_host': settings.SITE_HOST
                 })
                 text_content = strip_tags(html_content)
                 
@@ -344,7 +345,7 @@ def submit_tool(request):
                     text_content,
                     settings.DEFAULT_FROM_EMAIL,
                     [request.user.email],
-                    bcc=[settings.EMAIL_HOST_USER]
+                    bcc=[settings.SUPPORT_EMAIL]
                 )
                 msg.attach_alternative(html_content, "text/html")
                 msg.send(fail_silently=True)
@@ -1192,14 +1193,17 @@ def subscribe_newsletter(request):
             
             subject = "Welcome to AIJACK! 🚀"
             text_content = "Welcome to AIJACK! Thanks for joining our intelligence network. You'll receive weekly curated AI tools and workflows."
-            html_content = get_template('emails/welcome_email.html').render({'email': email})
+            html_content = get_template('emails/welcome_email.html').render({
+                'email': email,
+                'site_host': settings.SITE_HOST
+            })
             
             msg = EmailMultiAlternatives(
                 subject=subject,
                 body=text_content,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[email],
-                bcc=["support@growiumagent.com"]
+                bcc=[settings.SUPPORT_EMAIL]
             )
             msg.attach_alternative(html_content, "text/html")
             msg.send()

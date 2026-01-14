@@ -108,6 +108,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'config.context_processors.global_settings',
             ],
         },
     },
@@ -179,11 +180,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Email Configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "robert@uponsmart.eu"
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = "support@growiumagent.com"
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'consulting@gerebrobert.com')
+SITE_HOST = os.getenv('SITE_HOST', 'http://localhost:8000')
+SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', 'consulting@gerebrobert.com')
 
 # Allauth Configuration
 ACCOUNT_LOGIN_METHODS = {'email'}

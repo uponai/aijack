@@ -14,14 +14,17 @@ def send_welcome_email(request, email_address, **kwargs):
         
         subject = "Welcome to AIJACK! 🚀"
         text_content = "Welcome to AIJACK! Your email has been verified. You can now access all features."
-        html_content = get_template('emails/welcome_email.html').render({'email': user_email})
+        html_content = get_template('emails/welcome_email.html').render({
+            'email': user_email,
+            'site_host': settings.SITE_HOST
+        })
         
         msg = EmailMultiAlternatives(
             subject=subject,
             body=text_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[user_email],
-            bcc=["support@growiumagent.com"] # BCC support
+            bcc=[settings.SUPPORT_EMAIL] # BCC support
         )
         msg.attach_alternative(html_content, "text/html")
         msg.send()
