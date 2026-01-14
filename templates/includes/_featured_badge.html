@@ -1,0 +1,40 @@
+<span class="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300">
+    <!-- Gradient Background -->
+    <span class="absolute inset-0 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 animate-gradient-xy"></span>
+
+    <!-- Shine Effect -->
+    <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></span>
+
+    <!-- Content -->
+    <i class="fa-solid fa-star text-yellow-200 relative z-10"></i>
+    <span class="relative z-10 text-shadow-sm">Featured</span>
+</span>
+
+<style>
+    @keyframes shimmer {
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    .animate-gradient-xy {
+        background-size: 200% 200%;
+        animation: gradient-xy 3s ease infinite;
+    }
+
+    @keyframes gradient-xy {
+
+        0%,
+        100% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+
+    .text-shadow-sm {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+</style>

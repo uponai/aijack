@@ -53,7 +53,7 @@
                             {{ tool.get_pricing_type_display }}
                         </span>
                         {% if tool.is_featured %}
-                        <span class="neon-badge neon-badge-cyan">Featured</span>
+                        {% include 'includes/_featured_badge.html' %}
                         {% endif %}
                     </div>
 

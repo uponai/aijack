@@ -35,7 +35,7 @@
             <div class="inline-flex items-center gap-2 mb-4">
                 <span class="neon-badge neon-badge-cyan">{{ stack.tools.count }} Tools</span>
                 {% if stack.is_featured %}
-                <span class="neon-badge neon-badge-magenta">Featured Stack</span>
+                {% include 'includes/_featured_badge.html' %}
                 {% endif %}
             </div>
 
