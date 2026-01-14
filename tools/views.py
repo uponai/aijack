@@ -10,7 +10,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import send_mail
 from django.conf import settings
 import json
-from .models import Tool, Profession, Category, ToolStack, Tag, SavedTool, SavedStack, SubmittedTool
+from .models import Tool, Profession, Category, ToolStack, Tag, SavedTool, SavedStack, SubmittedTool, ToolReport
 from .forms import ToolForm, ToolStackForm, ProfessionForm, ToolSubmissionForm
 from .search import SearchService
 from .ai_service import AIService
@@ -359,6 +359,28 @@ def submit_tool(request):
         form = ToolSubmissionForm()
     
     return render(request, 'submit_tool.html', {'form': form})
+
+
+@require_POST
+def report_tool(request, slug):
+    """Handle tool report submission via HTMX."""
+    tool = get_object_or_404(Tool, slug=slug)
+    
+    reason = request.POST.get('reason')
+    message = request.POST.get('message', '')
+    
+    if reason:
+        ToolReport.objects.create(
+            tool=tool,
+            reason=reason,
+            message=message,
+            user=request.user if request.user.is_authenticated else None
+        )
+        # Return success message fragment
+        return render(request, 'partials/_report_success.html')
+    
+    return JsonResponse({'error': 'Reason is required'}, status=400)
+
 
 
 def stacks(request):
@@ -744,6 +766,10 @@ def admin_dashboard(request):
     search_stats = AnalyticsService.get_search_stats(days=days)
     click_stats = AnalyticsService.get_click_stats(days=days)
     
+    # Tool Reports
+    unresolved_reports = ToolReport.objects.filter(is_resolved=False).select_related('tool', 'user')[:5]
+    total_unresolved_reports = ToolReport.objects.filter(is_resolved=False).count()
+    
     # Newsletter Subscribers
     q_sub = request.GET.get('q_sub', '')
     sub_page = int(request.GET.get('sub_page', 1))
@@ -798,6 +824,8 @@ def admin_dashboard(request):
         'click_stats': click_stats,
         'days': days,
         'newsletter_subscribers': newsletter_subscribers,
+        'unresolved_reports': unresolved_reports,
+        'total_unresolved_reports': total_unresolved_reports,
         'newsletter_has_more': has_more,
         'newsletter_next_page': next_page,
         'newsletter_total': total_subs,

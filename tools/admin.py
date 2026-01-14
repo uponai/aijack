@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick, NewsletterSubscriber, SubmittedTool
+from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick, NewsletterSubscriber, SubmittedTool, ToolReport
 
 
 class ToolTranslationInline(admin.TabularInline):
@@ -166,3 +166,16 @@ class SubmittedToolAdmin(admin.ModelAdmin):
         # but for now we just mark them as approved.
         queryset.update(is_approved=True)
     approve_tools.short_description = "Mark selected tools as approved"
+
+
+@admin.register(ToolReport)
+class ToolReportAdmin(admin.ModelAdmin):
+    list_display = ['tool', 'reason', 'user', 'is_resolved', 'created_at']
+    list_filter = ['is_resolved', 'reason', 'created_at']
+    search_fields = ['tool__name', 'message', 'user__username']
+    actions = ['mark_as_resolved']
+
+    def mark_as_resolved(self, request, queryset):
+        queryset.update(is_resolved=True)
+    mark_as_resolved.short_description = "Mark selected reports as resolved"
+

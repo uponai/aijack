@@ -105,10 +105,19 @@
                         {% if tool.affiliate_url %}
                         <span class="text-xs text-slate-500 self-center">*Affiliate link</span>
                         {% endif %}
+
+                        <!-- Report Button -->
+                        <button @click="$dispatch('open-report-modal')"
+                                class="text-slate-400 hover:text-red-500 transition-colors ml-auto"
+                                title="Report a problem">
+                            <i class="fa-solid fa-flag"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+
+        {% include 'partials/_report_tool_modal.html' %}
 
         <!-- Content Tabs -->
         {% if translation %}

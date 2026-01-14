@@ -604,3 +604,26 @@ class SubmittedTool(models.Model):
 
     def __str__(self):
         return f"{self.name} (by {self.user.username})"
+
+
+class ToolReport(models.Model):
+    """User reports for issues with tools."""
+    REASON_CHOICES = [
+        ('broken_link', 'Broken Link'),
+        ('outdated', 'Outdated Information'),
+        ('inappropriate', 'Inappropriate Content'),
+        ('other', 'Other'),
+    ]
+
+    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, related_name='reports')
+    reason = models.CharField(max_length=20, choices=REASON_CHOICES)
+    message = models.TextField(blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_resolved = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Report for {self.tool.name}: {self.get_reason_display()}"
