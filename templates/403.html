@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Access Denied{% endblock %}
+
+{% block content %}
+<section class="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+    <div class="mb-6">
+        <i class="fa-solid fa-lock text-6xl text-brand-600 mb-4 animate-bounce"></i>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-900 mb-4">
+        ACCESS <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-neon-cyan">DENIED</span>
+    </h1>
+    <p class="text-xl text-slate-600 mb-8 max-w-lg mx-auto">
+        Your account has been temporarily locked due to multiple failed login attempts. Please try again later.
+    </p>
+    <a href="{% url 'home' %}" class="neon-button-filled">
+        Return Home
+    </a>
+</section>
+{% endblock %}

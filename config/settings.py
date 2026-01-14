@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'axes',
     'tools',
     # 3rd party
     'allauth',
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesBackend',
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
@@ -89,6 +91,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'axes.middleware.AxesMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -196,3 +199,12 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+
+# Django Axes Configuration
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # 1 hour
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCK_OUT_AT_FAILURE = True # Lock out AFTER the limit (fail 5 times -> locked on 6th)
+AXES_USERNAME_FORM_FIELD = 'login' # allauth uses 'login' field
+AXES_LOCKOUT_TEMPLATE = '403.html' # Render this template when locked out
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address", "user_agent"] # Pass these to the template

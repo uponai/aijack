@@ -698,6 +698,27 @@
         }
     }" @notify.window="addNotification($event.detail.message, $event.detail.type)">
 
+        {% if messages %}
+        <script>
+            document.addEventListener( 'alpine:init', () =>
+            {
+                const Alpine = window.Alpine;
+
+                {% for message in messages %}
+                setTimeout( () =>
+                {
+                    window.dispatchEvent( new CustomEvent( 'notify', {
+                        detail: {
+                            message: "{{ message|escapejs }}",
+                            type: "{% if message.tags == 'error' %}error{% else %}success{% endif %}"
+                        }
+                    } ) );
+                }, {{ forloop.counter0 }} * 500 + 500 );
+            {% endfor %}
+            });
+        </script>
+        {% endif %}
+
         {% include '_modals.html' %}
 
         <script>
