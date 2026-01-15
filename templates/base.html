@@ -378,9 +378,9 @@
            NAVIGATION
            ============================================ */
             .nav-link {
-                font-family: 'Orbitron', sans-serif;
-                font-weight: 600;
-                font-size: 13px;
+                font-family: 'Rajdhani', sans-serif;
+                font-weight: 700;
+                font-size: 15px;
                 text-transform: uppercase;
                 letter-spacing: 0.08em;
                 color: #475569;
@@ -783,9 +783,41 @@
                     <!-- Desktop Nav -->
                     <div class="hidden md:flex items-center gap-4">
                         <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
-                        <a href="{% url 'browse_tools' %}" class="nav-link {% if request.resolver_match.url_name == 'browse_tools' %}active{% endif %}">Tools</a>
-                        <a href="{% url 'professions' %}" class="nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
-                        <a href="{% url 'stacks' %}" class="nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
+
+                        <!-- Software Tools Dropdown -->
+                        <div x-data="{ open: false }" class="relative group">
+                            <button @click="open = !open" @mouseenter="open = true" @mouseleave="open = false" class="nav-link flex items-center gap-1 {% if request.resolver_match.url_name in 'browse_tools,professions,stacks' %}active{% endif %}">
+                                <span>AI Software</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] opacity-70 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div x-show="open"
+                                 @mouseenter="open = true"
+                                 @mouseleave="open = false"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 translate-y-2"
+                                 class="absolute left-0 mt-0 w-48 rounded-xl bg-white/95 backdrop-blur-lg shadow-xl border border-brand-100 py-2 z-50 top-full"
+                                 x-cloak>
+                                <a href="{% url 'browse_tools' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-brand-50 transition text-slate-700">
+                                    <i class="fa-solid fa-layer-group text-slate-400 w-5"></i>
+                                    <span class="font-semibold">All Tools</span>
+                                </a>
+                                <a href="{% url 'professions' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-brand-50 transition text-slate-700">
+                                    <i class="fa-solid fa-briefcase text-slate-400 w-5"></i>
+                                    <span class="font-semibold">Professions</span>
+                                </a>
+                                <a href="{% url 'stacks' %}" class="flex items-center gap-3 px-4 py-3 hover:bg-brand-50 transition text-slate-700">
+                                    <i class="fa-solid fa-cubes text-slate-400 w-5"></i>
+                                    <span class="font-semibold">Stacks</span>
+                                </a>
+                            </div>
+                        </div>
+
                         <a href="{% url 'robots' %}" class="nav-link {% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}active{% endif %}" style="{% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}color: #06B6D4;{% endif %}">
                             Robots
                         </a>
@@ -806,7 +838,7 @@
 
                         <!-- Account Dropdown -->
                         <div x-data="{ open: false }" class="relative">
-                            <button @click="open = !open" @click.outside="open = false" class="font-heading font-semibold text-[13px] uppercase tracking-[0.08em] text-slate-600 hover:text-brand-600 hover:bg-brand-50/50 px-4 py-2 rounded-lg transition flex items-center gap-2" aria-label="Account menu" aria-haspopup="true" :aria-expanded="open">
+                            <button @click="open = !open" @click.outside="open = false" class="nav-link flex items-center gap-2" aria-label="Account menu" aria-haspopup="true" :aria-expanded="open">
                                 <i class="fa-solid fa-user-circle"></i>
                                 <span>Account</span>
                                 <i class="fa-solid fa-chevron-down text-[10px] transition-transform" :class="open ? 'rotate-180' : ''"></i>
@@ -863,6 +895,9 @@
                     <a href="{% url 'browse_tools' %}" class="block nav-link {% if request.resolver_match.url_name == 'browse_tools' %}active{% endif %}">Tools</a>
                     <a href="{% url 'professions' %}" class="block nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                     <a href="{% url 'stacks' %}" class="block nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
+                    <a href="{% url 'robots' %}" class="block nav-link {% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}active{% endif %}" style="{% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}color: #06B6D4;{% endif %}">
+                        Robots
+                    </a>
                     <a href="{% url 'submit_tool' %}" class="block nav-link text-neon-magenta {% if request.resolver_match.url_name == 'submit_tool' %}active{% endif %}">Submit Tool</a>
                     <a href="{% url 'search' %}" class="block nav-link text-slate-600 font-bold {% if request.resolver_match.url_name == 'search' %}active{% endif %}">
                         <i class="fa-solid fa-magnifying-glass mr-2"></i> Search

@@ -188,13 +188,6 @@ class Robot(models.Model):
         help_text="Technical specs: {height, weight, battery_life, payload, speed, etc.}"
     )
     
-    # Cross-app relationship
-    compatible_tools = models.ManyToManyField(
-        'tools.Tool',
-        related_name='compatible_robots',
-        blank=True,
-        help_text="AI software tools that integrate with this robot"
-    )
     
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')

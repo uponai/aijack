@@ -262,45 +262,11 @@
         </section>
         {% endif %}
 
-        <!-- Compatible AI Robots -->
-        {% if compatible_robots %}
-        <section class="mt-12">
-            <h2 class="text-2xl font-heading font-bold text-slate-900 mb-2">
-                <span class="text-cyan-600">COMPATIBLE</span> AI ROBOTS
-            </h2>
-            <p class="text-slate-600 mb-6">Physical AI robots that can use this tool</p>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for robot in compatible_robots %}
-                <a href="{% url 'robot_detail' robot.slug %}" class="neon-card p-6 group hover:shadow-xl transition-all hover:scale-105 hover:border-cyan-400">
-                    <div class="flex items-start gap-4 mb-4">
-                        {% if robot.image %}
-                        <img src="{{ robot.image.url }}" alt="{{ robot.name }}" class="w-16 h-16 rounded-xl object-cover">
-                        {% else %}
-                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center">
-                            <i class="fa-solid fa-robot text-white text-2xl"></i>
-                        </div>
-                        {% endif %}
-                        <div class="flex-1">
-                            <h3 class="font-heading font-bold text-slate-900 group-hover:text-cyan-600 transition">{{ robot.name }}</h3>
-                            <p class="text-sm text-slate-500">{{ robot.company.name }}</p>
-                        </div>
-                    </div>
-                    <p class="text-slate-600 text-sm line-clamp-2">{{ robot.short_description }}</p>
-                    <div class="mt-4 flex items-center gap-2">
-                        <span class="text-xs px-2 py-1 rounded bg-cyan-100 text-cyan-700 font-semibold">
-                            {{ robot.get_robot_type_display }}
-                        </span>
-                        <span class="text-xs px-2 py-1 rounded bg-slate-100 text-slate-600">
-                            {{ robot.get_availability_display }}
-                        </span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        </section>
         {% endif %}
+
     </div>
+</section>
+</div>
 </section>
 
 <style>

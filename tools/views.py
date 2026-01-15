@@ -287,16 +287,6 @@ def tool_detail(request, slug):
         professions__in=tool.professions.all()
     ).exclude(id=tool.id).distinct()[:4]
     
-    # Compatible robots (robots that list this tool in their compatible_tools)
-    compatible_robots = []
-    try:
-        from robots.models import Robot
-        compatible_robots = Robot.objects.filter(
-            status='published',
-            compatible_tools=tool
-        ).select_related('company')[:6]
-    except Exception:
-        pass
     
     # Log tool view for analytics
     AnalyticsService.log_tool_view(request, tool, source_page='tool_detail')
@@ -305,7 +295,6 @@ def tool_detail(request, slug):
         'tool': tool,
         'translation': translation,
         'related_tools': related_tools,
-        'compatible_robots': compatible_robots,
     })
 
 

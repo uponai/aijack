@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load robot_extras %}
+{% load static %}
 
 {% block title %}AI Robots - Physical AI-Powered Robotic Solutions | AIJACK{% endblock %}
 {% block meta_description %}Explore cutting-edge AI robots from leading companies. Humanoid and specialized robots for home, industry, medical, and research applications.{% endblock %}
@@ -12,7 +13,7 @@
     "@type": "CollectionPage",
     "name": "AI Robots Directory",
     "description": "Directory of AI-powered physical robots and robotic solutions from leading manufacturers.",
-    "url": "/robots/",
+    "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'robots' %}",
     "mainEntity": {
         "@type": "ItemList",
         "numberOfItems": {{ total_count }},
@@ -24,7 +25,7 @@
                 "item": {
                     "@type": "Product",
                     "name": "{{ robot.name }}",
-                    "url": "/robot/{{ robot.slug }}/"
+                    "url": "{{ request.scheme }}://{{ request.get_host }}/robot/{{ robot.slug }}/"
                 }
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
@@ -35,98 +36,179 @@
 {% endblock %}
 
 {% block content %}
-<section class="py-8">
+<section class="py-6" x-data="robotsBrowser()">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Hero Section with Futuristic Design -->
-        <div class="text-center mb-8 relative">
-            <!-- Gradient Background -->
-            <div class="absolute inset-0 bg-gradient-to-b from-cyan-50/50 to-transparent rounded-3xl -z-10"></div>
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm mb-6" aria-label="Breadcrumb">
+            <a href="{% url 'home' %}" class="text-brand-600 hover:underline flex items-center gap-1">
+                <i class="fa-solid fa-home text-xs"></i>
+                Home
+            </a>
+            <span class="text-slate-400">/</span>
+            <span class="text-slate-600 font-semibold">AI Robots</span>
+        </nav>
 
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-100 border border-cyan-200 mb-4">
-                <i class="fa-solid fa-robot text-cyan-600 animate-pulse"></i>
-                <span class="font-heading font-bold text-cyan-700 text-sm tracking-wider uppercase">Physical AI</span>
+        <!-- Page Header with UX Buttons -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 border border-cyan-200 mb-2">
+                    <i class="fa-solid fa-robot text-cyan-600 text-xs animate-pulse"></i>
+                    <span class="font-heading font-bold text-cyan-700 text-[10px] tracking-wider uppercase">Physical AI</span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-heading font-black text-slate-900 mb-1">
+                    AI <span class="text-cyan-600 glow-text-cyan">ROBOTS</span>
+                </h1>
+                <p class="text-slate-600">
+                    <span class="font-semibold text-cyan-700">{{ total_count }}</span> robotic solutions
+                    {% if selected_type or selected_target or selected_availability or selected_company %}with filters active{% endif %}
+                </p>
             </div>
 
-            <h1 class="text-3xl md:text-4xl font-heading font-black text-slate-900 mb-3">
-                AI <span class="text-cyan-600">ROBOTS</span>
-            </h1>
-            <p class="text-base text-slate-600 max-w-2xl mx-auto mb-4">
-                The future of physical AI - from humanoid companions to industrial powerhouses.
-            </p>
+            <!-- UX Enhancement Buttons -->
+            <div class="flex items-center gap-2">
+                <!-- Companies Link -->
+                <a href="{% url 'robot_companies' %}" class="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-200 hover:text-slate-900 transition-all font-bold text-sm">
+                    <i class="fa-solid fa-building"></i>Companies
+                </a>
 
-            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-900 text-white">
-                <i class="fa-solid fa-microchip text-cyan-400"></i>
-                <span class="font-heading font-bold text-cyan-400">{{ total_count }}</span>
-                <span class="text-slate-400 text-sm">Robots Indexed</span>
-            </div>
-        </div>
+                <!-- Compare Link -->
+                <a href="{% url 'robot_comparison' %}" class="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-cyan-50 text-cyan-600 border border-cyan-200 rounded-lg hover:bg-cyan-100 hover:text-cyan-700 transition-all font-bold text-sm">
+                    <i class="fa-solid fa-code-compare"></i>Compare
+                    {% robot_comparison_count request as compare_count %}
+                    {% if compare_count > 0 %}
+                    <span class="ml-1 px-1.5 py-0.5 bg-cyan-600 text-white rounded text-xs">{{ compare_count }}</span>
+                    {% endif %}
+                </a>
 
-        <!-- Quick Links -->
-        <div class="flex flex-wrap justify-center gap-3 mb-6">
-            <a href="{% url 'robot_companies' %}" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition">
-                <i class="fa-solid fa-building mr-2"></i>Companies
-            </a>
-            <a href="{% url 'robot_timeline' %}" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition">
-                <i class="fa-solid fa-timeline mr-2"></i>Timeline
-            </a>
-            <a href="{% url 'robot_matrix' %}" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition">
-                <i class="fa-solid fa-table-cells mr-2"></i>Matrix View
-            </a>
-            <a href="{% url 'robot_comparison' %}" class="px-4 py-2 rounded-lg bg-cyan-100 hover:bg-cyan-200 text-cyan-700 font-semibold text-sm transition">
-                <i class="fa-solid fa-code-compare mr-2"></i>Compare
-                {% robot_comparison_count request as compare_count %}
-                {% if compare_count > 0 %}
-                <span class="ml-1 px-1.5 py-0.5 bg-cyan-600 text-white rounded text-xs">{{ compare_count }}</span>
-                {% endif %}
-            </a>
-        </div>
-
-        <!-- Filters -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 p-4 mb-6">
-            <form method="GET" class="flex flex-wrap gap-4 items-center">
-                <select name="type" class="rounded-lg border-slate-300 text-sm focus:border-cyan-400 focus:ring-cyan-400">
-                    <option value="">All Types</option>
-                    {% for value, label in robot_types %}
-                    <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-
-                <select name="target" class="rounded-lg border-slate-300 text-sm focus:border-cyan-400 focus:ring-cyan-400">
-                    <option value="">All Markets</option>
-                    {% for value, label in target_markets %}
-                    <option value="{{ value }}" {% if selected_target == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-
-                <select name="availability" class="rounded-lg border-slate-300 text-sm focus:border-cyan-400 focus:ring-cyan-400">
-                    <option value="">All Availability</option>
-                    {% for value, label in availability_choices %}
-                    <option value="{{ value }}" {% if selected_availability == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-
-                <select name="company" class="rounded-lg border-slate-300 text-sm focus:border-cyan-400 focus:ring-cyan-400">
-                    <option value="">All Companies</option>
-                    {% for company in companies %}
-                    <option value="{{ company.slug }}" {% if selected_company == company.slug %}selected{% endif %}>{{ company.name }}</option>
-                    {% endfor %}
-                </select>
-
-                <button type="submit" class="px-4 py-2 bg-cyan-600 text-white rounded-lg font-semibold text-sm hover:bg-cyan-700 transition">
-                    <i class="fa-solid fa-filter mr-2"></i>Filter
+                <!-- Back to Top -->
+                <button @click="scrollToTop()"
+                        class="ux-button-cyan"
+                        title="Back to top (T)">
+                    <i class="fa-solid fa-arrow-up text-slate-500"></i>
                 </button>
 
+                <!-- Keyboard Shortcuts Modal -->
+                <button @click="showShortcuts = true"
+                        class="ux-button-cyan"
+                        title="Keyboard shortcuts (?)">
+                    <i class="fa-solid fa-keyboard text-slate-500"></i>
+                </button>
+
+                <!-- Copy Page Link -->
+                <button @click="copyLink()"
+                        class="ux-button-cyan"
+                        title="Copy page link">
+                    <i class="fa-solid fa-link text-slate-500"></i>
+                </button>
+
+                <!-- View Toggle -->
+                <button @click="compactView = !compactView"
+                        class="ux-button-cyan"
+                        :title="compactView ? 'Expanded view' : 'Compact view'">
+                    <i class="fa-solid" :class="compactView ? 'fa-table-cells-large' : 'fa-table-cells'"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Compact Filter Bar -->
+        <div class="filter-bar-cyan mb-6">
+            <div class="grid grid-cols-2 md:flex md:flex-wrap items-center gap-3">
+
+                <!-- Type Filter -->
+                <div class="relative col-span-1">
+                    <select name="type"
+                            @change="updateFilter('type', $event.target.value)"
+                            class="filter-select-cyan w-full pr-10 appearance-none cursor-pointer text-ellipsis overflow-hidden">
+                        <option value="">All Types</option>
+                        {% for value, label in robot_types %}
+                        <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 text-xs pointer-events-none"></i>
+                </div>
+
+                <!-- Target Market Filter -->
+                <div class="relative col-span-1">
+                    <select name="target"
+                            @change="updateFilter('target', $event.target.value)"
+                            class="filter-select-cyan w-full pr-10 appearance-none cursor-pointer text-ellipsis overflow-hidden">
+                        <option value="">All Markets</option>
+                        {% for value, label in target_markets %}
+                        <option value="{{ value }}" {% if selected_target == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 text-xs pointer-events-none"></i>
+                </div>
+
+                <!-- Company Filter -->
+                <div class="relative col-span-1">
+                    <select name="company"
+                            @change="updateFilter('company', $event.target.value)"
+                            class="filter-select-cyan w-full pr-10 appearance-none cursor-pointer">
+                        <option value="">All Companies</option>
+                        {% for company in companies %}
+                        <option value="{{ company.slug }}" {% if selected_company == company.slug %}selected{% endif %}>{{ company.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 text-xs pointer-events-none"></i>
+                </div>
+
+                <!-- Availability Filter -->
+                <div class="relative col-span-1 hidden md:block">
+                    <select name="availability"
+                            @change="updateFilter('availability', $event.target.value)"
+                            class="filter-select-cyan w-full pr-10 appearance-none cursor-pointer">
+                        <option value="">Availability</option>
+                        {% for value, label in availability_choices %}
+                        <option value="{{ value }}" {% if selected_availability == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 text-xs pointer-events-none"></i>
+                </div>
+
+                <!-- Divider -->
+                <div class="hidden md:block h-8 w-px bg-slate-200"></div>
+
+                <!-- Clear Filters (only show if active) -->
                 {% if selected_type or selected_target or selected_availability or selected_company %}
-                <a href="{% url 'robots' %}" class="px-4 py-2 text-slate-500 hover:text-slate-700 font-semibold text-sm">
-                    <i class="fa-solid fa-xmark mr-1"></i>Clear
-                </a>
+                <button @click="clearFilters()"
+                        class="col-span-2 md:col-span-auto flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors font-semibold text-sm border border-red-100 md:border-none w-full md:w-auto mt-2 md:mt-0">
+                    <i class="fa-solid fa-xmark"></i>
+                    Clear Filters
+                </button>
                 {% endif %}
-            </form>
+            </div>
+
+            <!-- Active Filters Chips -->
+            {% if selected_type or selected_target or selected_availability or selected_company %}
+            <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-cyan-100">
+                {% if selected_type %}
+                <span class="filter-chip-cyan flex items-center gap-2">
+                    Type: {{ selected_type|title }}
+                    <button @click="removeFilter('type')" class="hover:text-red-600 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </span>
+                {% endif %}
+                {% if selected_target %}
+                <span class="filter-chip-cyan flex items-center gap-2">
+                    Market: {{ selected_target|title }}
+                    <button @click="removeFilter('target')" class="hover:text-red-600 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </span>
+                {% endif %}
+                {% if selected_company %}
+                <span class="filter-chip-cyan flex items-center gap-2">
+                    Company: {{ selected_company|title }}
+                    <button @click="removeFilter('company')" class="hover:text-red-600 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
 
         <!-- Robot Cards Grid -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="robots-grid"
+             class="grid gap-6 transition-all duration-300"
+             :class="compactView ? 'md:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-2 lg:grid-cols-3'">
             {% for robot in robots %}
             {% include 'robots/includes/_robot_card.html' with robot=robot %}
             {% empty %}
@@ -136,16 +218,16 @@
                 </div>
                 <h3 class="font-heading font-bold text-xl text-slate-900 mb-2">No Robots Found</h3>
                 <p class="text-slate-600 mb-4">Try adjusting your filters or check back soon for the latest AI robots!</p>
-                <a href="{% url 'robots' %}" class="neon-button-filled inline-flex items-center gap-2">
+                <button @click="clearFilters()" class="neon-button-outlined-cyan inline-flex items-center gap-2">
                     <i class="fa-solid fa-arrows-rotate"></i>
-                    Show All Robots
-                </a>
+                    Reset Filters
+                </button>
             </div>
             {% endfor %}
         </div>
 
-        <!-- Latest News Section -->
-        {% if latest_news %}
+        <!-- Latest News Section (Only on main view) -->
+        {% if latest_news and not request.GET.type and not request.GET.target and not request.GET.company %}
         <div class="mt-12 pt-8 border-t border-slate-200">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-heading font-bold text-slate-900">
@@ -158,20 +240,21 @@
             </div>
             <div class="grid md:grid-cols-3 gap-6">
                 {% for news in latest_news %}
-                <article class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition group">
+                <article class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition group border border-slate-100">
                     {% if news.featured_image %}
-                    <img src="{{ news.featured_image.url }}" alt="{{ news.title }}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                    <div class="overflow-hidden h-40">
+                        <img src="{{ news.featured_image.url }}" alt="{{ news.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                    </div>
                     {% else %}
                     <div class="w-full h-40 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
                         <i class="fa-solid fa-newspaper text-4xl text-cyan-500/50"></i>
                     </div>
                     {% endif %}
                     <div class="p-4">
-                        <span class="text-xs text-slate-500">{{ news.published_at|date:"M d, Y" }}</span>
+                        <span class="text-xs text-slate-500 font-mono">{{ news.published_at|date:"M d, Y" }}</span>
                         <h3 class="font-bold text-slate-900 mt-1 line-clamp-2 group-hover:text-cyan-600 transition-colors">
                             <a href="{% url 'robot_news_detail' news.slug %}">{{ news.title }}</a>
                         </h3>
-                        <p class="text-sm text-slate-600 mt-2 line-clamp-2">{{ news.excerpt }}</p>
                     </div>
                 </article>
                 {% endfor %}
@@ -179,17 +262,249 @@
         </div>
         {% endif %}
     </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div x-show="showShortcuts"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+         @click.self="showShortcuts = false"
+         @keydown.escape.window="showShortcuts = false"
+         x-cloak>
+        <div class="neon-card p-6 w-full max-w-md border-cyan-500/30">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-heading font-bold text-lg text-slate-900">Keyboard Shortcuts</h3>
+                <button @click="showShortcuts = false" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span class="text-slate-600">Back to top</span>
+                    <kbd class="px-2 py-1 rounded bg-slate-100 font-mono text-xs">T</kbd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span class="text-slate-600">Show shortcuts</span>
+                    <kbd class="px-2 py-1 rounded bg-slate-100 font-mono text-xs">?</kbd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span class="text-slate-600">Toggle compact view</span>
+                    <kbd class="px-2 py-1 rounded bg-slate-100 font-mono text-xs">V</kbd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span class="text-slate-600">Go to search</span>
+                    <kbd class="px-2 py-1 rounded bg-slate-100 font-mono text-xs">/</kbd>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <span class="text-slate-600">Close modal</span>
+                    <kbd class="px-2 py-1 rounded bg-slate-100 font-mono text-xs">Esc</kbd>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Back to Top Button -->
+    <button x-show="showBackToTop"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-4"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-4"
+            @click="scrollToTop()"
+            class="fixed bottom-24 right-6 z-40 w-12 h-12 rounded-full bg-cyan-600 text-white shadow-lg flex items-center justify-center hover:bg-cyan-700 hover:scale-110 transition-all border border-cyan-400"
+            x-cloak>
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
 </section>
 
+{% include 'robots/includes/_floating_comparison_bar.html' %}
+
 <style>
-    /* Robot-specific styles - Cyan theme */
-    .robot-card {
-        transition: all 0.3s ease;
+    /* Cyan Filter Bar Styling */
+    .filter-bar-cyan {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(6, 182, 212, 0.2);
+        border-radius: 16px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 20px rgba(6, 182, 212, 0.05);
     }
 
-    .robot-card:hover {
-        box-shadow: 0 0 30px rgba(6, 182, 212, 0.15);
+    .filter-select-cyan {
+        background: white;
+        border: 2px solid rgba(6, 182, 212, 0.1);
+        border-radius: 10px;
+        padding: 10px 36px 10px 14px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #334155;
+        transition: all 0.2s;
+        min-width: 140px;
+    }
+
+    .filter-select-cyan:hover,
+    .filter-select-cyan:focus {
         border-color: #06B6D4;
+        box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        outline: none;
+    }
+
+    .filter-chip-cyan {
+        background: rgba(6, 182, 212, 0.1);
+        color: #0891b2;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 13px;
+        border: 1px solid rgba(6, 182, 212, 0.2);
+    }
+
+    /* UX Button Cyan Styling */
+    .ux-button-cyan {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: white;
+        border: 1px solid rgba(6, 182, 212, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .ux-button-cyan:hover {
+        background: rgba(6, 182, 212, 0.05);
+        border-color: #06B6D4;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);
+    }
+
+    .ux-button-cyan:hover i {
+        color: #06B6D4;
+    }
+
+    .neon-button-outlined-cyan {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 2px solid #06B6D4;
+        color: #06B6D4;
+        font-weight: 700;
+        border-radius: 0.75rem;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .neon-button-outlined-cyan:hover {
+        background: rgba(6, 182, 212, 0.1);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+    }
+
+    [x-cloak] {
+        display: none !important;
     }
 </style>
+
+<script>
+    function robotsBrowser ()
+    {
+        return {
+            showShortcuts: false,
+            showBackToTop: false,
+            compactView: false,
+
+            init ()
+            {
+                // Listen for scroll to show/hide back to top
+                window.addEventListener( 'scroll', () =>
+                {
+                    this.showBackToTop = window.scrollY > 500;
+                } );
+
+                // Keyboard shortcuts
+                window.addEventListener( 'keydown', ( e ) =>
+                {
+                    if ( e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA' )
+                    {
+                        return;
+                    }
+
+                    switch ( e.key.toLowerCase() )
+                    {
+                        case 't':
+                            this.scrollToTop();
+                            break;
+                        case '?':
+                            this.showShortcuts = true;
+                            break;
+                        case 'v':
+                            this.compactView = !this.compactView;
+                            break;
+                        case '/':
+                            e.preventDefault();
+                            window.location.href = '{% url "search" %}';
+                            break;
+                        case 'escape':
+                            this.showShortcuts = false;
+                            break;
+                    }
+                } );
+            },
+
+            scrollToTop ()
+            {
+                window.scrollTo( { top: 0, behavior: 'smooth' } );
+            },
+
+            copyLink ()
+            {
+                navigator.clipboard.writeText( window.location.href ).then( () =>
+                {
+                    window.dispatchEvent( new CustomEvent( 'notify', {
+                        detail: { message: 'Link copied to clipboard!', type: 'success' }
+                    } ) );
+                } );
+            },
+
+            updateFilter ( type, value )
+            {
+                const url = new URL( window.location.href );
+                if ( value )
+                {
+                    url.searchParams.set( type, value );
+                } else
+                {
+                    url.searchParams.delete( type );
+                }
+                window.location.href = url.toString();
+            },
+
+            removeFilter ( type )
+            {
+                this.updateFilter( type, '' );
+            },
+
+            clearFilters ()
+            {
+                const url = new URL( window.location.href );
+                url.searchParams.delete( 'type' );
+                url.searchParams.delete( 'target' );
+                url.searchParams.delete( 'company' );
+                url.searchParams.delete( 'availability' );
+                window.location.href = url.toString();
+            }
+        };
+    }
+</script>
 {% endblock %}

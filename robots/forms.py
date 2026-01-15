@@ -51,7 +51,6 @@ class RobotForm(forms.ModelForm):
             # Technical
             'specifications',
             # Integrations
-            'compatible_tools',
             # Status
             'status', 'is_featured',
             # SEO
@@ -90,7 +89,6 @@ class RobotForm(forms.ModelForm):
                 'rows': 4, 
                 'placeholder': '{"height": "180cm", "weight": "70kg", "battery_life": "8h"}'
             }),
-            'compatible_tools': forms.SelectMultiple(attrs={'class': 'form-select', 'size': 6}),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'is_featured': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'meta_title': forms.TextInput(attrs={'class': 'form-input', 'maxlength': 60}),

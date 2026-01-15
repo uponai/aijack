@@ -20,7 +20,7 @@ class RobotAdmin(admin.ModelAdmin):
     list_filter = ['status', 'robot_type', 'target_market', 'availability', 'is_featured', 'company']
     search_fields = ['name', 'short_description', 'company__name']
     prepopulated_fields = {'slug': ('name',)}
-    filter_horizontal = ['compatible_tools']
+    filter_horizontal = []
     
     fieldsets = (
         ('Basic Info', {
@@ -37,9 +37,6 @@ class RobotAdmin(admin.ModelAdmin):
         }),
         ('Technical', {
             'fields': ('specifications',)
-        }),
-        ('Integrations', {
-            'fields': ('compatible_tools',)
         }),
         ('Status', {
             'fields': ('status', 'is_featured')
