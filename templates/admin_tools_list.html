@@ -34,6 +34,9 @@
             <a href="?filter=incomplete{% if query %}&q={{ query }}{% endif %}" class="text-sm font-bold {% if filter_type == 'incomplete' %}text-brand-600 border-b-2 border-brand-600 pb-3 -mb-3.5{% else %}text-slate-500 hover:text-slate-700{% endif %}">
                 Incomplete <span class="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded ml-1">Action Needed</span>
             </a>
+            <a href="{% url 'admin_webcheck' %}" class="neon-button-primary whitespace-nowrap">
+                <i class="fa-solid fa-robot mr-2"></i>Webcheck
+            </a>
         </div>
 
         <div class="overflow-x-auto">

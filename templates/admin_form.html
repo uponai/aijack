@@ -62,6 +62,65 @@
             </div>
         </div>
 
+        {% if model_type == 'Tool' and form.instance.pk %}
+        <!-- Tool Images Gallery -->
+        <div class="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                <i class="fa-solid fa-images mr-2 text-slate-400"></i> Tool Images
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Logo -->
+                <div class="relative group">
+                    <div class="aspect-square bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden">
+                        {% if form.instance.logo %}
+                        <img src="{{ form.instance.logo.url }}" alt="Logo" class="w-full h-full object-contain p-2">
+                        {% else %}
+                        <span class="text-slate-400 text-xs font-bold">NO LOGO</span>
+                        {% endif %}
+                    </div>
+                    <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">Logo</span>
+                </div>
+
+                <!-- OG Image -->
+                <div class="relative group">
+                    <div class="aspect-video bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden">
+                        {% if form.instance.og_image %}
+                        <img src="{{ form.instance.og_image.url }}" alt="OG Image" class="w-full h-full object-cover">
+                        {% else %}
+                        <span class="text-slate-400 text-xs font-bold">NO OG IMAGE</span>
+                        {% endif %}
+                    </div>
+                    <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">OG Image</span>
+                </div>
+
+                <!-- Tool Media -->
+                {% for media in form.instance.media.all %}
+                <div class="relative group">
+                    <div class="aspect-video bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden">
+                        {% if media.media_type == 'image' %}
+                        <img src="{{ media.file.url }}" alt="{{ media.alt_text }}" class="w-full h-full object-cover">
+                        {% elif media.media_type == 'video' %}
+                        <video src="{{ media.file.url }}" class="w-full h-full object-cover"></video>
+                        {% endif %}
+                    </div>
+                    <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                        {{ media.get_media_type_display }} #{{ media.order }}
+                    </span>
+                    {% if media.caption %}
+                    <span class="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded truncate max-w-[90%]">
+                        {{ media.caption }}
+                    </span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if not form.instance.logo and not form.instance.media.exists %}
+            <p class="text-slate-400 text-sm italic mt-2">No images found. Run Webcheck to auto-generate snapshots.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
             {{ form.media }}

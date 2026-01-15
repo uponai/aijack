@@ -1855,3 +1855,46 @@ def ai_complete_profession(request, slug):
         'is_complete': is_complete,
         'message': f'Completed {len(updated_fields)} fields with AI' + (' - profession is now complete!' if is_complete else '')
     })
+
+@staff_member_required
+def admin_webcheck(request):
+    """
+    Renders the Webcheck progress dashboard.
+    """
+    return render(request, 'admin_webcheck_progress.html')
+
+@staff_member_required
+def api_get_pending_webcheck_tools(request):
+    """
+    Returns list of tools pending webcheck.
+    """
+    tools = Tool.objects.filter(
+        Q(is_website_valid__isnull=True) | 
+        Q(webcheck_last_run__isnull=True)
+    ).order_by('created_at')[:500] # Limit to 500 for now
+    
+    data = [{
+        'id': t.id,
+        'name': t.name,
+        'website_url': t.website_url,
+        'slug': t.slug
+    } for t in tools]
+    
+    return JsonResponse({'tools': data, 'count': len(data)})
+
+@staff_member_required
+@require_POST
+def api_process_webcheck_tool(request, tool_id):
+    """
+    Process a single tool.
+    """
+    from .webcheck import process_tool_webcheck
+    
+    try:
+        tool = Tool.objects.get(id=tool_id)
+        results = process_tool_webcheck(tool)
+        return JsonResponse({'success': True, 'results': results})
+    except Tool.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Tool not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

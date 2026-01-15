@@ -57,4 +57,9 @@ urlpatterns = [
     path('privacy/', views.PrivacyView.as_view(), name='privacy'),
     path('cookies/', views.CookieView.as_view(), name='cookies'),
     path('api/subscribe/', views.subscribe_newsletter, name='subscribe_newsletter'),
+    
+    # Webcheck
+    path('admin-dashboard/webcheck/', views.admin_webcheck, name='admin_webcheck'),
+    path('api/webcheck/pending/', views.api_get_pending_webcheck_tools, name='api_get_pending_webcheck_tools'),
+    path('api/webcheck/process/<int:tool_id>/', views.api_process_webcheck_tool, name='api_process_webcheck_tool'),
 ]

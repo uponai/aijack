@@ -62,55 +62,6 @@
 
         {% if query %}
 
-        <!-- Professions Results -->
-        {% if professions %}
-        <div class="mb-6">
-            <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-user-tie text-cyan-500"></i>
-                Matching Professions
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {% for profession in professions %}
-                {% include 'includes/_profession_card.html' with profession=profession %}
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Robots Results -->
-        {% if robots and request.GET.robots_only %}
-        <div class="mb-6">
-            <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-robot text-cyan-600"></i>
-                Matching AI Robots
-            </h2>
-            <p class="text-slate-600 mb-3">
-                Found <span class="font-semibold text-cyan-600">{{ robots|length }}</span> robot{{ robots|length|pluralize }} for "<span class="font-semibold">{{ query }}</span>"
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {% for robot in robots %}
-                {% include 'robots/includes/_robot_card.html' with robot=robot %}
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-
-        <!-- Stacks Results -->
-        {% if stacks %}
-        <div class="mb-6">
-            <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-layer-group text-brand-500"></i>
-                Matching Stacks
-            </h2>
-            <div class="grid md:grid-cols-3 gap-3">
-                {% for stack in stacks %}
-                {% include 'includes/_stack_card.html' with stack=stack compact=True %}
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
         <!-- Tools Results -->
         <div class="mb-6">
             <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
@@ -126,7 +77,7 @@
             </p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-3">
+        <div class="grid md:grid-cols-3 gap-3 mb-10">
             {% for tool in tools %}
             {% include 'includes/_tool_card.html' with tool=tool %}
             {% empty %}
@@ -142,6 +93,54 @@
             </div>
             {% endfor %}
         </div>
+
+        <!-- Professions Results -->
+        {% if professions %}
+        <div class="mb-10">
+            <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-user-tie text-cyan-500"></i>
+                Matching Professions
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for profession in professions %}
+                {% include 'includes/_profession_card.html' with profession=profession %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Stacks Results -->
+        {% if stacks %}
+        <div class="mb-10">
+            <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-brand-500"></i>
+                Matching Stacks
+            </h2>
+            <div class="grid md:grid-cols-3 gap-3">
+                {% for stack in stacks %}
+                {% include 'includes/_stack_card.html' with stack=stack compact=True %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Robots Results -->
+        {% if robots and request.GET.robots_only %}
+        <div class="mb-10">
+            <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-robot text-cyan-600"></i>
+                Matching AI Robots
+            </h2>
+            <p class="text-slate-600 mb-3">
+                Found <span class="font-semibold text-cyan-600">{{ robots|length }}</span> robot{{ robots|length|pluralize }} for "<span class="font-semibold">{{ query }}</span>"
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for robot in robots %}
+                {% include 'robots/includes/_robot_card.html' with robot=robot %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         {% else %}
         <!-- Empty State -->
         <div class="text-center py-12">

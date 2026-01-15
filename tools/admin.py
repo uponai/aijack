@@ -45,10 +45,35 @@ class TagAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+class IncompleteToolFilter(admin.SimpleListFilter):
+    title = 'Incomplete Tools'
+    parameter_name = 'incomplete'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Incomplete (Missing Data / Invalid URL)'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            # This is a bit complex because we need to check multiple fields
+            # We can use Q objects for OR condition
+            from django.db.models import Q
+            return queryset.filter(
+                Q(is_website_valid=False) |
+                Q(description='') |
+                Q(logo__exact='') |
+                Q(categories=None) |
+                Q(professions=None) |
+                Q(tags=None)
+            ).distinct()
+        return queryset
+
+
 @admin.register(Tool)
 class ToolAdmin(admin.ModelAdmin):
-    list_display = ['name', 'pricing_type', 'status', 'is_featured', 'highlight_start', 'highlight_end', 'created_at']
-    list_filter = ['status', 'pricing_type', 'is_featured', 'highlight_start', 'highlight_end', 'professions']
+    list_display = ['name', 'pricing_type', 'status', 'is_featured', 'is_website_valid', 'highlight_start', 'highlight_end', 'created_at']
+    list_filter = ['status', 'pricing_type', IncompleteToolFilter, 'is_featured', 'highlight_start', 'highlight_end', 'professions']
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name']
     filter_horizontal = ['categories', 'professions', 'tags']
@@ -72,6 +97,41 @@ class ToolAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+    actions = ['reset_webcheck']
+
+    def reset_webcheck(self, request, queryset):
+        """
+        Resets webcheck status and deletes auto-generated snapshots.
+        """
+        # 1. Delete generated media
+        # We identify them by the caption "Auto-generated snapshot" used in webcheck.py
+        count_media = 0
+        for tool in queryset:
+            media_qs = tool.media.filter(caption="Auto-generated snapshot")
+            count_media += media_qs.count()
+            media_qs.delete()
+            
+            # Reset SEO image if it was the one we generated (detected via filename pattern)
+            if tool.og_image and tool.slug in tool.og_image.name and "_og.png" in tool.og_image.name:
+                tool.og_image.delete(save=False)
+                tool.og_image = None
+                
+            # Reset Logo if it was auto-generated (detected via filename pattern)
+            # webcheck.py saves as f"{tool.slug}_icon.png"
+            if tool.logo and tool.slug in tool.logo.name and "_icon.png" in tool.logo.name:
+                tool.logo.delete(save=False)
+                tool.logo = None
+            
+            tool.save()
+
+        # 2. Reset flags
+        updated_count = queryset.update(
+            is_website_valid=None,
+            webcheck_last_run=None
+        )
+        
+        self.message_user(request, f"Reset webcheck for {updated_count} tools. Deleted {count_media} snapshots.")
+    reset_webcheck.short_description = "Reset Webcheck status (clear flags & snapshots)"
 
 
 @admin.register(ToolStack)

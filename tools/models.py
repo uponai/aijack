@@ -178,6 +178,10 @@ class Tool(SEOModel):
     tags = models.ManyToManyField(Tag, related_name='tools', blank=True)
     
     is_featured = models.BooleanField(default=False)
+
+    # Webcheck fields
+    is_website_valid = models.BooleanField(null=True, blank=True, help_text="Checked by Webcheck")
+    webcheck_last_run = models.DateTimeField(null=True, blank=True)
     
     # Highlight period
     highlight_start = models.DateField(null=True, blank=True, help_text="Start date of highlight period")
@@ -286,6 +290,10 @@ class Tool(SEOModel):
             missing.append('Meta Title')
         if not self.meta_description:
             missing.append('Meta Description')
+        
+        # Webcheck validation
+        if self.is_website_valid is False:
+            missing.append('Invalid Website URL')
         
         return missing
 
