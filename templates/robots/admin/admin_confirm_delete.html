@@ -1,31 +1,32 @@
 {% extends 'base.html' %}
 
-{% block title %}Delete {{ object_type }} - Admin{% endblock %}
+{% block title %}Delete {{ object_type }} | Admin{% endblock %}
 
 {% block content %}
-<section class="py-8">
-    <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
 
-        <div class="bg-white rounded-xl border border-red-200 p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
-                <i class="fa-solid fa-trash text-3xl text-red-600"></i>
-            </div>
+    {% include 'partials/admin_nav.html' with active_tab='robots' %}
 
-            <h1 class="text-2xl font-heading font-bold text-slate-900 mb-2">Delete {{ object_type }}?</h1>
-            <p class="text-slate-600 mb-6">
-                Are you sure you want to delete "<strong>{{ object }}</strong>"? This action cannot be undone.
-            </p>
-
-            <form method="POST" class="flex justify-center gap-4">
-                {% csrf_token %}
-                <button type="submit" class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition">
-                    <i class="fa-solid fa-trash mr-2"></i>Yes, Delete
-                </button>
-                <a href="{% url cancel_url %}" class="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition">
-                    Cancel
-                </a>
-            </form>
+    <div class="neon-card p-8 text-center">
+        <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
+            <i class="fa-solid fa-trash text-3xl text-red-600"></i>
         </div>
+
+        <h1 class="text-2xl font-heading font-bold text-slate-900 mb-2">Delete {{ object_type }}?</h1>
+        <p class="text-slate-600 mb-6">
+            Are you sure you want to delete "<strong>{{ object }}</strong>"? This action cannot be undone.
+        </p>
+
+        <form method="POST" class="flex justify-center gap-4">
+            {% csrf_token %}
+            <button type="submit" class="px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition">
+                <i class="fa-solid fa-trash mr-2"></i>Yes, Delete
+            </button>
+            <a href="{% url cancel_url %}" class="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition">
+                Cancel
+            </a>
+        </form>
     </div>
-</section>
+
+</div>
 {% endblock %}

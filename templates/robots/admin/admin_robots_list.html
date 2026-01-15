@@ -1,186 +1,167 @@
 {% extends 'base.html' %}
 
-{% block title %}Manage Robots - Admin Dashboard{% endblock %}
+{% block title %}Manage Robots | Admin{% endblock %}
 
 {% block content %}
-<section class="py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
 
-        <!-- Admin Navigation -->
-        {% include 'partials/admin_nav.html' with active_tab='robots' %}
+    {% include 'partials/admin_nav.html' with active_tab='robots' %}
 
-        <!-- Header -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-            <div>
-                <a href="{% url 'admin_dashboard' %}" class="text-brand-600 hover:underline text-sm font-semibold">
-                    <i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard
-                </a>
-                <h1 class="text-3xl font-heading font-black text-slate-900 mt-2">
-                    <i class="fa-solid fa-robot text-cyan-600 mr-2"></i>Manage Robots
-                </h1>
-            </div>
-
-            <a href="{% url 'admin_robot_create' %}" class="neon-button-filled inline-flex items-center gap-2" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
-                <i class="fa-solid fa-plus"></i>
-                Add New Robot
-            </a>
-        </div>
-
-        <!-- Search & Filters -->
-        <div class="bg-white rounded-xl border border-slate-200 p-4 mb-6">
-            <form method="GET" class="flex flex-wrap gap-4 items-center">
-                <input type="text" name="q" value="{{ query }}" placeholder="Search robots..."
-                       class="flex-1 min-w-[200px] rounded-lg border-slate-300 text-sm focus:border-cyan-400 focus:ring-cyan-400">
-
-                <div class="flex gap-2">
-                    <a href="?filter=all{% if query %}&q={{ query }}{% endif %}"
-                       class="px-4 py-2 rounded-lg text-sm font-semibold transition
-                       {% if filter_type == 'all' %}bg-cyan-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-                        All Robots
-                    </a>
-                    <a href="?filter=incomplete{% if query %}&q={{ query }}{% endif %}"
-                       class="px-4 py-2 rounded-lg text-sm font-semibold transition
-                       {% if filter_type == 'incomplete' %}bg-orange-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-                        Incomplete
-                    </a>
-                </div>
-
-                <button type="submit" class="px-4 py-2 bg-slate-900 text-white rounded-lg font-semibold text-sm hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-search mr-2"></i>Search
-                </button>
+    <!-- Header & Actions -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <h1 class="text-3xl font-heading font-black text-slate-800">
+            <i class="fa-solid fa-robot text-cyan-500 mr-2"></i>Manage Robots
+            <span class="ml-2 text-lg font-normal text-slate-400">({{ robots.paginator.count }})</span>
+        </h1>
+        <div class="flex gap-3 w-full md:w-auto">
+            <form method="get" class="flex-1 md:flex-none flex items-center bg-white rounded-lg border border-slate-200 px-3 py-2 shadow-sm focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500 transition">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search robots..." class="bg-transparent border-none outline-none text-sm w-full md:w-64 placeholder-slate-400">
             </form>
-        </div>
-
-        <!-- Robots Table -->
-        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                            <th class="text-left p-4 text-sm font-bold text-slate-700">Robot</th>
-                            <th class="text-left p-4 text-sm font-bold text-slate-700">Company</th>
-                            <th class="text-center p-4 text-sm font-bold text-slate-700">Type</th>
-                            <th class="text-center p-4 text-sm font-bold text-slate-700">Availability</th>
-                            <th class="text-center p-4 text-sm font-bold text-slate-700">Completeness</th>
-                            <th class="text-center p-4 text-sm font-bold text-slate-700">Status</th>
-                            <th class="text-center p-4 text-sm font-bold text-slate-700">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        {% for robot in robots %}
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-4">
-                                <div class="flex items-center gap-3">
-                                    {% if robot.image %}
-                                    <img src="{{ robot.image.url }}" alt="{{ robot.name }}" class="w-10 h-10 rounded-lg object-cover">
-                                    {% else %}
-                                    <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                                        <i class="fa-solid fa-robot text-slate-400"></i>
-                                    </div>
-                                    {% endif %}
-                                    <div>
-                                        <div class="font-semibold text-slate-900">{{ robot.name }}</div>
-                                        {% if robot.is_featured %}
-                                        <span class="text-xs text-amber-600"><i class="fa-solid fa-star mr-1"></i>Featured</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="p-4 text-slate-600">{{ robot.company.name }}</td>
-                            <td class="p-4 text-center">
-                                <span class="px-2 py-1 rounded text-xs font-semibold 
-                                    {% if robot.robot_type == 'humanoid' %}bg-violet-100 text-violet-700{% else %}bg-amber-100 text-amber-700{% endif %}">
-                                    {{ robot.get_robot_type_display }}
-                                </span>
-                            </td>
-                            <td class="p-4 text-center">
-                                <span class="px-2 py-1 rounded text-xs font-semibold
-                                    {% if robot.availability == 'available' %}bg-green-100 text-green-700
-                                    {% elif robot.availability == 'preorder' %}bg-blue-100 text-blue-700
-                                    {% else %}bg-slate-100 text-slate-600{% endif %}">
-                                    {{ robot.get_availability_display }}
-                                </span>
-                            </td>
-                            <td class="p-4 text-center">
-                                {% if robot.missing_fields %}
-                                <span class="text-orange-600 text-xs" title="{{ robot.missing_fields|join:', ' }}">
-                                    <i class="fa-solid fa-exclamation-circle mr-1"></i>
-                                    {{ robot.missing_fields|length }} missing
-                                </span>
-                                {% else %}
-                                <span class="text-green-600 text-xs">
-                                    <i class="fa-solid fa-check-circle mr-1"></i>Complete
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td class="p-4 text-center">
-                                <span class="px-2 py-1 rounded text-xs font-semibold
-                                    {% if robot.status == 'published' %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                                    {{ robot.get_status_display }}
-                                </span>
-                            </td>
-                            <td class="p-4 text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    {% if robot.status == 'published' %}
-                                    <a href="{% url 'robot_detail' robot.slug %}" target="_blank"
-                                       class="p-2 text-slate-400 hover:text-cyan-600" title="View">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
-                                    {% endif %}
-                                    <a href="{% url 'admin_robot_edit' robot.slug %}"
-                                       class="p-2 text-slate-400 hover:text-blue-600" title="Edit">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <a href="{% url 'admin_robot_delete' robot.slug %}"
-                                       class="p-2 text-slate-400 hover:text-red-600" title="Delete">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="p-8 text-center text-slate-500">
-                                <i class="fa-solid fa-robot text-4xl text-slate-300 mb-4"></i>
-                                <p>No robots found.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        {% if robots.has_other_pages %}
-        <nav class="flex justify-center mt-6">
-            <div class="flex gap-2">
-                {% if robots.has_previous %}
-                <a href="?page={{ robots.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}"
-                   class="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-cyan-400">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </a>
-                {% endif %}
-                <span class="px-4 py-2 bg-cyan-600 text-white rounded-lg font-semibold">{{ robots.number }}</span>
-                {% if robots.has_next %}
-                <a href="?page={{ robots.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_type != 'all' %}&filter={{ filter_type }}{% endif %}"
-                   class="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-cyan-400">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </a>
-                {% endif %}
-            </div>
-        </nav>
-        {% endif %}
-
-        <!-- Quick Links -->
-        <div class="flex flex-wrap gap-4 mt-8">
-            <a href="{% url 'admin_robot_companies' %}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-sm transition">
-                <i class="fa-solid fa-building mr-2"></i>Manage Companies
-            </a>
-            <a href="{% url 'admin_robot_news' %}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-sm transition">
-                <i class="fa-solid fa-newspaper mr-2"></i>Manage News
+            <a href="{% url 'admin_robot_create' %}" class="neon-button-filled whitespace-nowrap" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
+                <i class="fa-solid fa-plus mr-2"></i>Add Robot
             </a>
         </div>
     </div>
-</section>
+
+    <!-- Robots List -->
+    <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+        <!-- Filter Tabs -->
+        <div class="border-b border-slate-200 bg-slate-50/50 px-6 py-3 flex gap-4">
+            <a href="?filter=all{% if query %}&q={{ query }}{% endif %}" class="text-sm font-bold {% if filter_type == 'all' %}text-cyan-600 border-b-2 border-cyan-600 pb-3 -mb-3.5{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+                All Robots
+            </a>
+            <a href="?filter=incomplete{% if query %}&q={{ query }}{% endif %}" class="text-sm font-bold {% if filter_type == 'incomplete' %}text-cyan-600 border-b-2 border-cyan-600 pb-3 -mb-3.5{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+                Incomplete <span class="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded ml-1">Action Needed</span>
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/50">
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Robot</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Company</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Completeness</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Status</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Type</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for robot in robots %}
+                    <tr class="hover:bg-slate-50/50 transition duration-150">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
+                                    {% if robot.image %}
+                                    <img src="{{ robot.image.url }}" alt="{{ robot.name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <i class="fa-solid fa-robot text-slate-400"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800">{{ robot.name }}</div>
+                                    <div class="text-xs text-slate-500">{{ robot.slug }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 text-sm text-slate-600">
+                            {{ robot.company.name }}
+                        </td>
+                        <td class="p-4">
+                            {% if robot.missing_fields %}
+                            <div class="flex flex-col gap-1">
+                                <span class="text-xs font-bold text-orange-600 flex items-center">
+                                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Missing Info
+                                </span>
+                                <div class="flex flex-wrap gap-1">
+                                    {% for field in robot.missing_fields|slice:":3" %}
+                                    <span class="text-[10px] bg-orange-50 text-orange-600 border border-orange-100 px-1.5 py-0.5 rounded">{{ field }}</span>
+                                    {% endfor %}
+                                    {% if robot.missing_fields|length > 3 %}
+                                    <span class="text-[10px] text-slate-400">+{{ robot.missing_fields|length|add:"-3" }} more</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="text-xs font-bold text-green-600 flex items-center">
+                                <i class="fa-solid fa-check mr-1"></i> Complete
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            {% if robot.status == 'published' %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-xs font-bold text-green-700 uppercase">
+                                <i class="fa-solid fa-check-circle mr-1"></i> Published
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-xs font-bold text-yellow-700 uppercase">
+                                <i class="fa-solid fa-pen-ruler mr-1"></i> Draft
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded text-xs font-semibold 
+                                {% if robot.robot_type == 'humanoid' %}bg-violet-100 text-violet-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+                                {{ robot.get_robot_type_display }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                {% if robot.status == 'published' %}
+                                <a href="{% url 'robot_detail' robot.slug %}" target="_blank" class="p-2 text-slate-400 hover:text-cyan-600 transition" title="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'admin_robot_edit' robot.slug %}" class="p-2 text-slate-400 hover:text-blue-600 transition" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="{% url 'admin_robot_delete' robot.slug %}" class="p-2 text-slate-400 hover:text-red-600 transition" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-12 text-center text-slate-400">
+                            <i class="fa-solid fa-robot text-4xl mb-4 opacity-50"></i>
+                            <p>No robots found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if robots.paginator.num_pages > 1 %}
+        <div class="border-t border-slate-200 p-4 bg-slate-50/50 flex justify-center">
+            <div class="flex gap-2">
+                {% if robots.has_previous %}
+                <a href="?page={{ robots.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Previous</a>
+                {% endif %}
+
+                <span class="px-3 py-1 text-slate-500 text-sm">Page {{ robots.number }} of {{ robots.paginator.num_pages }}</span>
+
+                {% if robots.has_next %}
+                <a href="?page={{ robots.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Links -->
+    <div class="flex flex-wrap gap-4 mt-8">
+        <a href="{% url 'admin_robot_companies' %}" class="px-4 py-2 bg-white/80 hover:bg-white text-slate-700 rounded-lg font-semibold text-sm transition border border-slate-200">
+            <i class="fa-solid fa-building text-cyan-500 mr-2"></i>Manage Companies
+        </a>
+        <a href="{% url 'admin_robot_news' %}" class="px-4 py-2 bg-white/80 hover:bg-white text-slate-700 rounded-lg font-semibold text-sm transition border border-slate-200">
+            <i class="fa-solid fa-newspaper text-cyan-500 mr-2"></i>Manage News
+        </a>
+    </div>
+
+</div>
 {% endblock %}

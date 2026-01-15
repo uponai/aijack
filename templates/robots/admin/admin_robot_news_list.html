@@ -1,54 +1,57 @@
 {% extends 'base.html' %}
 
-{% block title %}Manage Robot News - Admin Dashboard{% endblock %}
+{% block title %}Manage Robot News | Admin{% endblock %}
 
 {% block content %}
-<section class="py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
 
-        <!-- Admin Navigation -->
-        {% include 'partials/admin_nav.html' with active_tab='robots' %}
+    {% include 'partials/admin_nav.html' with active_tab='robots' %}
 
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-            <div>
-                <a href="{% url 'admin_robots' %}" class="text-brand-600 hover:underline text-sm font-semibold">
-                    <i class="fa-solid fa-arrow-left mr-1"></i> Back to Robots
-                </a>
-                <h1 class="text-3xl font-heading font-black text-slate-900 mt-2">
-                    <i class="fa-solid fa-newspaper text-cyan-600 mr-2"></i>Manage News
-                </h1>
-            </div>
-
-            <a href="{% url 'admin_robot_news_create' %}" class="neon-button-filled inline-flex items-center gap-2" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
-                <i class="fa-solid fa-plus"></i>
-                Add News Article
+    <!-- Header & Actions -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <h1 class="text-3xl font-heading font-black text-slate-800">
+            <i class="fa-solid fa-newspaper text-cyan-500 mr-2"></i>Manage News
+            <span class="ml-2 text-lg font-normal text-slate-400">({{ news_list|length }})</span>
+        </h1>
+        <div class="flex gap-3 w-full md:w-auto">
+            <a href="{% url 'admin_robot_news_create' %}" class="neon-button-filled whitespace-nowrap" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
+                <i class="fa-solid fa-plus mr-2"></i>Add Article
             </a>
         </div>
+    </div>
 
-        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                        <th class="text-left p-4 text-sm font-bold text-slate-700">Title</th>
-                        <th class="text-center p-4 text-sm font-bold text-slate-700">Published</th>
-                        <th class="text-center p-4 text-sm font-bold text-slate-700">Status</th>
-                        <th class="text-center p-4 text-sm font-bold text-slate-700">Featured</th>
-                        <th class="text-center p-4 text-sm font-bold text-slate-700">Actions</th>
+    <!-- News List -->
+    <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/50">
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Title</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Published</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Status</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Featured</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Linked Robots</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     {% for news in news_list %}
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-slate-50/50 transition duration-150">
                         <td class="p-4">
-                            <div class="font-semibold text-slate-900 line-clamp-1">{{ news.title }}</div>
-                            <div class="text-xs text-slate-500">{{ news.robots.count }} linked robot{{ news.robots.count|pluralize }}</div>
+                            <div class="font-bold text-slate-800 line-clamp-1">{{ news.title }}</div>
+                            <div class="text-xs text-slate-500">{{ news.slug }}</div>
                         </td>
-                        <td class="p-4 text-center text-sm text-slate-600">{{ news.published_at|date:"M d, Y" }}</td>
-                        <td class="p-4 text-center">
-                            <span class="px-2 py-1 rounded text-xs font-semibold
-                                {% if news.is_published %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
-                                {% if news.is_published %}Published{% else %}Draft{% endif %}
+                        <td class="p-4 text-sm text-slate-600">{{ news.published_at|date:"M d, Y" }}</td>
+                        <td class="p-4">
+                            {% if news.is_published %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-xs font-bold text-green-700 uppercase">
+                                <i class="fa-solid fa-check-circle mr-1"></i> Published
                             </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-xs font-bold text-yellow-700 uppercase">
+                                <i class="fa-solid fa-pen-ruler mr-1"></i> Draft
+                            </span>
+                            {% endif %}
                         </td>
                         <td class="p-4 text-center">
                             {% if news.is_featured %}
@@ -57,17 +60,22 @@
                             <span class="text-slate-300">-</span>
                             {% endif %}
                         </td>
-                        <td class="p-4 text-center">
-                            <div class="flex items-center justify-center gap-2">
+                        <td class="p-4">
+                            <span class="px-2 py-1 bg-cyan-100 text-cyan-700 rounded text-sm font-semibold">
+                                {{ news.robots.count }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
                                 {% if news.is_published %}
-                                <a href="{% url 'robot_news_detail' news.slug %}" target="_blank" class="p-2 text-slate-400 hover:text-cyan-600">
+                                <a href="{% url 'robot_news_detail' news.slug %}" target="_blank" class="p-2 text-slate-400 hover:text-cyan-600 transition" title="View">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'admin_robot_news_edit' news.slug %}" class="p-2 text-slate-400 hover:text-blue-600">
+                                <a href="{% url 'admin_robot_news_edit' news.slug %}" class="p-2 text-slate-400 hover:text-blue-600 transition" title="Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
-                                <a href="{% url 'admin_robot_news_delete' news.slug %}" class="p-2 text-slate-400 hover:text-red-600">
+                                <a href="{% url 'admin_robot_news_delete' news.slug %}" class="p-2 text-slate-400 hover:text-red-600 transition" title="Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </div>
@@ -75,12 +83,23 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="p-8 text-center text-slate-500">No news articles found.</td>
+                        <td colspan="6" class="p-12 text-center text-slate-400">
+                            <i class="fa-solid fa-newspaper text-4xl mb-4 opacity-50"></i>
+                            <p>No news articles found.</p>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-</section>
+
+    <!-- Back Link -->
+    <div class="mt-8">
+        <a href="{% url 'admin_robots' %}" class="text-slate-500 hover:text-cyan-600 font-semibold text-sm transition">
+            <i class="fa-solid fa-arrow-left mr-2"></i>Back to Robots
+        </a>
+    </div>
+
+</div>
 {% endblock %}
