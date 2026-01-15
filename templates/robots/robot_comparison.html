@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load robot_extras %}
+
+{% block title %}Compare AI Robots - Side-by-Side Comparison Tool | AIJACK{% endblock %}
+{% block meta_description %}Compare up to 4 AI robots side-by-side. Analyze specifications, features, and capabilities.{% endblock %}
+
+{% block content %}
+<section class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <a href="{% url 'robots' %}" class="text-cyan-600 hover:underline text-sm font-semibold">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Robots
+            </a>
+            <h1 class="text-3xl md:text-4xl font-heading font-black text-slate-900 mt-4 mb-3">
+                Robot <span class="text-cyan-600">COMPARISON</span>
+            </h1>
+            <p class="text-slate-600">Compare up to {{ max_comparison }} robots side-by-side</p>
+        </div>
+
+        <!-- Comparison Slots -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {% for robot in robots %}
+            <div class="bg-white rounded-xl border-2 border-cyan-400 p-4 relative">
+                <button onclick="removeFromComparison({{ robot.id }})"
+                        class="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                {% if robot.image %}
+                <img src="{{ robot.image.url }}" alt="{{ robot.name }}" class="w-full h-32 object-cover rounded-lg mb-3">
+                {% else %}
+                <div class="w-full h-32 bg-slate-100 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-robot text-3xl text-slate-400"></i>
+                </div>
+                {% endif %}
+
+                <h3 class="font-bold text-sm text-slate-900 line-clamp-1">{{ robot.name }}</h3>
+                <p class="text-xs text-slate-500">{{ robot.company.name }}</p>
+            </div>
+            {% empty %}
+            {% for i in "1234" %}
+            {% if forloop.counter <= max_comparison %}
+            <div class="bg-slate-50 rounded-xl border-2 border-dashed border-slate-300 p-4 flex flex-col items-center justify-center min-h-[200px]">
+                <i class="fa-solid fa-plus text-2xl text-slate-400 mb-2"></i>
+                <span class="text-sm text-slate-500">Add Robot</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+
+            <!-- Empty slots -->
+            {% if robots.count < max_comparison %}
+            {% for i in "1234" %}
+            {% if forloop.counter <= max_comparison|add:"-robots.count" %}
+            <div class="bg-slate-50 rounded-xl border-2 border-dashed border-slate-300 p-4 flex flex-col items-center justify-center min-h-[200px]">
+                <i class="fa-solid fa-plus text-2xl text-slate-400 mb-2"></i>
+                <span class="text-sm text-slate-500">Add Robot</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Add Robot Selector -->
+        {% if robots.count < max_comparison %}
+        <div class="bg-cyan-50 rounded-xl p-6 mb-8">
+            <h3 class="font-bold text-slate-900 mb-4">Add a Robot to Compare</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {% for robot in all_robots %}
+                {% is_in_comparison request robot.id as in_comp %}
+                {% if not in_comp %}
+                <button onclick="addToComparison({{ robot.id }})"
+                        class="text-left p-3 bg-white rounded-lg border border-slate-200 hover:border-cyan-400 transition">
+                    <div class="font-semibold text-sm text-slate-900 line-clamp-1">{{ robot.name }}</div>
+                    <div class="text-xs text-slate-500">{{ robot.company.name }}</div>
+                </button>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Comparison Table -->
+        {% if robots %}
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="text-left p-4 text-sm font-bold text-slate-700">Specification</th>
+                            {% for robot in robots %}
+                            <th class="text-center p-4 text-sm font-bold text-slate-700">{{ robot.name }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr>
+                            <td class="p-4 font-medium text-slate-600">Company</td>
+                            {% for robot in robots %}
+                            <td class="p-4 text-center">{{ robot.company.name }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium text-slate-600">Type</td>
+                            {% for robot in robots %}
+                            <td class="p-4 text-center">{{ robot.get_robot_type_display }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium text-slate-600">Target Market</td>
+                            {% for robot in robots %}
+                            <td class="p-4 text-center">{{ robot.get_target_market_display }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium text-slate-600">Availability</td>
+                            {% for robot in robots %}
+                            <td class="p-4 text-center">{{ robot.get_availability_display }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium text-slate-600">Price Range</td>
+                            {% for robot in robots %}
+                            <td class="p-4 text-center font-semibold text-cyan-600">{{ robot.get_pricing_tier_display }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% for spec_key, spec_label, unit in comparison_specs %}
+                        <tr>
+                            <td class="p-4 font-medium text-slate-600">{{ spec_label }}</td>
+                            {% for robot in robots %}
+                            <td class="p-4 text-center font-mono">
+                                {{ robot.specifications|get_spec:spec_key }}{% if robot.specifications|get_spec:spec_key != '-' %} {{ unit }}{% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Clear Button -->
+        <div class="text-center mt-6">
+            <button onclick="clearComparison()" class="text-red-600 hover:text-red-700 font-semibold">
+                <i class="fa-solid fa-trash mr-2"></i>Clear All
+            </button>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-2xl bg-cyan-100 flex items-center justify-center">
+                <i class="fa-solid fa-code-compare text-4xl text-cyan-600"></i>
+            </div>
+            <h3 class="font-heading font-bold text-xl text-slate-900 mb-2">No Robots Selected</h3>
+            <p class="text-slate-600 mb-4">Add robots from the selection above to compare them.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    function addToComparison ( robotId )
+    {
+        fetch( `/api/robots/comparison/add/?robot_id=${ robotId }` )
+            .then( r => r.json() )
+            .then( data =>
+            {
+                if ( data.success ) location.reload();
+                else if ( data.error ) alert( data.error );
+            } );
+    }
+
+    function removeFromComparison ( robotId )
+    {
+        fetch( `/api/robots/comparison/remove/?robot_id=${ robotId }` )
+            .then( r => r.json() )
+            .then( () => location.reload() );
+    }
+
+    function clearComparison ()
+    {
+        fetch( '/api/robots/comparison/clear/' )
+            .then( () => location.reload() );
+    }
+</script>
+{% endblock %}

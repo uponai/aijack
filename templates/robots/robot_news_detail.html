@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ article.get_seo_title }}{% endblock %}
+{% block meta_description %}{{ article.get_seo_description }}{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{{ article.get_schema_json|safe }}
+</script>
+<script type="application/ld+json">
+{{ article.get_breadcrumb_json|safe }}
+</script>
+{% endblock %}
+
+{% block content %}
+<article class="py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-3 mb-8 text-sm">
+            <a href="{% url 'home' %}" class="text-cyan-600 hover:underline">Home</a>
+            <span class="text-slate-400">/</span>
+            <a href="{% url 'robots' %}" class="text-cyan-600 hover:underline">AI Robots</a>
+            <span class="text-slate-400">/</span>
+            <a href="{% url 'robot_news' %}" class="text-cyan-600 hover:underline">News</a>
+            <span class="text-slate-400">/</span>
+            <span class="text-slate-600 line-clamp-1">{{ article.title|truncatewords:5 }}</span>
+        </nav>
+
+        <!-- Article Header -->
+        <header class="mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-sm text-slate-500">{{ article.published_at|date:"F d, Y" }}</span>
+                {% if article.source_name %}
+                <span class="text-slate-300">•</span>
+                <span class="text-sm text-slate-500">
+                    Source:
+                    {% if article.source_url %}
+                    <a href="{{ article.source_url }}" target="_blank" rel="noopener" class="text-cyan-600 hover:underline">
+                        {{ article.source_name }}
+                    </a>
+                    {% else %}
+                    {{ article.source_name }}
+                    {% endif %}
+                </span>
+                {% endif %}
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-heading font-black text-slate-900 mb-4">
+                {{ article.title }}
+            </h1>
+
+            <p class="text-xl text-slate-600">{{ article.excerpt }}</p>
+        </header>
+
+        <!-- Featured Image -->
+        {% if article.featured_image %}
+        <figure class="mb-8">
+            <img src="{{ article.featured_image.url }}" alt="{{ article.title }}"
+                 class="w-full rounded-2xl shadow-lg">
+        </figure>
+        {% endif %}
+
+        <!-- Linked Robots -->
+        {% if article.robots.exists %}
+        <div class="bg-cyan-50 rounded-xl p-4 mb-8">
+            <span class="text-sm font-semibold text-cyan-700 mr-3">Related Robots:</span>
+            <div class="inline-flex flex-wrap gap-2 mt-2">
+                {% for robot in article.robots.all %}
+                <a href="{% url 'robot_detail' robot.slug %}"
+                   class="inline-flex items-center gap-2 bg-white text-slate-700 px-3 py-1 rounded-lg text-sm font-medium hover:bg-cyan-100 transition">
+                    <i class="fa-solid fa-robot text-cyan-600"></i>{{ robot.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Article Content -->
+        <div class="prose prose-lg prose-slate max-w-none">
+            {{ article.content|linebreaks }}
+        </div>
+
+        <!-- Share & CTA -->
+        <div class="flex flex-wrap items-center gap-4 mt-8 pt-8 border-t border-slate-200">
+            <a href="{% url 'robots' %}" class="neon-button-filled inline-flex items-center gap-2" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
+                <i class="fa-solid fa-robot"></i>
+                <span>Explore All Robots</span>
+            </a>
+        </div>
+
+        <!-- Related News -->
+        {% if related_news %}
+        <section class="mt-12 pt-8 border-t border-slate-200">
+            <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">Related News</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                {% for news in related_news %}
+                <a href="{% url 'robot_news_detail' news.slug %}" class="group">
+                    {% if news.featured_image %}
+                    <img src="{{ news.featured_image.url }}" alt="{{ news.title }}"
+                         class="w-full h-32 object-cover rounded-lg mb-3" loading="lazy">
+                    {% endif %}
+                    <h3 class="font-semibold text-slate-900 group-hover:text-cyan-600 transition line-clamp-2">
+                        {{ news.title }}
+                    </h3>
+                    <span class="text-xs text-slate-500">{{ news.published_at|date:"M d, Y" }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</article>
+{% endblock %}

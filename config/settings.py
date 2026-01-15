@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'axes',
     'tools',
+    'robots',  # AI Robots app
     # 3rd party
     'allauth',
     'allauth.account',

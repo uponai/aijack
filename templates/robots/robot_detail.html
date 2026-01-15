@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+{% load robot_extras %}
+
+{% block title %}{{ robot.get_seo_title }}{% endblock %}
+{% block meta_description %}{{ robot.get_seo_description }}{% endblock %}
+{% block meta_keywords %}{{ robot.name }}, {{ robot.company.name }}, AI robot, {{ robot.get_robot_type_display }}, {% for uc in robot.get_use_cases_list %}{{ uc }}, {% endfor %}robotics, automation{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{{ robot.get_schema_json|safe }}
+</script>
+<script type="application/ld+json">
+{{ robot.get_breadcrumb_json|safe }}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-3 mb-8 text-sm" aria-label="Breadcrumb">
+            <a href="{% url 'home' %}" class="text-cyan-600 hover:underline">Home</a>
+            <span class="text-slate-400">/</span>
+            <a href="{% url 'robots' %}" class="text-cyan-600 hover:underline">AI Robots</a>
+            <span class="text-slate-400">/</span>
+            <a href="{% url 'robot_company_detail' robot.company.slug %}" class="text-cyan-600 hover:underline">{{ robot.company.name }}</a>
+            <span class="text-slate-400">/</span>
+            <span class="text-slate-600">{{ robot.name }}</span>
+        </nav>
+
+        <!-- Robot Header Card -->
+        <div class="neon-card p-8 md:p-10 mb-8 relative overflow-hidden">
+            <!-- Cyan accent border -->
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-cyan-500 to-teal-500"></div>
+
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Image -->
+                <div class="flex-shrink-0">
+                    {% if robot.image %}
+                    <img src="{{ robot.image.url }}"
+                         alt="{{ robot.name }} - {{ robot.get_robot_type_display }} robot by {{ robot.company.name }}"
+                         class="w-64 h-64 rounded-2xl object-cover shadow-lg">
+                    {% else %}
+                    <div class="w-64 h-64 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-robot text-6xl text-cyan-500 opacity-50"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1">
+                    <!-- Badges Row -->
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <!-- Type Badge -->
+                        <span class="px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider 
+                            {% if robot.robot_type == 'humanoid' %}bg-violet-100 text-violet-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+                            <i class="fa-solid {% if robot.robot_type == 'humanoid' %}fa-person{% else %}fa-gear{% endif %} mr-1"></i>
+                            {{ robot.get_robot_type_display }}
+                        </span>
+
+                        <!-- Availability -->
+                        <span class="px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider
+                            {% if robot.availability == 'available' %}bg-green-100 text-green-700
+                            {% elif robot.availability == 'preorder' %}bg-blue-100 text-blue-700
+                            {% elif robot.availability == 'announced' %}bg-yellow-100 text-yellow-700
+                            {% else %}bg-slate-100 text-slate-600{% endif %}">
+                            {{ robot.get_availability_display }}
+                        </span>
+
+                        <!-- Featured -->
+                        {% if robot.is_featured %}
+                        {% include 'includes/_featured_badge.html' %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Robot Name -->
+                    <h1 class="text-3xl md:text-4xl font-heading font-black text-slate-900 mb-2">
+                        {{ robot.name }}
+                    </h1>
+
+                    <!-- Company -->
+                    <a href="{% url 'robot_company_detail' robot.company.slug %}"
+                       class="inline-flex items-center gap-2 text-cyan-600 hover:text-cyan-700 transition mb-4">
+                        <i class="fa-solid fa-building"></i>
+                        <span class="font-semibold">{{ robot.company.name }}</span>
+                    </a>
+
+                    <!-- Description -->
+                    <p class="text-xl text-slate-600 mb-6">{{ robot.short_description }}</p>
+
+                    <!-- Meta Tags -->
+                    <div class="flex flex-wrap gap-4 mb-6">
+                        <div class="flex items-center gap-2 text-sm text-slate-500">
+                            <i class="fa-solid fa-crosshairs text-cyan-500"></i>
+                            <span>{{ robot.get_target_market_display }}</span>
+                        </div>
+                        {% if robot.release_date %}
+                        <div class="flex items-center gap-2 text-sm text-slate-500">
+                            <i class="fa-solid fa-calendar text-cyan-500"></i>
+                            <span>{{ robot.release_date|date:"F Y" }}</span>
+                        </div>
+                        {% endif %}
+                        {% if robot.pricing_tier != 'unknown' %}
+                        <div class="flex items-center gap-2 text-sm text-slate-500">
+                            <i class="fa-solid fa-tag text-cyan-500"></i>
+                            <span>{{ robot.get_pricing_tier_display }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-wrap gap-4 items-center">
+                        {% if robot.product_url %}
+                        <a href="{{ robot.product_url }}" target="_blank" rel="noopener"
+                           class="neon-button-filled inline-flex items-center gap-2" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
+                            <span>Visit Product Page</span>
+                            <i class="fa-solid fa-external-link"></i>
+                        </a>
+                        {% endif %}
+
+                        <!-- Compare Button -->
+                        <button onclick="addToComparison({{ robot.id }}, '{{ robot.name }}')"
+                                class="neon-button-outline inline-flex items-center gap-2" style="border-color: #06B6D4; color: #06B6D4;">
+                            <i class="fa-solid fa-code-compare"></i>
+                            <span>Add to Compare</span>
+                        </button>
+
+                        <!-- Save Button -->
+                        {% if request.user.is_authenticated %}
+                        <button onclick="toggleRobotSave({{ robot.id }})"
+                                class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center transition-colors hover:bg-white border border-transparent hover:border-slate-200"
+                                title="{% if is_saved %}Remove from favorites{% else %}Add to favorites{% endif %}">
+                            <i class="fa-solid fa-heart text-lg transition-colors {% if is_saved %}text-red-500{% else %}text-slate-400 hover:text-red-500{% endif %}" id="robot-heart-{{ robot.id }}"></i>
+                        </button>
+                        {% else %}
+                        <a href="{% url 'account_signup' %}"
+                           class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
+                           title="Sign up to save robots">
+                            <i class="fa-regular fa-heart text-lg"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Long Description -->
+                {% if robot.long_description %}
+                <div class="neon-card p-6">
+                    <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                        <i class="fa-solid fa-info-circle text-cyan-500 mr-2"></i>About {{ robot.name }}
+                    </h2>
+                    <div class="prose prose-slate max-w-none">
+                        {{ robot.long_description|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Pros & Cons -->
+                {% if robot.pros or robot.cons %}
+                <div class="grid md:grid-cols-2 gap-6">
+                    {% if robot.pros %}
+                    <div class="neon-card p-6">
+                        <h3 class="font-heading font-bold text-lg text-green-600 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-thumbs-up"></i>PROS
+                        </h3>
+                        <ul class="space-y-3">
+                            {% for pro in robot.get_pros_list %}
+                            <li class="flex items-start gap-2 text-slate-700">
+                                <span class="text-green-500 font-bold">+</span>
+                                {{ pro }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if robot.cons %}
+                    <div class="neon-card p-6">
+                        <h3 class="font-heading font-bold text-lg text-red-500 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-thumbs-down"></i>CONS
+                        </h3>
+                        <ul class="space-y-3">
+                            {% for con in robot.get_cons_list %}
+                            <li class="flex items-start gap-2 text-slate-700">
+                                <span class="text-red-500 font-bold">-</span>
+                                {{ con }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Use Cases -->
+                {% if robot.use_cases %}
+                <div class="neon-card p-6">
+                    <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                        <i class="fa-solid fa-lightbulb text-cyan-500 mr-2"></i>Use Cases
+                    </h2>
+                    <div class="flex flex-wrap gap-2">
+                        {% for uc in robot.get_use_cases_list %}
+                        <span class="px-3 py-1 bg-cyan-50 text-cyan-700 rounded-full text-sm font-medium">
+                            {{ uc }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Specifications -->
+                {% if robot.specifications %}
+                <div class="neon-card p-6">
+                    <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                        <i class="fa-solid fa-microchip text-cyan-500 mr-2"></i>Technical Specifications
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <tbody class="divide-y divide-slate-100">
+                                {% for key, value in robot.specifications.items %}
+                                <tr>
+                                    <td class="py-3 text-sm font-semibold text-slate-500 uppercase tracking-wider">{{ key|title }}</td>
+                                    <td class="py-3 text-sm text-slate-900 font-mono">{{ value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Compatible AI Tools -->
+                {% if robot.compatible_tools.exists %}
+                <div class="neon-card p-6">
+                    <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                        <i class="fa-solid fa-plug text-cyan-500 mr-2"></i>Compatible AI Tools
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {% for tool in robot.compatible_tools.all %}
+                        <a href="{% url 'tool_detail' tool.slug %}" class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
+                            {% if tool.logo %}
+                            <img src="{{ tool.logo.url }}" alt="{{ tool.name }}" class="w-8 h-8 rounded-lg object-cover">
+                            {% else %}
+                            <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-xs">
+                                {{ tool.name|slice:":2"|upper }}
+                            </div>
+                            {% endif %}
+                            <span class="font-semibold text-slate-700 text-sm">{{ tool.name }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Company Card -->
+                <div class="neon-card p-6">
+                    <h3 class="font-heading font-bold text-slate-900 mb-4">
+                        <i class="fa-solid fa-building text-cyan-500 mr-2"></i>Manufacturer
+                    </h3>
+                    <a href="{% url 'robot_company_detail' robot.company.slug %}" class="block group">
+                        {% if robot.company.logo %}
+                        <img src="{{ robot.company.logo.url }}" alt="{{ robot.company.name }}"
+                             class="w-16 h-16 rounded-xl object-cover mb-3">
+                        {% else %}
+                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xl mb-3">
+                            {{ robot.company.name|slice:":2"|upper }}
+                        </div>
+                        {% endif %}
+                        <div class="font-semibold text-lg text-slate-900 group-hover:text-cyan-600 transition">
+                            {{ robot.company.name }}
+                        </div>
+                        {% if robot.company.headquarters %}
+                        <div class="text-sm text-slate-500 mt-1">
+                            <i class="fa-solid fa-location-dot mr-1"></i>{{ robot.company.headquarters }}
+                        </div>
+                        {% endif %}
+                        <div class="text-sm text-cyan-600 mt-2 font-semibold">
+                            View {{ robot.company.robot_count }} robots by {{ robot.company.name }} →
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Quick Specs Card -->
+                <div class="neon-card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+                    <h3 class="font-heading font-bold mb-4 text-cyan-400">
+                        <i class="fa-solid fa-bolt mr-2"></i>Quick Specs
+                    </h3>
+                    <dl class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <dt class="text-slate-400">Type</dt>
+                            <dd class="font-semibold">{{ robot.get_robot_type_display }}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-slate-400">Market</dt>
+                            <dd class="font-semibold">{{ robot.get_target_market_display }}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-slate-400">Availability</dt>
+                            <dd class="font-semibold">{{ robot.get_availability_display }}</dd>
+                        </div>
+                        {% if robot.pricing_tier != 'unknown' %}
+                        <div class="flex justify-between">
+                            <dt class="text-slate-400">Price Range</dt>
+                            <dd class="font-semibold text-cyan-400">{{ robot.get_pricing_tier_display }}</dd>
+                        </div>
+                        {% endif %}
+                        {% if robot.price_value %}
+                        <div class="flex justify-between">
+                            <dt class="text-slate-400">Price</dt>
+                            <dd class="font-bold text-lg text-cyan-400">${{ robot.price_value|floatformat:0 }}</dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+
+                <!-- Robot News -->
+                {% if robot_news %}
+                <div class="neon-card p-6">
+                    <h3 class="font-heading font-bold text-slate-900 mb-4">
+                        <i class="fa-solid fa-newspaper text-cyan-500 mr-2"></i>Related News
+                    </h3>
+                    <div class="space-y-4">
+                        {% for news in robot_news %}
+                        <a href="{% url 'robot_news_detail' news.slug %}" class="block group">
+                            <div class="text-xs text-slate-500 mb-1">{{ news.published_at|date:"M d, Y" }}</div>
+                            <div class="font-semibold text-slate-900 group-hover:text-cyan-600 transition line-clamp-2">
+                                {{ news.title }}
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Related Robots -->
+        {% if related_robots %}
+        <section class="mt-12 pt-8 border-t border-slate-200">
+            <h2 class="text-2xl font-heading font-bold text-slate-900 mb-6">
+                <span class="text-cyan-600">SIMILAR</span> ROBOTS
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for rel_robot in related_robots %}
+                {% include 'robots/includes/_robot_card.html' with robot=rel_robot %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    function toggleRobotSave ( robotId )
+    {
+        fetch( `/api/save-robot/${ robotId }/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        } )
+            .then( r => r.json() )
+            .then( data =>
+            {
+                if ( data.success )
+                {
+                    const heart = document.getElementById( `robot-heart-${ robotId }` );
+                    if ( data.is_saved )
+                    {
+                        heart.classList.remove( 'text-slate-400' );
+                        heart.classList.add( 'text-red-500' );
+                    } else
+                    {
+                        heart.classList.remove( 'text-red-500' );
+                        heart.classList.add( 'text-slate-400' );
+                    }
+                }
+            } );
+    }
+
+    function addToComparison ( robotId, robotName )
+    {
+        fetch( `/api/robots/comparison/add/?robot_id=${ robotId }` )
+            .then( r => r.json() )
+            .then( data =>
+            {
+                if ( data.success )
+                {
+                    alert( `${ robotName } added to comparison! (${ data.count }/4)` );
+                } else if ( data.error )
+                {
+                    alert( data.error );
+                }
+            } );
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Robot News - Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Admin Navigation -->
+        {% include 'partials/admin_nav.html' with active_tab='robots' %}
+
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            <div>
+                <a href="{% url 'admin_robots' %}" class="text-brand-600 hover:underline text-sm font-semibold">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Back to Robots
+                </a>
+                <h1 class="text-3xl font-heading font-black text-slate-900 mt-2">
+                    <i class="fa-solid fa-newspaper text-cyan-600 mr-2"></i>Manage News
+                </h1>
+            </div>
+
+            <a href="{% url 'admin_robot_news_create' %}" class="neon-button-filled inline-flex items-center gap-2" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
+                <i class="fa-solid fa-plus"></i>
+                Add News Article
+            </a>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="text-left p-4 text-sm font-bold text-slate-700">Title</th>
+                        <th class="text-center p-4 text-sm font-bold text-slate-700">Published</th>
+                        <th class="text-center p-4 text-sm font-bold text-slate-700">Status</th>
+                        <th class="text-center p-4 text-sm font-bold text-slate-700">Featured</th>
+                        <th class="text-center p-4 text-sm font-bold text-slate-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for news in news_list %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-4">
+                            <div class="font-semibold text-slate-900 line-clamp-1">{{ news.title }}</div>
+                            <div class="text-xs text-slate-500">{{ news.robots.count }} linked robot{{ news.robots.count|pluralize }}</div>
+                        </td>
+                        <td class="p-4 text-center text-sm text-slate-600">{{ news.published_at|date:"M d, Y" }}</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2 py-1 rounded text-xs font-semibold
+                                {% if news.is_published %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                                {% if news.is_published %}Published{% else %}Draft{% endif %}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center">
+                            {% if news.is_featured %}
+                            <i class="fa-solid fa-star text-amber-500"></i>
+                            {% else %}
+                            <span class="text-slate-300">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                {% if news.is_published %}
+                                <a href="{% url 'robot_news_detail' news.slug %}" target="_blank" class="p-2 text-slate-400 hover:text-cyan-600">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'admin_robot_news_edit' news.slug %}" class="p-2 text-slate-400 hover:text-blue-600">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="{% url 'admin_robot_news_delete' news.slug %}" class="p-2 text-slate-400 hover:text-red-600">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-slate-500">No news articles found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

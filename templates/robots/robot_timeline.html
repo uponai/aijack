@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Robot Timeline - Release History | AIJACK{% endblock %}
+{% block meta_description %}Visual timeline of AI robot releases by year. Track the evolution of humanoid and specialized robots.{% endblock %}
+
+{% block content %}
+<section class="py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <a href="{% url 'robots' %}" class="text-cyan-600 hover:underline text-sm font-semibold">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Robots
+            </a>
+            <h1 class="text-3xl md:text-4xl font-heading font-black text-slate-900 mt-4 mb-3">
+                Robot <span class="text-cyan-600">TIMELINE</span>
+            </h1>
+            <p class="text-slate-600">The evolution of AI robotics through the years</p>
+        </div>
+
+        <!-- Timeline -->
+        <div class="relative">
+            <!-- Vertical Line -->
+            <div class="absolute left-1/2 transform -translate-x-1/2 w-1 bg-gradient-to-b from-cyan-500 to-teal-500 h-full rounded-full"></div>
+
+            {% for year, robots in timeline_data %}
+            <!-- Year Marker -->
+            <div class="relative flex items-center justify-center mb-8">
+                <div class="bg-cyan-600 text-white font-heading font-bold text-xl px-6 py-2 rounded-full z-10 shadow-lg">
+                    {{ year }}
+                </div>
+            </div>
+
+            {% for robot in robots %}
+            <!-- Robot Entry -->
+            <div class="relative flex items-center mb-8 {% if forloop.counter|divisibleby:2 %}flex-row-reverse{% endif %}">
+                <!-- Content -->
+                <div class="w-5/12 {% if forloop.counter|divisibleby:2 %}text-left{% else %}text-right{% endif %}">
+                    <a href="{% url 'robot_detail' robot.slug %}"
+                       class="block bg-white rounded-xl border border-slate-200 p-4 hover:border-cyan-400 hover:shadow-lg transition group">
+                        <div class="flex items-center gap-4 {% if forloop.counter|divisibleby:2 %}flex-row{% else %}flex-row-reverse{% endif %}">
+                            {% if robot.image %}
+                            <img src="{{ robot.image.url }}" alt="{{ robot.name }}"
+                                 class="w-16 h-16 rounded-lg object-cover" loading="lazy">
+                            {% else %}
+                            <div class="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center">
+                                <i class="fa-solid fa-robot text-2xl text-slate-400"></i>
+                            </div>
+                            {% endif %}
+
+                            <div class="flex-1">
+                                <div class="font-bold text-slate-900 group-hover:text-cyan-600">{{ robot.name }}</div>
+                                <div class="text-sm text-slate-500">{{ robot.company.name }}</div>
+                                <div class="text-xs text-cyan-600 mt-1">{{ robot.release_date|date:"M d, Y" }}</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Dot -->
+                <div class="w-2/12 flex justify-center">
+                    <div class="w-4 h-4 bg-white border-4 border-cyan-500 rounded-full z-10"></div>
+                </div>
+
+                <!-- Spacer -->
+                <div class="w-5/12"></div>
+            </div>
+            {% endfor %}
+            {% empty %}
+            <div class="text-center py-12">
+                <p class="text-slate-600">No robots with release dates yet.</p>
+            </div>
+            {% endfor %}
+
+            <!-- Upcoming Section -->
+            {% if upcoming %}
+            <div class="relative flex items-center justify-center mt-12 mb-8">
+                <div class="bg-amber-500 text-white font-heading font-bold text-lg px-6 py-2 rounded-full z-10 shadow-lg">
+                    <i class="fa-solid fa-clock mr-2"></i>Upcoming
+                </div>
+            </div>
+
+            {% for robot in upcoming %}
+            <div class="relative flex items-center mb-6 justify-center">
+                <a href="{% url 'robot_detail' robot.slug %}"
+                   class="bg-amber-50 border border-amber-200 rounded-xl p-4 hover:border-amber-400 transition max-w-md w-full">
+                    <div class="flex items-center gap-4">
+                        {% if robot.image %}
+                        <img src="{{ robot.image.url }}" alt="{{ robot.name }}"
+                             class="w-12 h-12 rounded-lg object-cover" loading="lazy">
+                        {% else %}
+                        <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <i class="fa-solid fa-robot text-xl text-amber-600"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="font-bold text-slate-900">{{ robot.name }}</div>
+                            <div class="text-sm text-amber-700">Expected: {{ robot.release_date|date:"M Y" }}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

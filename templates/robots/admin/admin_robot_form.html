@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}Edit: {{ robot.name }}{% else %}Add New Robot{% endif %} - Admin{% endblock %}
+
+{% block content %}
+<section class="py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Admin Navigation -->
+        {% include 'partials/admin_nav.html' with active_tab='robots' %}
+
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{% url 'admin_robots' %}" class="text-brand-600 hover:underline text-sm font-semibold">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Robots
+            </a>
+            <h1 class="text-3xl font-heading font-black text-slate-900 mt-2">{{ title }}</h1>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Basic Info -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                    <i class="fa-solid fa-info-circle text-cyan-600 mr-2"></i>Basic Information
+                </h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Name *</label>
+                        {{ form.name }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Slug *</label>
+                        {{ form.slug }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Company *</label>
+                        {{ form.company }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Product URL</label>
+                        {{ form.product_url }}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Robot Image</label>
+                    {{ form.image }}
+                    {% if form.instance.image %}
+                    <div class="mt-2">
+                        <img src="{{ form.instance.image.url }}" alt="Current image" class="w-20 h-20 rounded-lg object-cover">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Classification -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                    <i class="fa-solid fa-tags text-cyan-600 mr-2"></i>Classification
+                </h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Robot Type</label>
+                        {{ form.robot_type }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Target Market</label>
+                        {{ form.target_market }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Release & Pricing -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                    <i class="fa-solid fa-calendar text-cyan-600 mr-2"></i>Release & Pricing
+                </h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Release Date</label>
+                        {{ form.release_date }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Availability</label>
+                        {{ form.availability }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Pricing Tier</label>
+                        {{ form.pricing_tier }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Exact Price (USD)</label>
+                        {{ form.price_value }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                    <i class="fa-solid fa-file-lines text-cyan-600 mr-2"></i>Content
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Short Description *</label>
+                        {{ form.short_description }}
+                        <p class="text-xs text-slate-500 mt-1">Max 300 characters</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Long Description</label>
+                        {{ form.long_description }}
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Pros</label>
+                            {{ form.pros }}
+                            <p class="text-xs text-slate-500 mt-1">Comma-separated</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Cons</label>
+                            {{ form.cons }}
+                            <p class="text-xs text-slate-500 mt-1">Comma-separated</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Use Cases</label>
+                            {{ form.use_cases }}
+                            <p class="text-xs text-slate-500 mt-1">Comma-separated</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                    <i class="fa-solid fa-microchip text-cyan-600 mr-2"></i>Technical Specifications
+                </h2>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Specifications (JSON)</label>
+                    {{ form.specifications }}
+                    <p class="text-xs text-slate-500 mt-1">Format: {"height": "180cm", "weight": "70kg", "battery_life": "8h"}</p>
+                </div>
+            </div>
+
+            <!-- Integrations -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                    <i class="fa-solid fa-plug text-cyan-600 mr-2"></i>Compatible AI Tools
+                </h2>
+                <div>
+                    {{ form.compatible_tools }}
+                    <p class="text-xs text-slate-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                    <i class="fa-solid fa-toggle-on text-cyan-600 mr-2"></i>Status
+                </h2>
+                <div class="flex gap-8">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Publication Status</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="flex items-center gap-2">
+                        {{ form.is_featured }}
+                        <label class="text-sm font-semibold text-slate-700">Featured Robot</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
+                <h2 class="font-heading font-bold text-lg text-slate-900 mb-4">
+                    <i class="fa-solid fa-search text-cyan-600 mr-2"></i>SEO Settings
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Meta Title</label>
+                        {{ form.meta_title }}
+                        <p class="text-xs text-slate-500 mt-1">50-60 characters recommended</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Meta Description</label>
+                        {{ form.meta_description }}
+                        <p class="text-xs text-slate-500 mt-1">150-160 characters recommended</p>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">OG Image</label>
+                            {{ form.og_image }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Canonical URL</label>
+                            {{ form.canonical_url }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex gap-4">
+                <button type="submit" class="neon-button-filled inline-flex items-center gap-2" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
+                    <i class="fa-solid fa-save"></i>
+                    {% if is_edit %}Save Changes{% else %}Create Robot{% endif %}
+                </button>
+                <a href="{% url 'admin_robots' %}" class="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
