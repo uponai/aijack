@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}Robot Webcheck Progress | AIJACK{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12" x-data="robotWebcheckApp()">
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-heading font-black text-slate-800">
+            <i class="fa-solid fa-robot text-cyan-500 mr-3"></i>Robot Webcheck Progress
+        </h1>
+        <a href="{% url 'admin_robots' %}" class="text-slate-500 hover:text-slate-800 font-bold">
+            Exit
+        </a>
+    </div>
+
+    <!-- Controls / Status -->
+    <div class="neon-card p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800">
+                    <span x-text="statusMessage">Initializing...</span>
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">
+                    Processed: <span class="font-bold text-slate-800" x-text="processedCount">0</span> / <span x-text="totalCount">0</span>
+                </p>
+            </div>
+
+            <div class="flex gap-3">
+                <button @click="startProcess()"
+                        x-show="!isRunning && pendingRobots.length > 0"
+                        class="px-4 py-2 rounded-lg font-bold bg-cyan-600 text-white hover:bg-cyan-700 transition">
+                    <i class="fa-solid fa-play mr-2"></i> Start
+                </button>
+
+                <button @click="stopProcess()"
+                        x-show="isRunning"
+                        class="px-4 py-2 rounded-lg font-bold bg-red-100 text-red-600 hover:bg-red-200 transition">
+                    <i class="fa-solid fa-stop mr-2"></i> Stop
+                </button>
+
+                <button @click="fetchPending()"
+                        x-show="!isRunning"
+                        class="px-4 py-2 rounded-lg font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-rotate mr-2"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden">
+            <div class="bg-cyan-600 h-4 rounded-full transition-all duration-300 relative"
+                 :style="`width: ${progressPercent}%`">
+                <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log / Results -->
+    <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2" id="log-container">
+        <template x-for="log in logs" :key="log.id">
+            <div class="bg-white rounded-lg border p-4 shadow-sm flex items-center gap-4 transition-all"
+                 :class="{'border-cyan-500 ring-2 ring-cyan-100': log.status === 'processing', 'border-slate-200': log.status !== 'processing'}">
+
+                <!-- Icon -->
+                <div class="w-8 flex-shrink-0 text-center">
+                    <template x-if="log.status === 'pending'">
+                        <i class="fa-solid fa-circle text-slate-200"></i>
+                    </template>
+                    <template x-if="log.status === 'processing'">
+                        <i class="fa-solid fa-spinner fa-spin text-cyan-500"></i>
+                    </template>
+                    <template x-if="log.status === 'success'">
+                        <i class="fa-solid fa-circle-check text-green-500"></i>
+                    </template>
+                    <template x-if="log.status === 'error'">
+                        <i class="fa-solid fa-circle-xmark text-red-500"></i>
+                    </template>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-slate-800 truncate" x-text="log.name">Robot Name</h3>
+                        <span class="text-xs text-slate-400 font-mono truncate max-w-[200px]" x-text="log.url">url</span>
+                    </div>
+
+                    <!-- Result Badges -->
+                    <template x-if="log.result">
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <template x-if="log.result.url_valid">
+                                <span class="px-2 py-0.5 bg-green-50 text-green-700 text-[10px] rounded font-bold uppercase">URL Valid</span>
+                            </template>
+                            <template x-if="!log.result.url_valid">
+                                <span class="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] rounded font-bold uppercase">Invalid URL</span>
+                            </template>
+
+                            <template x-if="log.result.snapshot_taken">
+                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] rounded font-bold uppercase">Snapshot</span>
+                            </template>
+
+                            <template x-if="log.result.favicon_updated">
+                                <span class="px-2 py-0.5 bg-purple-50 text-purple-700 text-[10px] rounded font-bold uppercase">Favicon</span>
+                            </template>
+
+                            <template x-if="log.result.meta_updated">
+                                <span class="px-2 py-0.5 bg-yellow-50 text-yellow-700 text-[10px] rounded font-bold uppercase">Meta</span>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template x-if="log.error">
+                        <p class="text-red-600 text-xs mt-1 font-mono" x-text="log.error">Error message</p>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <div x-show="logs.length === 0 && !isLoading" class="text-center py-12 text-slate-400">
+            <i class="fa-solid fa-check-double text-4xl mb-4 opacity-50"></i>
+            <p>All robots checked! No pending items.</p>
+        </div>
+
+        <div x-show="isLoading" class="text-center py-12 text-slate-400">
+            <i class="fa-solid fa-spinner fa-spin text-4xl mb-4 text-cyan-500"></i>
+            <p>Loading pending robots...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function robotWebcheckApp ()
+    {
+        return {
+            pendingRobots: [],
+            logs: [],
+            isRunning: false,
+            isLoading: true,
+            processedCount: 0,
+            totalCount: 0,
+            statusMessage: 'Ready',
+
+            async init ()
+            {
+                await this.fetchPending();
+            },
+
+            get progressPercent ()
+            {
+                if ( this.totalCount === 0 ) return 0;
+                return Math.round( ( this.processedCount / this.totalCount ) * 100 );
+            },
+
+            async fetchPending ()
+            {
+                this.isLoading = true;
+                this.statusMessage = 'Fetching list...';
+                try
+                {
+                    const response = await fetch( '/api/robots/webcheck/pending/' );
+                    const data = await response.json();
+                    this.pendingRobots = data.robots;
+                    this.totalCount = data.count;
+                    this.processedCount = 0;
+                    this.logs = [];
+
+                    if ( this.totalCount > 0 )
+                    {
+                        this.statusMessage = `Ready to check ${ this.totalCount } robots`;
+                    } else
+                    {
+                        this.statusMessage = 'All caught up!';
+                    }
+                } catch ( e )
+                {
+                    console.error( e );
+                    this.statusMessage = 'Error fetching list';
+                } finally
+                {
+                    this.isLoading = false;
+                }
+            },
+
+            async startProcess ()
+            {
+                this.isRunning = true;
+                this.statusMessage = 'Processing...';
+
+                for ( let i = 0; i < this.pendingRobots.length; i++ )
+                {
+                    if ( !this.isRunning ) break;
+
+                    const robot = this.pendingRobots[ i ];
+
+                    const logItem = {
+                        id: robot.id,
+                        name: robot.name,
+                        url: robot.product_url,
+                        status: 'processing',
+                        result: null,
+                        error: null
+                    };
+                    this.logs.unshift( logItem );
+
+                    try
+                    {
+                        const response = await fetch( `/api/robots/webcheck/process/${ robot.id }/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            }
+                        } );
+                        const data = await response.json();
+
+                        const updatedLog = { ...this.logs[ 0 ] };
+
+                        if ( data.success )
+                        {
+                            updatedLog.status = 'success';
+                            updatedLog.result = data.results;
+                        } else
+                        {
+                            updatedLog.status = 'error';
+                            updatedLog.error = data.error;
+                        }
+
+                        this.logs[ 0 ] = updatedLog;
+
+                    } catch ( e )
+                    {
+                        const updatedLog = { ...this.logs[ 0 ] };
+                        updatedLog.status = 'error';
+                        updatedLog.error = 'Network error';
+                        this.logs[ 0 ] = updatedLog;
+                    }
+
+                    this.processedCount++;
+                }
+
+                this.isRunning = false;
+                this.statusMessage = 'Process complete';
+            },
+
+            stopProcess ()
+            {
+                this.isRunning = false;
+                this.statusMessage = 'Stopped';
+            }
+        };
+    }
+</script>
+{% endblock %}

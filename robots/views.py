@@ -355,7 +355,7 @@ def admin_robots(request):
         robot.missing_fields = robot.get_missing_fields()
     
     # Pagination
-    paginator = Paginator(robots_list, 20)
+    paginator = Paginator(robots_list, 100)
     page = request.GET.get('page', 1)
     robots_page = paginator.get_page(page)
     
@@ -834,3 +834,52 @@ def bulk_upload_robots(request):
     
     return render(request, 'robots/admin/admin_bulk_upload_robots.html', context)
 
+
+# =============================================================================
+# WEBCHECK FEATURE
+# =============================================================================
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_robot_webcheck(request):
+    """
+    Renders the Robot Webcheck progress dashboard.
+    """
+    return render(request, 'robots/admin/admin_robot_webcheck_progress.html')
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def api_get_pending_webcheck_robots(request):
+    """
+    Returns list of robots pending webcheck.
+    """
+    robots = Robot.objects.filter(
+        Q(is_product_url_valid__isnull=True) | 
+        Q(webcheck_last_run__isnull=True)
+    ).order_by('created_at')[:500]  # Limit to 500
+    
+    data = [{
+        'id': r.id,
+        'name': r.name,
+        'product_url': r.product_url,
+        'slug': r.slug
+    } for r in robots]
+    
+    return JsonResponse({'robots': data, 'count': len(data)})
+
+
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def api_process_webcheck_robot(request, robot_id):
+    """
+    Process a single robot.
+    """
+    from .webcheck import process_robot_webcheck
+    
+    try:
+        robot = Robot.objects.get(id=robot_id)
+        results = process_robot_webcheck(robot)
+        return JsonResponse({'success': True, 'results': results})
+    except Robot.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Robot not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

@@ -193,6 +193,10 @@ class Robot(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     is_featured = models.BooleanField(default=False)
     
+    # Webcheck fields
+    is_product_url_valid = models.BooleanField(null=True, blank=True, help_text="Checked by Webcheck")
+    webcheck_last_run = models.DateTimeField(null=True, blank=True)
+    
     # SEO Fields
     meta_title = models.CharField(
         max_length=200, blank=True,
@@ -333,6 +337,10 @@ class Robot(models.Model):
             missing.append('Meta Title')
         if not self.meta_description:
             missing.append('Meta Description')
+        
+        # Webcheck validation
+        if self.is_product_url_valid is False:
+            missing.append('Invalid Product URL')
         
         return missing
 

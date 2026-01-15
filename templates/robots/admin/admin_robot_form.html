@@ -19,6 +19,56 @@
             </div>
         </div>
 
+        {% if form.instance.pk %}
+        <!-- Robot Images Gallery -->
+        <div class="mb-8 p-6 bg-slate-50 rounded-xl border border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                <i class="fa-solid fa-images mr-2 text-slate-400"></i> Robot Images
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Main Image -->
+                <div class="relative group">
+                    <div class="aspect-square bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden">
+                        {% if form.instance.image %}
+                        <img src="{{ form.instance.image.url }}" alt="Robot Image" class="w-full h-full object-contain p-2">
+                        {% else %}
+                        <span class="text-slate-400 text-xs font-bold">NO IMAGE</span>
+                        {% endif %}
+                    </div>
+                    <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">Main Image</span>
+                </div>
+
+                <!-- OG Image -->
+                <div class="relative group">
+                    <div class="aspect-video bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden">
+                        {% if form.instance.og_image %}
+                        <img src="{{ form.instance.og_image.url }}" alt="OG Image" class="w-full h-full object-cover">
+                        {% else %}
+                        <span class="text-slate-400 text-xs font-bold">NO OG IMAGE</span>
+                        {% endif %}
+                    </div>
+                    <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">OG Image</span>
+                </div>
+
+                <!-- Company Logo -->
+                <div class="relative group">
+                    <div class="aspect-square bg-white rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden">
+                        {% if form.instance.company.logo %}
+                        <img src="{{ form.instance.company.logo.url }}" alt="Company Logo" class="w-full h-full object-contain p-2">
+                        {% else %}
+                        <span class="text-slate-400 text-xs font-bold">NO COMPANY LOGO</span>
+                        {% endif %}
+                    </div>
+                    <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">{{ form.instance.company.name }} Logo</span>
+                </div>
+            </div>
+
+            {% if not form.instance.image %}
+            <p class="text-slate-400 text-sm italic mt-2">No image found. Run Webcheck to auto-generate a snapshot.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
             {{ form.media }}

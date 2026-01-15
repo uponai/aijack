@@ -49,4 +49,9 @@ urlpatterns = [
     path('api/robots/comparison/remove/', views.remove_from_comparison, name='remove_from_comparison'),
     path('api/robots/comparison/clear/', views.clear_comparison, name='clear_comparison'),
     path('api/robots/comparison/status/', views.robot_comparison_status, name='robot_comparison_status'),
+    
+    # Webcheck
+    path('admin-dashboard/robots/webcheck/', views.admin_robot_webcheck, name='admin_robot_webcheck'),
+    path('api/robots/webcheck/pending/', views.api_get_pending_webcheck_robots, name='api_get_pending_webcheck_robots'),
+    path('api/robots/webcheck/process/<int:robot_id>/', views.api_process_webcheck_robot, name='api_process_webcheck_robot'),
 ]

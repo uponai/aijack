@@ -4,6 +4,7 @@
 {% block title %}{{ robot.get_seo_title }}{% endblock %}
 {% block meta_description %}{{ robot.get_seo_description }}{% endblock %}
 {% block meta_keywords %}{{ robot.name }}, {{ robot.company.name }}, AI robot, {{ robot.get_robot_type_display }}, {% for uc in robot.get_use_cases_list %}{{ uc }}, {% endfor %}robotics, automation{% endblock %}
+{% block og_image %}{% if robot.og_image %}{{ robot.og_image.url }}{% elif robot.image %}{{ robot.image.url }}{% endif %}{% endblock %}
 
 {% block schema %}
 <script type="application/ld+json">
