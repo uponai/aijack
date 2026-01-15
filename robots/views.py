@@ -379,10 +379,12 @@ def admin_robot_create(request):
     else:
         form = RobotForm()
     
-    return render(request, 'robots/admin/admin_robot_form.html', {
+    return render(request, 'admin_form.html', {
         'form': form,
         'title': 'Add New Robot',
         'is_edit': False,
+        'back_url': 'admin_robots',
+        'active_tab': 'robots'
     })
 
 
@@ -400,11 +402,13 @@ def admin_robot_edit(request, slug):
     else:
         form = RobotForm(instance=robot)
     
-    return render(request, 'robots/admin/admin_robot_form.html', {
+    return render(request, 'admin_form.html', {
         'form': form,
         'robot': robot,
         'title': f'Edit: {robot.name}',
         'is_edit': True,
+        'back_url': 'admin_robots',
+        'active_tab': 'robots'
     })
 
 
