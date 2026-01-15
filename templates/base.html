@@ -33,9 +33,11 @@
         <meta property="og:description" content="{% block og_description %}{{ seo_description|default:"Discover the best AI tools for your profession." }}{% endblock %}">
         <meta property="og:type" content="{% block og_type %}website{% endblock %}">
         <meta property="og:url" content="{{ request.build_absolute_uri }}">
+        {% block og_image %}
         {% if seo_image %}
         <meta property="og:image" content="{{ seo_image }}">
         {% endif %}
+        {% endblock %}
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">

@@ -4,9 +4,17 @@
 {% block meta_description %}{{ tool.get_seo_description }}{% endblock %}
 {% block meta_keywords %}{{ tool.name }}, {{ tool.name }} AI, {% for tag in tool.tags.all %}{{ tag.name }}, {% endfor %}{% for cat in tool.categories.all %}{{ cat.name }}, {% endfor %}{% for prof in tool.professions.all %}{{ prof.name }} AI tools, {% endfor %}{{ tool.name }} review, {{ tool.name }} pricing, {{ tool.name }} alternatives, best AI tools{% endblock %}
 
+{% block og_image %}
+{% if tool.og_image %}
+<meta property="og:image" content="{{ tool.og_image.url }}">
+{% elif tool.logo %}
+<meta property="og:image" content="{{ tool.logo.url }}">
+{% endif %}
+{% endblock %}
+
 {% block extra_css %}
 <!-- Context for Base SEO -->
-{% with seo_title=tool.get_seo_title seo_description=tool.get_seo_description seo_image=tool.og_image|default:tool.logo|default:None canonical_url=tool.canonical_url %}
+{% with seo_title=tool.get_seo_title seo_description=tool.get_seo_description seo_image=tool.og_image.url|default:tool.logo.url|default:None canonical_url=tool.canonical_url %}
 {% endwith %}
 {% endblock %}
 
@@ -20,7 +28,7 @@
 {% endblock %}
 
 {% block content %}
-<section class="py-12">
+<section class="py-6">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
         <div class="flex items-center gap-3 mb-8 text-sm">
@@ -82,8 +90,14 @@
                             </svg>
                         </a>
 
+                        {% if tool.is_website_valid is False %}
+                        <span class="text-red-500 text-lg" title="Website reported as invalid or unreachable">
+                            <i class="fa-solid fa-link-slash"></i>
+                        </span>
+                        {% endif %}
+
                         <!-- Share Buttons -->
-                        {% include 'includes/_share_component.html' with share_url=request.build_absolute_uri share_title=tool.name share_text=translation.short_description %}
+                        {% include 'includes/_share_component.html' with share_url=request.build_absolute_uri share_title=tool.name share_text=translation.short_description hide_label=True %}
 
                         <!-- Favorite Button -->
                         {% load tools_extras %}

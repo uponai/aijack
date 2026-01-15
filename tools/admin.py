@@ -61,7 +61,8 @@ class IncompleteToolFilter(admin.SimpleListFilter):
             from django.db.models import Q
             return queryset.filter(
                 Q(is_website_valid=False) |
-                Q(description='') |
+                Q(meta_description='') |
+                Q(translations__short_description='') |
                 Q(logo__exact='') |
                 Q(categories=None) |
                 Q(professions=None) |
@@ -74,6 +75,7 @@ class IncompleteToolFilter(admin.SimpleListFilter):
 class ToolAdmin(admin.ModelAdmin):
     list_display = ['name', 'pricing_type', 'status', 'is_featured', 'is_website_valid', 'highlight_start', 'highlight_end', 'created_at']
     list_filter = ['status', 'pricing_type', IncompleteToolFilter, 'is_featured', 'highlight_start', 'highlight_end', 'professions']
+    list_per_page = 100
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name']
     filter_horizontal = ['categories', 'professions', 'tags']

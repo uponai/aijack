@@ -936,7 +936,7 @@ def admin_tools(request):
             Q(meta_description="")
         ).distinct()
 
-    paginator = Paginator(tools, 20)
+    paginator = Paginator(tools, 100)
     page_number = request.GET.get('page')
     tools_page = paginator.get_page(page_number)
     

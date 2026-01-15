@@ -6,7 +6,9 @@
     - share_text: Description or text for the post
 -->
 <div class="flex items-center gap-2" x-data="{ copied: false }">
+    {% if not hide_label %}
     <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider mr-2">Share:</span>
+    {% endif %}
 
     <!-- X (Twitter) -->
     <!-- <a href="https://twitter.com/intent/tweet?url={{ share_url }}&text={{ share_text|urlencode }}"
@@ -39,7 +41,7 @@
     <button @click="navigator.clipboard.writeText('{{ share_url }}'); copied = true; setTimeout(() => copied = false, 2000)"
             class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-brand-600 hover:text-white transition relative"
             title="Copy Link">
-        <i class="fa-solid" :class="copied ? 'fa-check' : 'fa-link'"></i>
+        <i class="fa-solid" :class="copied ? 'fa-check' : 'fa-copy'"></i>
 
         <!-- Tooltip -->
         <span x-show="copied"
