@@ -1,0 +1,94 @@
+<!-- Floating Comparison Bar -->
+<div id="robot-comparison-bar" class="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-cyan-600 to-cyan-700 text-white shadow-2xl transform transition-transform duration-300 z-50" style="display: none;">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center justify-between gap-4">
+            <!-- Left: Count and Robots -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-code-compare text-2xl"></i>
+                    <span class="font-heading font-bold text-lg">
+                        Compare (<span id="comparison-count">0</span>)
+                    </span>
+                </div>
+                <div id="comparison-robots" class="flex items-center gap-2 flex-wrap">
+                    <!-- Dynamically filled -->
+                </div>
+            </div>
+
+            <!-- Right: Actions -->
+            <div class="flex items-center gap-3">
+                <a href="{% url 'robot_comparison' %}" class="px-6 py-2 bg-white text-cyan-600 rounded-lg font-semibold hover:bg-cyan-50 transition inline-flex items-center gap-2">
+                    <i class="fa-solid fa-eye"></i>
+                    View Comparison
+                </a>
+                <button onclick="clearRobotComparison()" class="px-4 py-2 bg-cyan-800 hover:bg-cyan-900 rounded-lg font-semibold transition">
+                    Clear All
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Floating Robot Comparison Bar
+    function updateComparisonBar ()
+    {
+        fetch( '/api/robots/comparison/status/' )
+            .then( r => r.json() )
+            .then( data =>
+            {
+                const bar = document.getElementById( 'robot-comparison-bar' );
+                const count = data.robots ? data.robots.length : 0;
+
+                if ( count > 0 )
+                {
+                    document.getElementById( 'comparison-count' ).textContent = count;
+
+                    const robotsContainer = document.getElementById( 'comparison-robots' );
+                    robotsContainer.innerHTML = data.robots.map( robot => `
+                        <span class="text-xs px-2 py-1 bg-cyan-800 rounded-full flex items-center gap-1">
+                            ${ robot.name }
+                            <button onclick="removeFromComparison(${ robot.id }); return false;" class="hover:text-red-300">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </span>
+                    `).join( '' );
+
+                    bar.style.display = 'block';
+                } else
+                {
+                    bar.style.display = 'none';
+                }
+            } )
+            .catch( () => { } );
+    }
+
+    function clearRobotComparison ()
+    {
+        fetch( '/api/robots/comparison/clear/' )
+            .then( () => updateComparisonBar() );
+    }
+
+    // Initialize on page load
+    if ( typeof addToComparison === 'undefined' )
+    {
+        function addToComparison ( robotId )
+        {
+            fetch( `/api/robots/comparison/add/?robot_id=${ robotId }` )
+                .then( r => r.json() )
+                .then( () => updateComparisonBar() );
+        }
+    }
+
+    if ( typeof removeFromComparison === 'undefined' )
+    {
+        function removeFromComparison ( robotId )
+        {
+            fetch( `/api/robots/comparison/remove/?robot_id=${ robotId }` )
+                .then( () => updateComparisonBar() );
+        }
+    }
+
+    // Update bar on page load
+    document.addEventListener( 'DOMContentLoaded', updateComparisonBar );
+</script>

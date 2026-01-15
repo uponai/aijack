@@ -287,6 +287,17 @@ def tool_detail(request, slug):
         professions__in=tool.professions.all()
     ).exclude(id=tool.id).distinct()[:4]
     
+    # Compatible robots (robots that list this tool in their compatible_tools)
+    compatible_robots = []
+    try:
+        from robots.models import Robot
+        compatible_robots = Robot.objects.filter(
+            status='published',
+            compatible_tools=tool
+        ).select_related('company')[:6]
+    except Exception:
+        pass
+    
     # Log tool view for analytics
     AnalyticsService.log_tool_view(request, tool, source_page='tool_detail')
     
@@ -294,6 +305,7 @@ def tool_detail(request, slug):
         'tool': tool,
         'translation': translation,
         'related_tools': related_tools,
+        'compatible_robots': compatible_robots,
     })
 
 
@@ -412,62 +424,109 @@ def search(request):
     query = request.GET.get('q', '')
     tools = []
     professions_results = []
+    robots_results = []
     
     if query:
+        # Check if robots-only search is enabled
+        robots_only = request.GET.get('robots_only') == 'on'
+        
         # Semantic Search using ChromaDB
         try:
-            # 1. Search Tools
-            tool_ids = SearchService.search(query, collection_name='tools')
-            if tool_ids:
-                preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(tool_ids)])
-                tools = Tool.objects.filter(
-                    status='published',
-                    id__in=tool_ids
-                ).prefetch_related('translations').order_by(preserved)
+            # 1. Search Robots (if enabled or not filtered)
+            if not robots_only:
+                # Search Tools
+                tool_ids = SearchService.search(query, collection_name='tools')
+                if tool_ids:
+                    preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(tool_ids)])
+                    tools = Tool.objects.filter(
+                        status='published',
+                        id__in=tool_ids
+                    ).prefetch_related('translations').order_by(preserved)
+                else:
+                    tools = []
+            
+            # Search Robots using RobotSearchService
+            try:
+                from robots.search import RobotSearchService
+                from robots.models import Robot
+                
+                robot_ids = RobotSearchService.search(query, n_results=20)
+                if robot_ids:
+                    preserved_robots = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(robot_ids)])
+                    robots_results = Robot.objects.filter(
+                        status='published',
+                        id__in=robot_ids
+                    ).select_related('company').order_by(preserved_robots)
+                else:
+                    robots_results = []
+            except Exception as robot_error:
+                print(f"Robot search failed: {robot_error}")
+                robots_results = []
+            
+            if not robots_only:
+                # 2. Search Stacks
+                include_community = request.GET.get('community') == 'on'
+                
+                # Default: System stacks (owner is None)
+                where_clause = {"owner_id": ""}
+                
+                if include_community:
+                    where_clause = {"visibility": "public"}
+                
+                stack_ids = SearchService.search(query, collection_name='stacks', where=where_clause)
+                
+                if stack_ids:
+                    preserved_stacks = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(stack_ids)])
+                    stacks_results = ToolStack.objects.filter(id__in=stack_ids).order_by(preserved_stacks)[:6]
+                else:
+                    stacks_results = []
+                
+                # 3. Search Professions
+                pro_ids = SearchService.search(query, collection_name='professions')
+                if pro_ids:
+                     preserved_pros = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pro_ids)])
+                     professions_results = Profession.objects.filter(id__in=pro_ids).order_by(preserved_pros)[:6]
+                else:
+                     professions_results = []
             else:
-                tools = []
-            
-            # 2. Search Stacks
-            include_community = request.GET.get('community') == 'on'
-            
-            # Default: System stacks (owner is None)
-            where_clause = {"owner_id": ""}
-            
-            if include_community:
-                where_clause = {"visibility": "public"}
-            
-            stack_ids = SearchService.search(query, collection_name='stacks', where=where_clause)
-            
-            if stack_ids:
-                preserved_stacks = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(stack_ids)])
-                stacks_results = ToolStack.objects.filter(id__in=stack_ids).order_by(preserved_stacks)[:6]
-            else:
+                # Robots-only mode: skip stacks and professions
                 stacks_results = []
-            
-            # 3. Search Professions
-            pro_ids = SearchService.search(query, collection_name='professions')
-            if pro_ids:
-                 preserved_pros = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pro_ids)])
-                 professions_results = Profession.objects.filter(id__in=pro_ids).order_by(preserved_pros)[:6]
-            else:
-                 professions_results = []
+                professions_results = []
                 
         except Exception as e:
             # Fallback to simple keyword search
             print(f"Semantic search failed: {e}. Falling back to keyword search.")
-            tools = Tool.objects.filter(
-                status='published'
-            ).filter(
-                Q(name__icontains=query) |
-                Q(translations__short_description__icontains=query) |
-                Q(translations__use_cases__icontains=query)
-            ).distinct().prefetch_related('translations', 'tags')[:20]
-            stacks_results = []
             
-            # Fallback profession search
-            professions_results = Profession.objects.filter(
-                Q(name__icontains=query) | Q(description__icontains=query) | Q(hero_tagline__icontains=query)
-            )[:6]
+            if not robots_only:
+                tools = Tool.objects.filter(
+                    status='published'
+                ).filter(
+                    Q(name__icontains=query) |
+                    Q(translations__short_description__icontains=query) |
+                    Q(translations__use_cases__icontains=query)
+                ).distinct().prefetch_related('translations', 'tags')[:20]
+                stacks_results = []
+                
+                # Fallback profession search
+                professions_results = Profession.objects.filter(
+                    Q(name__icontains=query) | Q(description__icontains=query) | Q(hero_tagline__icontains=query)
+                )[:6]
+            else:
+                tools = []
+                stacks_results = []
+                professions_results = []
+            
+            # Fallback robot search
+            try:
+                from robots.models import Robot
+                robots_results = Robot.objects.filter(
+                    Q(name__icontains=query) |
+                    Q(short_description__icontains=query) |
+                    Q(use_cases__icontains=query) |
+                    Q(company__name__icontains=query)
+                ).filter(status='published').select_related('company')[:20]
+            except Exception:
+                robots_results = []
     else:
         # No query
         stacks_results = []
@@ -480,7 +539,10 @@ def search(request):
             query, 
             results_count,
             source_page='search',
-            filters={'community': request.GET.get('community') == 'on'}
+            filters={
+                'community': request.GET.get('community') == 'on',
+                'robots_only': request.GET.get('robots_only') == 'on'
+            }
         )
 
     return render(request, 'search.html', {
@@ -488,7 +550,9 @@ def search(request):
         'tools': tools,
         'stacks': stacks_results,
         'professions': professions_results,
+        'robots': robots_results,
     })
+
 
 
 
@@ -767,6 +831,24 @@ def admin_dashboard(request):
     search_stats = AnalyticsService.get_search_stats(days=days)
     click_stats = AnalyticsService.get_click_stats(days=days)
     
+    # Robot Analytics
+    try:
+        from robots.models import RobotView
+        from django.db.models import Count
+        from datetime import timedelta, datetime
+        
+        cutoff_date = datetime.now()  - timedelta(days=days)
+        top_viewed_robots = RobotView.objects.filter(
+            created_at__gte=cutoff_date
+        ).values(
+            'robot__name', 'robot__slug', 'robot__image'
+        ).annotate(
+            view_count=Count('id')
+        ).order_by('-view_count')[:10]
+    except Exception as e:
+        print(f"Robot analytics failed: {e}")
+        top_viewed_robots = []
+    
     # Tool Reports
     unresolved_reports = ToolReport.objects.filter(is_resolved=False).select_related('tool', 'user')[:5]
     total_unresolved_reports = ToolReport.objects.filter(is_resolved=False).count()
@@ -820,6 +902,7 @@ def admin_dashboard(request):
         'top_clicked_stacks': top_clicked_stacks,
         'top_professions': top_professions,
         'top_clicked_professions': top_clicked_professions,
+        'top_viewed_robots': top_viewed_robots,
         'recent_searches': recent_searches,
         'search_stats': search_stats,
         'click_stats': click_stats,

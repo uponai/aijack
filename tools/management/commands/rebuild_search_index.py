@@ -3,7 +3,7 @@ from tools.models import Tool, ToolStack, Profession
 from tools.search import SearchService
 
 class Command(BaseCommand):
-    help = 'Rebuild or reindex the semantic search index'
+    help = 'Rebuild or reindex the semantic search index for tools, stacks, professions, and robots'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -14,15 +14,15 @@ class Command(BaseCommand):
         parser.add_argument(
             '--models',
             nargs='+',
-            default=['tools', 'stacks', 'professions'],
-            help='Specify which models to index (tools, stacks, professions)',
+            default=['tools', 'stacks', 'professions', 'robots'],
+            help='Specify which models to index (tools, stacks, professions, robots)',
         )
 
     def handle(self, *args, **options):
         models = options['models']
         clear = options['clear']
         
-        valid_models = {'tools', 'stacks', 'professions'}
+        valid_models = {'tools', 'stacks', 'professions', 'robots'}
         target_models = [m for m in models if m in valid_models]
         
         if not target_models:
@@ -51,3 +51,17 @@ class Command(BaseCommand):
             professions = Profession.objects.all()
             count = SearchService.add_professions(professions)
             self.stdout.write(self.style.SUCCESS(f'Indexed {count} professions.'))
+
+        if 'robots' in target_models:
+            self.stdout.write('Indexing robots...')
+            try:
+                from robots.models import Robot
+                from robots.search import RobotSearchService
+                
+                robots = Robot.objects.filter(status='published').select_related('company')
+                count = RobotSearchService.add_robots(robots)
+                self.stdout.write(self.style.SUCCESS(f'Indexed {count} robots.'))
+            except ImportError:
+                self.stdout.write(self.style.WARNING('Robots app not available. Skipping robots indexing.'))
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f'Error indexing robots: {e}'))

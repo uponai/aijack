@@ -48,4 +48,5 @@ urlpatterns = [
     path('api/robots/comparison/add/', views.add_to_comparison, name='add_to_comparison'),
     path('api/robots/comparison/remove/', views.remove_from_comparison, name='remove_from_comparison'),
     path('api/robots/comparison/clear/', views.clear_comparison, name='clear_comparison'),
+    path('api/robots/comparison/status/', views.robot_comparison_status, name='robot_comparison_status'),
 ]

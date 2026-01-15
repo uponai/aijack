@@ -288,27 +288,35 @@ def add_to_comparison(request):
 
 
 def remove_from_comparison(request):
-    """Remove a robot from comparison."""
+    """Remove a robot from session comparison."""
     robot_id = request.GET.get('robot_id')
     
-    if not robot_id:
-        return JsonResponse({'success': False, 'error': 'No robot_id provided'})
+    if robot_id and 'robot_comparison' in request.session:
+        try:
+            robot_id = int(robot_id)
+            comparison = request.session['robot_comparison']
+            if robot_id in comparison:
+                comparison.remove(robot_id)
+                request.session['robot_comparison'] = comparison
+                request.session.modified = True
+        except (ValueError, TypeError):
+            pass
     
-    try:
-        robot_id = int(robot_id)
-    except ValueError:
-        return JsonResponse({'success': False, 'error': 'Invalid robot_id'})
+    return JsonResponse({'success': True})
+
+
+def robot_comparison_status(request):
+    """Get current comparison status for floating bar."""
+    robot_ids = request.session.get('robot_comparison', [])
+    robots_data = []
     
-    comparison = request.session.get('robot_comparison', [])
-    
-    if robot_id in comparison:
-        comparison.remove(robot_id)
-        request.session['robot_comparison'] = comparison
+    if robot_ids:
+        robots = Robot.objects.filter(id__in=robot_ids, status='published')
+        robots_data = [{'id': r.id, 'name': r.name} for r in robots]
     
     return JsonResponse({
-        'success': True,
-        'comparison': comparison,
-        'count': len(comparison),
+        'robots': robots_data,
+        'count': len(robots_data)
     })
 
 

@@ -45,10 +45,16 @@
                         </svg>
                     </button>
                 </div>
-                <div class="mt-3 flex justify-center">
+                <div class="mt-3 flex flex-col sm:flex-row justify-center gap-3">
                     <label class="inline-flex items-center cursor-pointer">
                         <input type="checkbox" name="community" class="form-checkbox w-5 h-5 text-brand-600 rounded bg-slate-100 border-slate-300 focus:ring-brand-500" {% if request.GET.community %}checked{% endif %}>
                         <span class="ml-2 text-slate-600">Search in other users' public stacks too</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="robots_only" class="form-checkbox w-5 h-5 text-cyan-600 rounded bg-slate-100 border-slate-300 focus:ring-cyan-500" {% if request.GET.robots_only %}checked{% endif %}>
+                        <span class="ml-2 text-slate-600 flex items-center gap-1.5">
+                            Search for AI robotic solutions only
+                        </span>
                     </label>
                 </div>
             </form>
@@ -70,6 +76,25 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- Robots Results -->
+        {% if robots and request.GET.robots_only %}
+        <div class="mb-6">
+            <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-robot text-cyan-600"></i>
+                Matching AI Robots
+            </h2>
+            <p class="text-slate-600 mb-3">
+                Found <span class="font-semibold text-cyan-600">{{ robots|length }}</span> robot{{ robots|length|pluralize }} for "<span class="font-semibold">{{ query }}</span>"
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for robot in robots %}
+                {% include 'robots/includes/_robot_card.html' with robot=robot %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
 
         <!-- Stacks Results -->
         {% if stacks %}
