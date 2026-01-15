@@ -586,3 +586,239 @@ def admin_robot_news_delete(request, slug):
         'object_type': 'News Article',
         'cancel_url': 'admin_robot_news',
     })
+
+
+# =============================================================================
+# BULK UPLOAD ROBOTS
+# =============================================================================
+
+import csv
+import io
+from urllib.parse import urlparse
+from django.utils.text import slugify
+from .ai_service import RobotAIService
+from .search import RobotSearchService
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def bulk_upload_robots(request):
+    """Handle CSV bulk upload of robots with AI-powered metadata generation."""
+    
+    context = {
+        'active_tab': 'robots',
+        'step': 'upload'  # upload, validate, complete
+    }
+    
+    if request.method == 'POST':
+        action = request.POST.get('action', 'upload')
+        
+        if action == 'upload':
+            # Step 1: Parse and validate CSV
+            csv_file = request.FILES.get('csv_file')
+            if not csv_file:
+                messages.error(request, "Please select a CSV file.")
+                return render(request, 'robots/admin/admin_bulk_upload_robots.html', context)
+            
+            if not csv_file.name.endswith('.csv'):
+                messages.error(request, "File must be a CSV file.")
+                return render(request, 'robots/admin/admin_bulk_upload_robots.html', context)
+            
+            try:
+                # Read and decode file
+                decoded = csv_file.read().decode('utf-8-sig')
+                
+                # Auto-detect delimiter (semicolon or comma)
+                try:
+                    dialect = csv.Sniffer().sniff(decoded[:2048], delimiters=';,')
+                    delimiter = dialect.delimiter
+                except csv.Error:
+                    delimiter = ','
+                
+                reader = csv.DictReader(io.StringIO(decoded), delimiter=delimiter)
+                
+                rows = []
+                row_num = 1
+                
+                for row in reader:
+                    row_num += 1
+                    row_data = {
+                        'row_num': row_num,
+                        'robot_name': row.get('Robot Name', '').strip(),
+                        'company_name': row.get('Company', '').strip(),
+                        'product_url': row.get('Website URL', '').strip(),
+                        'short_description': row.get('Short Description', '').strip(),
+                        'long_description': row.get('Detailed Description', '').strip(),
+                        'pricing_text': row.get('Pricing Strategy', '').strip(),
+                        'status': 'pending',
+                        'error': None
+                    }
+                    
+                    # Validation
+                    missing = []
+                    if not row_data['robot_name']:
+                        missing.append('Robot Name')
+                    if not row_data['product_url']:
+                        missing.append('Website URL')
+                    if not row_data['short_description']:
+                        missing.append('Short Description')
+                    
+                    if missing:
+                        row_data['status'] = 'error'
+                        row_data['error'] = f"Missing: {', '.join(missing)}"
+                    else:
+                        # Check for duplicates
+                        domain = urlparse(row_data['product_url']).netloc.replace('www.', '')
+                        name_slug = slugify(row_data['robot_name'])
+                        
+                        exists_by_name = Robot.objects.filter(slug=name_slug).exists()
+                        exists_by_domain = Robot.objects.filter(product_url__icontains=domain).exists() if domain else False
+                        
+                        if exists_by_name or exists_by_domain:
+                            row_data['status'] = 'skipped'
+                            row_data['error'] = 'Robot already exists (by name or domain)'
+                        
+                    rows.append(row_data)
+                
+                # Store in session for next step
+                request.session['bulk_upload_robot_rows'] = rows
+                
+                context['step'] = 'validate'
+                context['rows'] = rows
+                context['total'] = len(rows)
+                context['valid'] = sum(1 for r in rows if r['status'] == 'pending')
+                context['skipped'] = sum(1 for r in rows if r['status'] == 'skipped')
+                context['errors'] = sum(1 for r in rows if r['status'] == 'error')
+                
+            except Exception as e:
+                messages.error(request, f"Error parsing CSV: {str(e)}")
+                return render(request, 'robots/admin/admin_bulk_upload_robots.html', context)
+        
+        elif action == 'import':
+            # Step 2: Process the import
+            rows = request.session.get('bulk_upload_robot_rows', [])
+            if not rows:
+                messages.error(request, "No data to import. Please upload a CSV first.")
+                return render(request, 'robots/admin/admin_bulk_upload_robots.html', context)
+            
+            results = []
+            created_count = 0
+            skipped_count = 0
+            error_count = 0
+            
+            for row in rows:
+                if row['status'] != 'pending':
+                    if row['status'] == 'skipped':
+                        skipped_count += 1
+                    elif row['status'] == 'error':
+                        error_count += 1
+                    results.append(row)
+                    continue
+                
+                try:
+                    # Get or create company
+                    company_name = row['company_name'] or 'Unknown'
+                    company_slug = slugify(company_name)
+                    
+                    # Extract base URL for company website (e.g., https://example.com)
+                    company_website = ''
+                    if row['product_url']:
+                        parsed = urlparse(row['product_url'])
+                        if parsed.scheme and parsed.netloc:
+                            company_website = f"{parsed.scheme}://{parsed.netloc}"
+                    
+                    company, _ = RobotCompany.objects.get_or_create(
+                        slug=company_slug,
+                        defaults={
+                            'name': company_name,
+                            'website': company_website
+                        }
+                    )
+                    
+                    # Generate metadata via AI
+                    metadata = RobotAIService.generate_robot_metadata(
+                        robot_name=row['robot_name'],
+                        product_url=row['product_url'],
+                        short_description=row['short_description'],
+                        long_description=row['long_description'],
+                        pricing_text=row['pricing_text'],
+                        company_name=company_name
+                    )
+                    
+                    # Create slug
+                    base_slug = slugify(row['robot_name'])
+                    slug = base_slug
+                    counter = 1
+                    while Robot.objects.filter(slug=slug).exists():
+                        slug = f"{base_slug}-{counter}"
+                        counter += 1
+                    
+                    # Create Robot
+                    robot = Robot.objects.create(
+                        name=row['robot_name'],
+                        slug=slug,
+                        company=company,
+                        product_url=row['product_url'],
+                        short_description=row['short_description'],
+                        long_description=row['long_description'],
+                        robot_type=metadata.get('robot_type', 'humanoid'),
+                        target_market=metadata.get('target_market', 'industry'),
+                        availability=metadata.get('availability', 'announced'),
+                        pricing_tier=metadata.get('pricing_tier', 'unknown'),
+                        use_cases=metadata.get('use_cases', ''),
+                        pros=metadata.get('pros', ''),
+                        cons=metadata.get('cons', ''),
+                        meta_title=metadata.get('meta_title', ''),
+                        meta_description=metadata.get('meta_description', ''),
+                        status='published',
+                        is_featured=True
+                    )
+                    
+                    # Find similar robots using vector search
+                    similar_robot_names = []
+                    try:
+                        search_query = f"{row['robot_name']} {row['short_description']}"
+                        similar_ids = RobotSearchService.search(search_query, n_results=4)
+                        
+                        for similar_id in similar_ids:
+                            if similar_id != robot.id:
+                                try:
+                                    similar_robot = Robot.objects.get(id=similar_id)
+                                    similar_robot_names.append(similar_robot.name)
+                                    if len(similar_robot_names) >= 3:
+                                        break
+                                except Robot.DoesNotExist:
+                                    continue
+                    except Exception as e:
+                        print(f"Similarity search error for {row['robot_name']}: {e}")
+                    
+                    # Add robot to vector database
+                    try:
+                        RobotSearchService.add_robots([robot])
+                    except Exception as e:
+                        print(f"Vector DB add error for {row['robot_name']}: {e}")
+                    
+                    row['status'] = 'success'
+                    row['robot_id'] = robot.id
+                    row['robot_slug'] = robot.slug
+                    row['similar_robots'] = similar_robot_names
+                    created_count += 1
+                    
+                except Exception as e:
+                    row['status'] = 'error'
+                    row['error'] = str(e)
+                    error_count += 1
+                
+                results.append(row)
+            
+            # Clear session
+            if 'bulk_upload_robot_rows' in request.session:
+                del request.session['bulk_upload_robot_rows']
+            
+            context['step'] = 'complete'
+            context['results'] = results
+            context['created'] = created_count
+            context['skipped'] = skipped_count
+            context['errors'] = error_count
+    
+    return render(request, 'robots/admin/admin_bulk_upload_robots.html', context)
+

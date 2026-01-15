@@ -787,7 +787,7 @@
                         <a href="{% url 'professions' %}" class="nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                         <a href="{% url 'stacks' %}" class="nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
                         <a href="{% url 'robots' %}" class="nav-link {% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}active{% endif %}" style="{% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}color: #06B6D4;{% endif %}">
-                            <i class="fa-solid fa-robot mr-1" style="color: #06B6D4;"></i>Robots
+                            Robots
                         </a>
                         <a href="{% url 'submit_tool' %}" class="nav-link text-neon-magenta font-bold {% if request.resolver_match.url_name == 'submit_tool' %}active{% endif %}">
                             <i class="fa-solid fa-plus-circle mr-1"></i>Tool

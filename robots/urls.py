@@ -40,6 +40,9 @@ urlpatterns = [
     path('admin-dashboard/robot-news/<slug:slug>/edit/', views.admin_robot_news_edit, name='admin_robot_news_edit'),
     path('admin-dashboard/robot-news/<slug:slug>/delete/', views.admin_robot_news_delete, name='admin_robot_news_delete'),
     
+    # Bulk Upload
+    path('admin-dashboard/bulk-upload-robots/', views.bulk_upload_robots, name='bulk_upload_robots'),
+    
     # API Endpoints
     path('api/save-robot/<int:robot_id>/', views.toggle_save_robot, name='toggle_save_robot'),
     path('api/robots/comparison/add/', views.add_to_comparison, name='add_to_comparison'),
