@@ -62,6 +62,7 @@
 
         {% if query %}
 
+        {% if not request.GET.robots_only %}
         <!-- Tools Results -->
         <div class="mb-6">
             <h2 class="text-lg font-heading font-black text-slate-900 mb-3 flex items-center gap-2">
@@ -93,6 +94,7 @@
             </div>
             {% endfor %}
         </div>
+        {% endif %}
 
         <!-- Professions Results -->
         {% if professions %}

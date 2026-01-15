@@ -430,7 +430,7 @@ def search(request):
                     tools = Tool.objects.filter(
                         status='published',
                         id__in=tool_ids
-                    ).prefetch_related('translations').order_by(preserved)
+                    ).prefetch_related('translations').order_by(preserved)[:9]
                 else:
                     tools = []
             
