@@ -22,7 +22,11 @@ class RobotSearchService:
         if not CHROMADB_AVAILABLE:
             return None
         if cls._client is None:
-            cls._client = chromadb.PersistentClient(path="./chroma_db")
+            # Consistent path with tools/search.py
+            from django.conf import settings
+            import os
+            db_path = os.path.join(settings.BASE_DIR, 'chroma_db')
+            cls._client = chromadb.PersistentClient(path=db_path)
         return cls._client
     
     @classmethod

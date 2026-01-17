@@ -12,7 +12,13 @@ class SearchService:
         if cls._client is None:
             # Persist data in the 'chroma_db' directory within the project
             db_path = os.path.join(settings.BASE_DIR, 'chroma_db')
-            cls._client = chromadb.PersistentClient(path=db_path)
+            try:
+                cls._client = chromadb.PersistentClient(path=db_path)
+            except Exception as e:
+                print(f"Error initializing ChromaDB client: {e}")
+                # Fallback to ephemeral client if persistent fails? 
+                # For now just re-raise but log it clearly
+                raise e
         return cls._client
     
     @classmethod
