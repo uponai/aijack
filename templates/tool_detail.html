@@ -13,9 +13,6 @@
 {% endblock %}
 
 {% block extra_css %}
-<!-- Context for Base SEO -->
-{% with seo_title=tool.get_seo_title seo_description=tool.get_seo_description seo_image=tool.og_image.url|default:tool.logo.url|default:None canonical_url=tool.canonical_url %}
-{% endwith %}
 {% endblock %}
 
 {% block schema %}
