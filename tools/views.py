@@ -1868,10 +1868,16 @@ def api_get_pending_webcheck_tools(request):
     """
     Returns list of tools pending webcheck.
     """
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    cutoff = timezone.now() - timedelta(days=1)
+    
     tools = Tool.objects.filter(
         Q(is_website_valid__isnull=True) | 
-        Q(webcheck_last_run__isnull=True)
-    ).order_by('created_at')[:500] # Limit to 500 for now
+        Q(webcheck_last_run__isnull=True) |
+        Q(webcheck_last_run__lt=cutoff)
+    ).order_by('webcheck_last_run', 'created_at')[:500]
     
     data = [{
         'id': t.id,

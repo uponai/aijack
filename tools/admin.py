@@ -73,8 +73,8 @@ class IncompleteToolFilter(admin.SimpleListFilter):
 
 @admin.register(Tool)
 class ToolAdmin(admin.ModelAdmin):
-    list_display = ['name', 'pricing_type', 'status', 'is_featured', 'is_website_valid', 'highlight_start', 'highlight_end', 'created_at']
-    list_filter = ['status', 'pricing_type', IncompleteToolFilter, 'is_featured', 'highlight_start', 'highlight_end', 'professions']
+    list_display = ['name', 'pricing_type', 'status', 'is_featured', 'is_website_valid', 'webcheck_last_run', 'highlight_start', 'highlight_end', 'created_at']
+    list_filter = ['status', 'pricing_type', IncompleteToolFilter, 'is_featured', 'is_website_valid', 'highlight_start', 'highlight_end', 'professions']
     list_per_page = 100
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name']

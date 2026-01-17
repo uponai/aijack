@@ -124,6 +124,17 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Hero Image -->
+                {% with header_image=tool.media.first %}
+                {% if header_image and header_image.media_type == 'image' %}
+                <div class="hidden lg:block w-80 flex-shrink-0">
+                    <img src="{{ header_image.file.url }}"
+                         alt="{{ header_image.alt_text|default:tool.name }}"
+                         class="w-full h-48 object-cover rounded-2xl shadow-lg border border-slate-100 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                </div>
+                {% endif %}
+                {% endwith %}
             </div>
         </div>
 
