@@ -133,7 +133,7 @@
 
         <!-- Central Text (Top Layer) -->
         <div class="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-            <div class="text-center transition-all duration-500 bg-white/50 p-8 md:p-12 rounded-3xl shadow-sm border border-white/40 max-w-xl mx-4" id="anim-text-container">
+            <div class="text-center transition-all duration-500 bg-white/65 p-8 md:p-12 rounded-3xl shadow-sm border border-white/40 max-w-xl mx-4" id="anim-text-container">
                 <h3 id="anim-headline" class="text-4xl md:text-5xl font-heading font-bold text-slate-900 mb-2 transition-opacity duration-500 relative z-20">
                     <!-- Title injected -->
                 </h3>
@@ -352,7 +352,16 @@
                     return;
                 }
 
-                const item = items[ Math.floor( Math.random() * items.length ) ];
+                const item1 = items[ Math.floor( Math.random() * items.length ) ];
+                let item2 = items[ Math.floor( Math.random() * items.length ) ];
+                // Ensure unique second item if possible
+                if ( items.length > 1 )
+                {
+                    while ( item2 === item1 )
+                    {
+                        item2 = items[ Math.floor( Math.random() * items.length ) ];
+                    }
+                }
 
                 // 1. Text Transition
                 headline.style.opacity = '0';
@@ -366,27 +375,30 @@
                     headline.style.opacity = '1';
                     subtitle.style.opacity = '1';
 
-                    // 2. Spawn Card
-                    // Random position around center but usually slightly offset
-                    // We want it to "float by"
-                    const randX = isMobile ? ( 10 + Math.random() * 30 ) + '%' : ( 55 + Math.random() * 15 ) + '%';
-                    const randY = ( 10 + Math.random() * 40 ) + '%';
-                    const rot = ( Math.random() * 10 - 5 );
+                    // 2. Spawn Cards
+                    // Card 1: Left side
+                    const randX1 = isMobile ? ( 5 + Math.random() * 20 ) + '%' : ( 15 + Math.random() * 15 ) + '%';
+                    const randY1 = ( 10 + Math.random() * 30 ) + '%';
+                    const rot1 = ( Math.random() * 10 - 5 );
 
-                    if ( isMobile )
-                    {
-                        // On mobile, maybe center it below text
-                        // Text occupies center roughly.
-                    }
+                    // Card 2: Right side
+                    const randX2 = isMobile ? ( 45 + Math.random() * 20 ) + '%' : ( 65 + Math.random() * 15 ) + '%';
+                    const randY2 = ( 20 + Math.random() * 40 ) + '%';
+                    const rot2 = ( Math.random() * 10 - 5 );
 
-                    const card = spawnCard( item.html, randX, randY, rot );
+                    const card1 = spawnCard( item1.html, randX1, randY1, rot1, 0 );
+                    const card2 = spawnCard( item2.html, randX2, randY2, rot2, 400 ); // Slight delay for second card
 
-                    // 3. Remove Card
+                    // 3. Remove Cards
                     setTimeout( () =>
                     {
-                        card.style.opacity = '0';
-                        card.style.transform = `scale(0.9) translate(0, -30px) rotate(${ rot }deg)`;
-                        setTimeout( () => card.remove(), 1000 );
+                        card1.style.opacity = '0';
+                        card1.style.transform = `scale(0.9) translate(0, -30px) rotate(${ rot1 }deg)`;
+                        setTimeout( () => card1.remove(), 1000 );
+
+                        card2.style.opacity = '0';
+                        card2.style.transform = `scale(0.9) translate(0, -30px) rotate(${ rot2 }deg)`;
+                        setTimeout( () => card2.remove(), 1000 );
                     }, 4000 ); // Show for 4s
 
                 }, 500 );
