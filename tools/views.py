@@ -57,6 +57,75 @@ def home(request):
         created_at__gte=thirty_days_ago
     ).prefetch_related('translations', 'tags').order_by('-created_at')[:6]
     
+    # Hero Animation Data
+    import random
+    from django.template.loader import render_to_string
+    from robots.models import Robot
+
+    hero_data = {
+        'tools': [],
+        'professions': [],
+        'stacks': [],
+        'robots': []
+    }
+
+    # Helper to serialize
+    def serialize_hero_item(item, type_name):
+        data = {
+            'type': type_name,
+            'name': item.name,
+            'html': '',
+            'description': ''
+        }
+        
+        if type_name == 'tool':
+            # Get short description from translation or meta
+            trans = item.get_translation('en')
+            data['description'] = trans.short_description if trans else item.meta_description or "AI Tool"
+            data['html'] = render_to_string('includes/_tool_card.html', {'tool': item, 'request': request})
+            
+        elif type_name == 'profession':
+            data['description'] = item.hero_tagline or f"AI tools for {item.name}"
+            data['html'] = render_to_string('includes/_profession_card.html', {'profession': item})
+            
+        elif type_name == 'stack':
+            data['description'] = item.tagline
+            data['html'] = render_to_string('includes/_stack_card.html', {'stack': item, 'request': request})
+
+        elif type_name == 'robot':
+            data['description'] = item.short_description
+            data['html'] = render_to_string('robots/includes/_robot_card.html', {'robot': item, 'request': request})
+
+        return data
+
+    # 1. Random Tools (Verified/Published with Logo)
+    tools_pool = list(Tool.objects.filter(status='published', logo__isnull=False).exclude(logo='').values_list('id', flat=True))
+    if tools_pool:
+        random_tool_ids = random.sample(tools_pool, min(len(tools_pool), 5))
+        for t in Tool.objects.filter(id__in=random_tool_ids):
+            hero_data['tools'].append(serialize_hero_item(t, 'tool'))
+
+    # 2. Random Professions (with Icon)
+    prof_pool = list(Profession.objects.exclude(icon='').values_list('id', flat=True))
+    if prof_pool:
+        random_prof_ids = random.sample(prof_pool, min(len(prof_pool), 5))
+        for p in Profession.objects.filter(id__in=random_prof_ids):
+            hero_data['professions'].append(serialize_hero_item(p, 'profession'))
+
+    # 3. Random Stacks (Public)
+    stack_pool = list(ToolStack.objects.filter(visibility='public').values_list('id', flat=True))
+    if stack_pool:
+        random_stack_ids = random.sample(stack_pool, min(len(stack_pool), 5))
+        for s in ToolStack.objects.filter(id__in=random_stack_ids):
+             hero_data['stacks'].append(serialize_hero_item(s, 'stack'))
+
+    # 4. Random Robots (Published with Image)
+    robot_pool = list(Robot.objects.filter(status='published', image__isnull=False).exclude(image='').values_list('id', flat=True))
+    if robot_pool:
+        random_robot_ids = random.sample(robot_pool, min(len(robot_pool), 5))
+        for r in Robot.objects.filter(id__in=random_robot_ids):
+             hero_data['robots'].append(serialize_hero_item(r, 'robot'))
+
     return render(request, 'home.html', {
         'professions': professions,
         'featured_stacks': featured_stacks,
@@ -68,6 +137,7 @@ def home(request):
         'tool_count': tool_count,
         'stack_count': stack_count,
         'profession_count': profession_count,
+        'hero_data': hero_data,
     })
 
 

@@ -123,6 +123,283 @@
     </div>
 </section>
 
+<!-- Animated Info Section -->
+<section id="hero-animation-stage" class="relative py-8 overflow-hidden bg-slate-50/50 border-b border-white">
+    {{ hero_data|json_script:"hero-data" }}
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative h-[400px]">
+        <!-- Background Grid Effect -->
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 30px 30px;"></div>
+
+        <!-- Central Text (Top Layer) -->
+        <div class="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+            <div class="text-center transition-all duration-500 bg-white/50 p-8 md:p-12 rounded-3xl shadow-sm border border-white/40 max-w-xl mx-4" id="anim-text-container">
+                <h3 id="anim-headline" class="text-4xl md:text-5xl font-heading font-bold text-slate-900 mb-2 transition-opacity duration-500 relative z-20">
+                    <!-- Title injected -->
+                </h3>
+                <p id="anim-subtitle" class="text-lg text-slate-600 max-w-lg mx-auto transition-opacity duration-500 relative z-20">
+                    <!-- Description injected -->
+                </p>
+            </div>
+        </div>
+
+        <!-- Flying Cards Stage (Bottom Layer) -->
+        <div id="anim-stage" class="absolute inset-0 w-full h-full z-10">
+            <!-- Cards injected here -->
+        </div>
+    </div>
+
+    <style>
+        .anim-card-float {
+            position: absolute;
+            width: 320px;
+            /* Wider cards */
+            height: auto;
+            max-height: 320px;
+            transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 0;
+            transform: scale(0.5) translate(0, 50px);
+            z-index: 10;
+            /* Behind text */
+            /* Reset card styles to behave in container */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .anim-card-float .tool-card,
+        .anim-card-float .stack-card,
+        .anim-card-float .robot-card,
+        .anim-card-float .profession-card {
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+            /* Enhnaced shadow for depth */
+            height: auto !important;
+            /* Allow auto height */
+            background: white;
+            /* Ensure non-transparent */
+        }
+
+        /* Mobile: Cards slightly smaller but still wide */
+        @media (max-width: 768px) {
+            .anim-card-float {
+                width: 280px;
+            }
+        }
+
+        .anim-card-float.visible {
+            opacity: 1;
+            transform: scale(1) translate(0, 0);
+        }
+
+        /* Initial 4 cards specific positions */
+        .anim-pos-tl {
+            top: 10%;
+            left: 5%;
+            transform: rotate(-5deg);
+        }
+
+        .anim-pos-tr {
+            top: 15%;
+            right: 5%;
+            transform: rotate(5deg);
+        }
+
+        .anim-pos-bl {
+            bottom: 10%;
+            left: 10%;
+            transform: rotate(3deg);
+        }
+
+        .anim-pos-br {
+            bottom: 15%;
+            right: 10%;
+            transform: rotate(-3deg);
+        }
+    </style>
+
+    <script>
+        document.addEventListener( 'DOMContentLoaded', () =>
+        {
+            const heroData = JSON.parse( document.getElementById( 'hero-data' ).textContent );
+            const stage = document.getElementById( 'anim-stage' );
+            const headline = document.getElementById( 'anim-headline' );
+            const subtitle = document.getElementById( 'anim-subtitle' );
+
+            // If no data, hide section
+            if ( !heroData.tools || heroData.tools.length === 0 )
+            {
+                document.getElementById( 'hero-animation-stage' ).style.display = 'none';
+                return;
+            }
+
+            let activeCards = [];
+            const isMobile = window.innerWidth < 768;
+
+            // Helper to spawn card
+            function spawnCard ( html, x, y, rotate, delay = 0 )
+            {
+                const el = document.createElement( 'div' );
+                el.className = 'anim-card-float';
+                el.innerHTML = html;
+
+                // Position logic
+                el.style.left = x;
+                el.style.top = y;
+                // Initial transform override handled by CSS class addition
+
+                stage.appendChild( el );
+
+                setTimeout( () =>
+                {
+                    el.classList.add( 'visible' );
+                    // We apply rotation via inline style AFTER visible class sets the base transform
+                    // But to animate properly, we need to handle it carefully. 
+                    // Let's set the target state here.
+                    el.style.transform = `scale(1) translate(0,0) rotate(${ rotate }deg)`;
+                }, 50 + delay );
+
+                return el;
+            }
+
+            // Phase 1: Intro (Show 4 corner cards)
+            function startIntro ()
+            {
+                const corners = [
+                    { type: 'tools', x: '15%', y: '10%', rot: -6 },
+                    { type: 'professions', x: '60%', y: '15%', rot: 5 }, // Using % for responsive pos
+                    { type: 'stacks', x: '20%', y: '50%', rot: 4 },
+                    { type: 'robots', x: '65%', y: '55%', rot: -3 }
+                ];
+
+                if ( isMobile )
+                {
+                    // Adjust spacing on mobile
+                    corners[ 0 ].x = '5%'; corners[ 0 ].y = '5%';
+                    corners[ 1 ].x = '45%'; corners[ 1 ].y = '10%';
+                    corners[ 2 ].x = '5%'; corners[ 2 ].y = '55%';
+                    corners[ 3 ].x = '50%'; corners[ 3 ].y = '60%';
+                }
+
+                corners.forEach( ( c, i ) =>
+                {
+                    const items = heroData[ c.type ];
+                    if ( items && items.length > 0 )
+                    {
+                        const item = items[ 0 ]; // First item
+                        const card = spawnCard( item.html, c.x, c.y, c.rot, i * 150 );
+                        activeCards.push( card );
+                    }
+                } );
+
+                // Clear intro after 4.5s
+                setTimeout( () =>
+                {
+                    activeCards.forEach( ( card, i ) =>
+                    {
+                        setTimeout( () =>
+                        {
+                            card.style.opacity = '0';
+                            card.style.transform = `scale(1.1) translate(0, -50px)`;
+                        }, i * 100 );
+                    } );
+
+                    setTimeout( () =>
+                    {
+                        stage.innerHTML = '';
+                        activeCards = [];
+                        startLoop();
+                    }, 1000 );
+                }, 4500 );
+            }
+
+            // Phase 2: Loop
+            const sequence = [
+                {
+                    type: 'tools',
+                    title: 'AI TOOLS: UNLEASH <span class="text-brand-600">AI POTENTIAL</span>',
+                    description: 'Dive into a comprehensive library of cutting-edge AI software. From writing assistants to code generators, find the perfect tool to elevate your productivity.'
+                },
+                {
+                    type: 'professions',
+                    title: 'PROFESSIONS: TAILORED <span class="text-brand-600">FOR YOU</span>',
+                    description: "Stop searching blindly. We've organized the AI landscape by profession, giving you exactly the right tools to master your specific craft."
+                },
+                {
+                    type: 'stacks',
+                    title: 'STACKS: SYNERGY <span class="text-purple-600">IN ACTION</span>',
+                    description: "Why use one when you can combine many? Discover 'Stacks' - powerful combinations of AI tools that work together to solve complex workflows."
+                },
+                {
+                    type: 'robots',
+                    title: 'ROBOTS: BEYOND <span class="text-cyan-600">THE DIGITAL</span>',
+                    description: "Explore the physical frontier of AI. Browse our database of humanoid and industrial robots reshaping the workforce of tomorrow."
+                }
+            ];
+            let seqIndex = 0;
+
+            function startLoop ()
+            {
+                cycleStep();
+                setInterval( cycleStep, 6000 ); // 6s per cycle
+            }
+
+            function cycleStep ()
+            {
+                const current = sequence[ seqIndex ];
+                const items = heroData[ current.type ];
+                if ( !items || items.length === 0 )
+                {
+                    seqIndex = ( seqIndex + 1 ) % sequence.length;
+                    return;
+                }
+
+                const item = items[ Math.floor( Math.random() * items.length ) ];
+
+                // 1. Text Transition
+                headline.style.opacity = '0';
+                subtitle.style.opacity = '0';
+
+                setTimeout( () =>
+                {
+                    headline.innerHTML = current.title;
+                    subtitle.innerHTML = current.description; // Use category explanation
+
+                    headline.style.opacity = '1';
+                    subtitle.style.opacity = '1';
+
+                    // 2. Spawn Card
+                    // Random position around center but usually slightly offset
+                    // We want it to "float by"
+                    const randX = isMobile ? ( 10 + Math.random() * 30 ) + '%' : ( 55 + Math.random() * 15 ) + '%';
+                    const randY = ( 10 + Math.random() * 40 ) + '%';
+                    const rot = ( Math.random() * 10 - 5 );
+
+                    if ( isMobile )
+                    {
+                        // On mobile, maybe center it below text
+                        // Text occupies center roughly.
+                    }
+
+                    const card = spawnCard( item.html, randX, randY, rot );
+
+                    // 3. Remove Card
+                    setTimeout( () =>
+                    {
+                        card.style.opacity = '0';
+                        card.style.transform = `scale(0.9) translate(0, -30px) rotate(${ rot }deg)`;
+                        setTimeout( () => card.remove(), 1000 );
+                    }, 4000 ); // Show for 4s
+
+                }, 500 );
+
+                seqIndex = ( seqIndex + 1 ) % sequence.length;
+            }
+
+            // Init
+            startIntro();
+        } );
+    </script>
+</section>
+
 <!-- Professions Section -->
 <section class="py-8 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
