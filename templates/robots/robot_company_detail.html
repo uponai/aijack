@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load tools_extras %}
 
 {% block title %}{{ company.get_seo_title }}{% endblock %}
 {% block meta_description %}{{ company.get_seo_description }}{% endblock %}
@@ -56,25 +57,25 @@
                     <!-- Social Links -->
                     <div class="flex flex-wrap justify-center md:justify-start gap-3">
                         {% if company.website %}
-                        <a href="{{ company.website }}" target="_blank" rel="noopener"
+                        <a href="{{ company.website|add_ref }}" target="_blank" rel="noopener"
                            class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition">
                             <i class="fa-solid fa-globe mr-2"></i>Website
                         </a>
                         {% endif %}
                         {% if company.twitter_url %}
-                        <a href="{{ company.twitter_url }}" target="_blank" rel="noopener"
+                        <a href="{{ company.twitter_url|add_ref }}" target="_blank" rel="noopener"
                            class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition">
                             <i class="fa-brands fa-x-twitter mr-2"></i>Twitter
                         </a>
                         {% endif %}
                         {% if company.linkedin_url %}
-                        <a href="{{ company.linkedin_url }}" target="_blank" rel="noopener"
+                        <a href="{{ company.linkedin_url|add_ref }}" target="_blank" rel="noopener"
                            class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition">
                             <i class="fa-brands fa-linkedin mr-2"></i>LinkedIn
                         </a>
                         {% endif %}
                         {% if company.youtube_url %}
-                        <a href="{{ company.youtube_url }}" target="_blank" rel="noopener"
+                        <a href="{{ company.youtube_url|add_ref }}" target="_blank" rel="noopener"
                            class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition">
                             <i class="fa-brands fa-youtube mr-2"></i>YouTube
                         </a>

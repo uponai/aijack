@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load robot_extras %}
+{% load robot_extras tools_extras %}
 
 {% block title %}{{ robot.get_seo_title }}{% endblock %}
 {% block meta_description %}{{ robot.get_seo_description }}{% endblock %}
@@ -119,7 +119,7 @@
                     <!-- CTAs -->
                     <div class="flex flex-wrap gap-4 items-center">
                         {% if robot.product_url %}
-                        <a href="{{ robot.product_url }}" target="_blank" rel="noopener"
+                        <a href="{{ robot.product_url|add_ref }}" target="_blank" rel="noopener"
                            class="neon-button-filled inline-flex items-center gap-2" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
                             <span>Visit Product Page</span>
                             <i class="fa-solid fa-external-link"></i>

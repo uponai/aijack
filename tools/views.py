@@ -310,6 +310,11 @@ def visit_tool(request, slug):
     
     # Redirect to affiliate URL if exists, else website URL
     target_url = tool.affiliate_url if tool.affiliate_url else tool.website_url
+    
+    # Add ref parameter
+    from .utils import append_ref_param
+    target_url = append_ref_param(target_url)
+    
     return redirect(target_url)
 
 

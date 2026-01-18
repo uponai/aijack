@@ -1,7 +1,15 @@
 from django import template
 from tools.models import SavedTool, SavedStack
+from tools.utils import append_ref_param
 
 register = template.Library()
+
+@register.filter
+def add_ref(url):
+    """
+    Appends ?ref=aijack.info to the URL.
+    """
+    return append_ref_param(url)
 
 @register.filter
 def is_saved_by(obj, user):
