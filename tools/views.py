@@ -142,6 +142,36 @@ def home(request):
 
 
 
+def guide(request):
+    """Documentation page explaining the platform data types."""
+    # Get one example of each type for the guide
+    # We try to get featured/high quality items first
+    
+    example_tool = Tool.objects.filter(status='published', is_featured=True).first()
+    if not example_tool:
+        example_tool = Tool.objects.filter(status='published').first()
+        
+    example_stack = ToolStack.objects.filter(visibility='public', is_featured=True).first()
+    if not example_stack:
+        example_stack = ToolStack.objects.filter(visibility='public').first()
+        
+    example_profession = Profession.objects.first()
+    
+    room_company_qs = None
+    try:
+        from robots.models import Robot
+        example_robot = Robot.objects.filter(status='published').first()
+    except ImportError:
+        example_robot = None
+    
+    return render(request, 'guide.html', {
+        'example_tool': example_tool,
+        'example_stack': example_stack,
+        'example_profession': example_profession,
+        'example_robot': example_robot,
+    })
+
+
 def professions(request):
     """List all professions."""
     professions = Profession.objects.all()

@@ -11,7 +11,7 @@ class StaticViewSitemap(Sitemap):
             'home', 'browse_tools', 'submit_tool', 'professions', 'stacks', 'search',
             'account_login', 'account_signup',
             'terms', 'privacy', 'cookies',
-            'ai_stack_builder'
+            'ai_stack_builder', 'guide'
         ]
 
     def location(self, item):

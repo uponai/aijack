@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+
+{% block title %}Platform Guide - Data Types | AIJack{% endblock %}
+{% block meta_description %}Learn about the different data types on AIJack: AI Tools, Professions, Stacks, and Robots. Understand how to use the platform effectively.{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 pb-20">
+    <!-- Hero Header -->
+    <div class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+            <h1 class="text-4xl md:text-5xl font-heading font-bold text-slate-900 mb-4">
+                Platform <span class="text-brand-600">Guide</span>
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+                Understanding the building blocks of AIJack. Explore our core data types and how they help you navigate the AI landscape.
+            </p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- SECTION 1: AI TOOLS -->
+        <section id="tools" class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-wide mb-4">
+                    <i class="fa-solid fa-cube"></i> Core Entity
+                </div>
+                <h2 class="text-3xl font-heading font-bold text-slate-900 mb-4">
+                    AI Tools
+                </h2>
+                <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                    The fundamental unit of our platform. An AI Tool represents a specific software, application, or service that utilizes Artificial Intelligence to perform tasks.
+                </p>
+
+                <h3 class="text-lg font-bold text-slate-800 mb-3">Key Data Points:</h3>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Pricing Model:</span>
+                            <span class="text-slate-600">Free, Freemium, Paid, or Contact for Pricing.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Verification:</span>
+                            <span class="text-slate-600">Verified tools (Blue Check) have been manually tested by our team.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Affiliation:</span>
+                            <span class="text-slate-600">Direct links to official websites, sometimes with affiliate tracking to support us.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Categorization:</span>
+                            <span class="text-slate-600">Tagged by use case (e.g., "Copywriting", "Image Gen") and profession.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <a href="{% url 'browse_tools' %}" class="neon-button-primary mb-12 inline-block">
+                    Browse All Tools <i class="fa-solid fa-arrow-right ml-2"></i>
+                </a>
+
+                <!-- Anatomy Section -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h4 class="font-heading font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-regular fa-file-lines text-brand-500"></i> Anatomy of a Tool Page
+                    </h4>
+                    <ul class="text-sm space-y-3 text-slate-600">
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-brand-300 mt-1"></i>
+                            <span><strong>Header Card:</strong> Quick stats (Pricing, Verified/Featured status), Tags, and direct "Visit Website" affiliation link.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-brand-300 mt-1"></i>
+                            <span><strong>Visuals:</strong> High-res screenshots or video demos to preview the interface.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-brand-300 mt-1"></i>
+                            <span><strong>Deep Dive Tabs:</strong> Switch between "Overview" for specs and "Use Cases" for practical examples.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Example Card -->
+            <div class="bg-slate-100/50 p-8 rounded-3xl border border-slate-200">
+                <div class="text-center mb-6 text-slate-400 font-mono text-sm uppercase tracking-widest">Example Card Interaction</div>
+                <div class="max-w-[340px] mx-auto transform hover:scale-105 transition-transform duration-300">
+                    {% if example_tool %}
+                    {% include 'includes/_tool_card.html' with tool=example_tool %}
+                    {% else %}
+                    <div class="p-4 bg-white rounded-lg shadow text-center">No example available</div>
+                    {% endif %}
+                </div>
+                <div class="text-center mt-6">
+                    <p class="text-sm text-slate-500">
+                        <i class="fa-solid fa-arrow-pointer animate-bounce mr-2"></i> Try clicking the card to visit the detail page
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Divider -->
+        <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+
+        <!-- SECTION 2: PROFESSIONS -->
+        <section id="professions" class="grid md:grid-cols-2 gap-12 items-center md:flex-row-reverse">
+            <!-- Content (Right on desktop for staggered look, handled by grid order if needed, but simple grid is fine) -->
+            <div class="md:order-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 font-bold text-xs uppercase tracking-wide mb-4">
+                    <i class="fa-solid fa-user-tie"></i> User Context
+                </div>
+                <h2 class="text-3xl font-heading font-bold text-slate-900 mb-4">
+                    Professions
+                </h2>
+                <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                    Targeted collections of tools tailored for specific job roles. We curate the vast AI landscape to show you clearly: "What can I actually use in my job?"
+                </p>
+
+                <h3 class="text-lg font-bold text-slate-800 mb-3">Why browse by Profession?</h3>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Relevance:</span>
+                            <span class="text-slate-600">Filter out noise. An Accountant doesn't need 3D modeling tools.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Discovery:</span>
+                            <span class="text-slate-600">Find niche tools you didn't know existed for your industry.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Stacks:</span>
+                            <span class="text-slate-600">See pre-built workflows used by top professionals in your field.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <a href="{% url 'professions' %}" class="neon-button-cyan mb-12 inline-block">
+                    Find Your Profession <i class="fa-solid fa-arrow-right ml-2"></i>
+                </a>
+
+                <!-- Anatomy Section -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h4 class="font-heading font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-regular fa-id-card text-cyan-500"></i> Anatomy of a Profession Page
+                    </h4>
+                    <ul class="text-sm space-y-3 text-slate-600">
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-cyan-300 mt-1"></i>
+                            <span><strong>Hero Context:</strong> Clear icon and tagline defining the role (e.g., "AI Tools for Architects").</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-cyan-300 mt-1"></i>
+                            <span><strong>Smart Filters:</strong> Toggle between Free, Freemium, and Paid tools to fit your budget.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-cyan-300 mt-1"></i>
+                            <span><strong>Recommended Stacks:</strong> Curated tool combos specific to this profession's common workflows.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Example Card -->
+            <div class="md:order-1 bg-slate-100/50 p-8 rounded-3xl border border-slate-200">
+                <div class="text-center mb-6 text-slate-400 font-mono text-sm uppercase tracking-widest">Example Card Interaction</div>
+                <div class="max-w-[280px] mx-auto transform hover:scale-105 transition-transform duration-300">
+                    {% if example_profession %}
+                    {% include 'includes/_profession_card.html' with profession=example_profession %}
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Divider -->
+        <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+
+        <!-- SECTION 3: TOOL STACKS -->
+        <section id="stacks" class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 font-bold text-xs uppercase tracking-wide mb-4">
+                    <i class="fa-solid fa-layer-group"></i> Workflows
+                </div>
+                <h2 class="text-3xl font-heading font-bold text-slate-900 mb-4">
+                    Tool Stacks
+                </h2>
+                <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                    Why use just one tool? Stacks are powerful combinations of AI tools designed to solve complex, multi-step problems. They represent a complete workflow or a "tech stack" for a specific task.
+                </p>
+
+                <h3 class="text-lg font-bold text-slate-800 mb-3">Stack Features:</h3>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Community Created:</span>
+                            <span class="text-slate-600">Users can build and share their own successful combinations.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">AI Generated workflows:</span>
+                            <span class="text-slate-600">Our AI Stack Builder can suggest optimized workflows for your needs.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">One-Click Save:</span>
+                            <span class="text-slate-600">Save entire workflows to your profile for easy access later.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <a href="{% url 'stacks' %}" class="inline-flex items-center px-6 py-3 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-700 hover:shadow-lg hover:-translate-y-0.5 transition-all mb-12">
+                    Explore Stacks <i class="fa-solid fa-arrow-right ml-2"></i>
+                </a>
+
+                <!-- Anatomy Section -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h4 class="font-heading font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-diagram-project text-purple-500"></i> Anatomy of a Stack Page
+                    </h4>
+                    <ul class="text-sm space-y-3 text-slate-600">
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-purple-300 mt-1"></i>
+                            <span><strong>Stack Overview:</strong> Tool count, author, and visibility status.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-purple-300 mt-1"></i>
+                            <span><strong>AI Workflow Integration:</strong> A generated step-by-step guide explaining exactly how to chain these tools together for maximum output.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-purple-300 mt-1"></i>
+                            <span><strong>Tools List:</strong> The specific set of tools included, with quick links to their individual detail pages.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Example Card -->
+            <div class="bg-slate-100/50 p-8 rounded-3xl border border-slate-200">
+                <div class="text-center mb-6 text-slate-400 font-mono text-sm uppercase tracking-widest">Example Card Interaction</div>
+                <div class="max-w-[340px] mx-auto transform hover:scale-105 transition-transform duration-300">
+                    {% if example_stack %}
+                    {% include 'includes/_stack_card.html' with stack=example_stack %}
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Divider -->
+        <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+
+        <!-- SECTION 4: ROBOTS -->
+        <section id="robots" class="grid md:grid-cols-2 gap-12 items-center md:flex-row-reverse">
+            <div class="md:order-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-white font-bold text-xs uppercase tracking-wide mb-4">
+                    <i class="fa-solid fa-robot"></i> Physical AI
+                </div>
+                <h2 class="text-3xl font-heading font-bold text-slate-900 mb-4">
+                    AI Robots
+                </h2>
+                <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                    Going beyond software. This section tracks the rapidly evolving world of embodied AI, including humanoid robots, industrial automations, and consumer robotics.
+                </p>
+
+                <h3 class="text-lg font-bold text-slate-800 mb-3">Tracking The Future:</h3>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Specs & Details:</span>
+                            <span class="text-slate-600">Track DoF (Degrees of Freedom), height, weight, and battery life.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Manufacturer Profiles:</span>
+                            <span class="text-slate-600">Detailed pages for companies like Boston Dynamics, Tesla, and more.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-500 mt-1"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Status Updates:</span>
+                            <span class="text-slate-600">Know what's a Concept, Prototype, or Available for Purchase.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <button disabled class="inline-flex items-center px-6 py-3 rounded-xl bg-slate-800 text-white font-bold opacity-80 cursor-not-allowed mb-12">
+                    Robots Section (Coming Soon)
+                </button>
+
+                <!-- Anatomy Section -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h4 class="font-heading font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-microchip text-slate-600"></i> Anatomy of a Robot Page
+                    </h4>
+                    <ul class="text-sm space-y-3 text-slate-600">
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-slate-400 mt-1"></i>
+                            <span><strong>Tech Specs Table:</strong> Detailed breakdown of physical attributes like Height, Weight, DoF (Degrees of Freedom), and Battery Life.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-slate-400 mt-1"></i>
+                            <span><strong>Comparison Tool:</strong> Add robots to a side-by-side comparison matrix to evaluate specs against competitors.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <i class="fa-solid fa-caret-right text-slate-400 mt-1"></i>
+                            <span><strong>Software Ecosystem:</strong> See which AI models and software tools are compatible with the hardware.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Example Card -->
+            <div class="md:order-1 bg-slate-100/50 p-8 rounded-3xl border border-slate-200">
+                <div class="text-center mb-6 text-slate-400 font-mono text-sm uppercase tracking-widest">Example Card Interaction</div>
+                <div class="max-w-[340px] mx-auto transform hover:scale-105 transition-transform duration-300">
+                    {% if example_robot %}
+                    {% include 'robots/includes/_robot_card.html' with robot=example_robot %}
+                    {% else %}
+                    <div class="p-8 text-center text-slate-500 border-2 border-dashed border-slate-300 rounded-xl">
+                        Robots module not active
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <div class="mt-20 p-8 md:p-12 rounded-3xl bg-slate-900 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-12 opacity-10">
+                <i class="fa-solid fa-rocket text-9xl text-white"></i>
+            </div>
+
+            <h2 class="text-3xl font-heading font-bold text-white mb-4 relative z-10">
+                Ready to explore?
+            </h2>
+            <p class="text-slate-400 mb-8 max-w-xl mx-auto relative z-10">
+                Now that you know the basics, dive in and find the tools that will transform your work.
+            </p>
+            <a href="{% url 'home' %}" class="inline-flex items-center px-8 py-4 rounded-xl bg-brand-600 text-white font-bold text-lg hover:bg-brand-500 hover:shadow-lg hover:-translate-y-1 transition-all relative z-10">
+                Start Exploring
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
