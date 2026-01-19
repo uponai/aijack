@@ -30,8 +30,16 @@
             </p>
 
             <!-- Search Form -->
-            <form action="{% url 'search' %}" method="GET" class="max-w-3xl mx-auto">
+            <form action="{% url 'search' %}" method="GET" class="max-w-3xl mx-auto" x-data="{ showSearchGuide: false }">
+                <!-- Search Guide Modal Include -->
+                {% include 'partials/_search_guide_modal.html' %}
+
                 <div class="relative">
+                    <!-- Info Icon Trigger -->
+                    <button type="button" @click="showSearchGuide = true" class="absolute right-0 -top-8 text-brand-600 hover:text-brand-700 transition flex items-center gap-2 font-semibold text-xs">
+                        <i class="fa-solid fa-circle-question text-base"></i>
+                        <span>How to search properly?</span>
+                    </button>
                     <input
                            type="text"
                            name="q"

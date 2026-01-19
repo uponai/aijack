@@ -1,0 +1,92 @@
+<!-- Search Guide Modal -->
+<div x-show="showSearchGuide"
+     x-cloak
+     class="fixed inset-0 z-[100] overflow-y-auto"
+     aria-labelledby="modal-title"
+     role="dialog"
+     aria-modal="true">
+
+    <!-- Backdrop -->
+    <div x-show="showSearchGuide"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm transition-opacity"
+         @click="showSearchGuide = false"></div>
+
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <!-- Modal Panel -->
+        <div x-show="showSearchGuide"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-brand-100">
+
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-brand-600 to-cyan-600 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-lg font-heading font-black text-white flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    AI-POWERED SEARCH
+                </h3>
+                <button type="button" @click="showSearchGuide = false" class="text-white/80 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="px-6 py-6 space-y-6">
+
+                <!-- Semantic vs Keyword -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">How it works</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        Unlike traditional search that looks for exact keywords, our <strong class="text-brand-600">Semantic Core</strong> understands the *meaning* and *intent* behind your words. It matches your problem to the solution description, not just the name.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div class="p-3 bg-red-50 rounded-lg border border-red-100">
+                            <div class="text-red-800 font-bold mb-1"><i class="fa-solid fa-xmark mr-1"></i> Don't just search:</div>
+                            <div class="text-red-600 italic">"Email marketing tool"</div>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-lg border border-green-100">
+                            <div class="text-green-800 font-bold mb-1"><i class="fa-solid fa-check mr-1"></i> Instead, describe it:</div>
+                            <div class="text-green-600 italic">"I need to automate cold outreach emails to specialized clients"</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Examples Carousel -->
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Try asking things like:</h4>
+                    <ul class="space-y-2 text-sm text-slate-700">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-comment-dots text-brand-400 mt-1"></i>
+                            "Tools to help me design logos faster using AI"
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-comment-dots text-brand-400 mt-1"></i>
+                            "Analyze large PDF documents for legal contracts"
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-comment-dots text-brand-400 mt-1"></i>
+                            "Robots that can handle warehouse logistics"
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- CTA -->
+                <div class="text-center pt-2">
+                    <button type="button" @click="showSearchGuide = false" class="neon-button-cyan w-full justify-center">
+                        Got it, I'm ready to search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
