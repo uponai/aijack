@@ -531,11 +531,38 @@ def search(request):
                 # Search Tools
                 tool_ids = SearchService.search(query, collection_name='tools')
                 if tool_ids:
+                    from django.utils import timezone
+                    from django.db.models import Count, Q, BooleanField
+                    
+                    today = timezone.now().date()
+                    
+                    # Create semantic ranking preservation
                     preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(tool_ids)])
+                    
+                    # Fetch tools with intelligent ranking
                     tools = Tool.objects.filter(
                         status='published',
                         id__in=tool_ids
-                    ).prefetch_related('translations').order_by(preserved)[:9]
+                    ).annotate(
+                        # Detect if tool is currently highlighted
+                        is_highlighted=Case(
+                            When(
+                                Q(highlight_start__lte=today) & 
+                                Q(highlight_end__gte=today),
+                                then=True
+                            ),
+                            default=False,
+                            output_field=BooleanField()
+                        ),
+                        # Count affiliate clicks for conversion ranking
+                        conversion_count=Count('affiliate_clicks', distinct=True),
+                        # Preserve semantic relevance from vector search
+                        semantic_rank=preserved
+                    ).prefetch_related('translations').order_by(
+                        '-is_highlighted',      # Highlighted tools first
+                        '-conversion_count',     # Then by conversion performance
+                        'semantic_rank'          # Then by semantic relevance
+                    )[:12]  # Increased from 9 to 12 results
                 else:
                     tools = []
             
