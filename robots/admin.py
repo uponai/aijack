@@ -12,6 +12,28 @@ class RobotCompanyAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description', 'headquarters']
     prepopulated_fields = {'slug': ('name',)}
     list_filter = ['founded_year']
+    
+    fieldsets = (
+        ('General', {
+            'fields': ('name', 'slug', 'description', 'logo')
+        }),
+        ('Location & Company Info', {
+            'fields': ('headquarters', 'founded_year', 'website')
+        }),
+        ('Social Media Links', {
+            'fields': ('twitter_url', 'linkedin_url', 'youtube_url'),
+            'classes': ('collapse',),
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+        ('SEO Metadata', {
+            'fields': ('meta_title', 'meta_description', 'og_image', 'canonical_url'),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ['created_at', 'updated_at', 'robot_count']
 
 
 @admin.register(Robot)
@@ -47,11 +69,17 @@ class RobotAdmin(admin.ModelAdmin):
             'fields': ('is_product_url_valid', 'webcheck_last_run'),
             'classes': ('collapse',),
         }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
         ('SEO', {
             'fields': ('meta_title', 'meta_description', 'og_image', 'canonical_url'),
             'classes': ('collapse',)
         }),
     )
+    
+    readonly_fields = ['created_at', 'updated_at']
     
     def reset_webcheck(self, request, queryset):
         """

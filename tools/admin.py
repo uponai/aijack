@@ -32,11 +32,16 @@ class ProfessionAdmin(admin.ModelAdmin):
         ('General', {
             'fields': ('name', 'slug', 'icon', 'hero_tagline', 'description')
         }),
+        ('Timestamps', {
+            'fields': ('updated_at',),
+            'classes': ('collapse',),
+        }),
         ('SEO Metadata', {
             'fields': ('meta_title', 'meta_description', 'og_image', 'canonical_url'),
             'classes': ('collapse',),
         }),
     )
+    readonly_fields = ['updated_at']
 
 
 @admin.register(Tag)
@@ -94,11 +99,21 @@ class ToolAdmin(admin.ModelAdmin):
         ('Classification', {
             'fields': ('pricing_type', 'categories', 'professions', 'tags')
         }),
+        ('Webcheck Status', {
+            'fields': ('is_website_valid', 'webcheck_last_run'),
+            'classes': ('collapse',),
+            'description': 'Website validation status - automatically updated by webcheck system',
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
         ('SEO Metadata', {
             'fields': ('meta_title', 'meta_description', 'og_image', 'canonical_url'),
             'classes': ('collapse',),
         }),
     )
+    readonly_fields = ['created_at', 'updated_at']
     actions = ['reset_webcheck']
 
     def reset_webcheck(self, request, queryset):
@@ -154,11 +169,16 @@ class ToolStackAdmin(admin.ModelAdmin):
         ('Relations', {
             'fields': ('tools', 'professions')
         }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',),
+        }),
         ('SEO Metadata', {
             'fields': ('meta_title', 'meta_description', 'og_image', 'canonical_url'),
             'classes': ('collapse',),
         }),
     )
+    readonly_fields = ['created_at']
 
 
 class ToolMediaInline(admin.TabularInline):
