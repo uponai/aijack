@@ -72,7 +72,7 @@
                 }
             },
 
-            dismiss ()
+            next ()
             {
                 if ( this.current )
                 {
@@ -85,6 +85,18 @@
                         this.showNext();
                     }, 300 );
                 }
+            },
+
+            closeAll ()
+            {
+                if ( this.current )
+                {
+                    window.notificationCookies.addDismissed( this.current.id );
+                }
+                // Mark all remaining in queue as read
+                this.queue.forEach( n => window.notificationCookies.addDismissed( n.id ) );
+                this.queue = [];
+                this.show = false;
             }
         } ) );
     } );
@@ -141,8 +153,8 @@
                                    x-text="current && current.notification_type === 'permanent' ? 'Announcement' : 'News Update'"></p>
                             </div>
                         </div>
-                        <button type="button" @click="dismiss()" class="text-slate-400 hover:text-slate-500 transition-colors">
-                            <span class="sr-only">Close</span>
+                        <button type="button" @click="closeAll()" class="text-slate-400 hover:text-slate-500 transition-colors">
+                            <span class="sr-only">Close All</span>
                             <i class="fa-solid fa-xmark text-xl"></i>
                         </button>
                     </div>
@@ -151,10 +163,11 @@
                     <div class="mt-2">
                         <template x-if="current && current.youtube_id">
                             <div class="rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100 aspect-video relative mb-4">
-                                <iframe :src="'https://www.youtube.com/embed/' + current.youtube_id + '?rel=0&modestbranding=1&playsinline=1&origin=' + window.location.origin"
+                                <iframe :src="'https://www.youtube.com/embed/' + current.youtube_id + '?modestbranding=1&playsinline=1&origin=' + window.location.origin"
                                         class="absolute inset-0 w-full h-full"
                                         frameborder="0"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        referrerpolicy="strict-origin-when-cross-origin"
                                         allowfullscreen></iframe>
                             </div>
                         </template>
@@ -176,7 +189,7 @@
                             <div x-show="total <= 1"></div> <!-- Spacer -->
 
                             <button type="button"
-                                    @click="dismiss()"
+                                    @click="next()"
                                     class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 transition-all">
                                 <span x-text="queue.length > 0 ? 'Next' : 'Got it'"></span>
                                 <i x-show="queue.length > 0" class="fa-solid fa-arrow-right"></i>

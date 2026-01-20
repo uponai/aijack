@@ -152,9 +152,12 @@
 
                                 <!-- Preview -->
                                 <div x-show="youtubeId" class="mt-4 rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100 aspect-video relative">
-                                    <iframe :src="'https://www.youtube.com/embed/' + youtubeId + '?rel=0&modestbranding=1&playsinline=1&origin=' + window.location.origin"
+                                    <iframe :src="'https://www.youtube.com/embed/' + youtubeId + '?modestbranding=1&playsinline=1&origin=' + window.location.origin"
                                             class="absolute inset-0 w-full h-full"
-                                            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            referrerpolicy="strict-origin-when-cross-origin"
+                                            allowfullscreen></iframe>
                                 </div>
                                 <p class="text-xs text-slate-400 mt-1" x-show="!youtubeId">Paste a YouTube URL to see a preview.</p>
                             </div>
