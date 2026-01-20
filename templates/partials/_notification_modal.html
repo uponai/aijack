@@ -1,0 +1,191 @@
+<script>
+    // Cookie utilities
+    window.notificationCookies = {
+        cookieName: 'dismissed_notifications',
+        getDismissed ()
+        {
+            const cookie = document.cookie.split( '; ' ).find( row => row.startsWith( this.cookieName + '=' ) );
+            if ( !cookie ) return [];
+            try { return JSON.parse( decodeURIComponent( cookie.split( '=' )[ 1 ] ) ); } catch ( e ) { return []; }
+        },
+        addDismissed ( id )
+        {
+            const dismissed = this.getDismissed();
+            if ( !dismissed.includes( id ) )
+            {
+                dismissed.push( id );
+                const expires = new Date();
+                expires.setDate( expires.getDate() + 30 );
+                document.cookie = `${ this.cookieName }=${ encodeURIComponent( JSON.stringify( dismissed ) ) }; expires=${ expires.toUTCString() }; path=/`;
+            }
+        },
+        isDismissed ( id ) { return this.getDismissed().includes( id ); }
+    };
+
+    document.addEventListener( 'alpine:init', () =>
+    {
+        Alpine.data( 'notificationSystem', () => ( {
+            queue: [],
+            current: null,
+            total: 0,
+            show: false,
+
+            async init ()
+            {
+                // Small delay to ensure page interaction doesn't conflict
+                setTimeout( () => this.fetchNotifications(), 1000 );
+            },
+
+            async fetchNotifications ()
+            {
+                try
+                {
+                    const response = await fetch( '/api/notifications/' );
+                    if ( !response.ok ) throw new Error( 'Network response was not ok' );
+
+                    const data = await response.json();
+                    const undismissed = data.notifications.filter( n => !window.notificationCookies.isDismissed( n.id ) );
+
+                    this.queue = undismissed;
+                    this.total = undismissed.length;
+
+                    if ( this.queue.length > 0 )
+                    {
+                        this.showNext();
+                    }
+                } catch ( error )
+                {
+                    console.error( 'Notification Error:', error );
+                }
+            },
+
+            showNext ()
+            {
+                if ( this.queue.length > 0 )
+                {
+                    this.current = this.queue.shift();
+                    this.show = true;
+                } else
+                {
+                    this.show = false;
+                    this.current = null;
+                }
+            },
+
+            dismiss ()
+            {
+                if ( this.current )
+                {
+                    window.notificationCookies.addDismissed( this.current.id );
+                    this.show = false;
+
+                    // Wait for transition before showing next
+                    setTimeout( () =>
+                    {
+                        this.showNext();
+                    }, 300 );
+                }
+            }
+        } ) );
+    } );
+</script>
+
+<div x-data="notificationSystem"
+     x-show="show"
+     x-cloak
+     class="relative z-[9999]"
+     aria-labelledby="modal-title"
+     role="dialog"
+     aria-modal="true">
+
+    <!-- Backdrop with blur -->
+    <div x-show="show"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+
+            <!-- Modal Panel -->
+            <div x-show="show"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full border border-slate-100"
+                 :class="current && current.youtube_id ? 'sm:max-w-4xl' : 'sm:max-w-lg'">
+
+                <!-- Decorative Top Bar -->
+                <div class="h-2 w-full bg-gradient-to-r from-brand-600 via-cyan-500 to-brand-600"></div>
+
+                <div class="px-6 py-6">
+                    <!-- Header -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                                 :class="current && current.notification_type === 'permanent' ? 'bg-brand-50 text-brand-600' : 'bg-cyan-50 text-cyan-600'">
+                                <i class="fa-solid text-xl"
+                                   :class="current && current.notification_type === 'permanent' ? 'fa-bullhorn' : 'fa-bolt'"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-heading font-bold text-slate-900 leading-6"
+                                    x-text="current ? current.title : ''"></h3>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide font-bold mt-1"
+                                   x-text="current && current.notification_type === 'permanent' ? 'Announcement' : 'News Update'"></p>
+                            </div>
+                        </div>
+                        <button type="button" @click="dismiss()" class="text-slate-400 hover:text-slate-500 transition-colors">
+                            <span class="sr-only">Close</span>
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="mt-2">
+                        <template x-if="current && current.youtube_id">
+                            <div class="rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100 aspect-video relative mb-4">
+                                <iframe :src="'https://www.youtube.com/embed/' + current.youtube_id + '?rel=0&modestbranding=1&playsinline=1&origin=' + window.location.origin"
+                                        class="absolute inset-0 w-full h-full"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen></iframe>
+                            </div>
+                        </template>
+                        <template x-if="!current || !current.youtube_id">
+                            <div x-html="current ? current.content : ''" class="prose prose-sm text-slate-600 max-w-none"></div>
+                        </template>
+                    </div>
+
+                    <!-- Progress & Action -->
+                    <div class="mt-6 pt-6 border-t border-slate-100">
+                        <div class="flex items-center justify-between">
+                            <!-- Progress Dots -->
+                            <div class="flex gap-1.5" x-show="total > 1">
+                                <template x-for="i in total" :key="i">
+                                    <div class="w-2 h-2 rounded-full transition-colors"
+                                         :class="i <= (total - queue.length) ? 'bg-brand-600' : 'bg-slate-200'"></div>
+                                </template>
+                            </div>
+                            <div x-show="total <= 1"></div> <!-- Spacer -->
+
+                            <button type="button"
+                                    @click="dismiss()"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 transition-all">
+                                <span x-text="queue.length > 0 ? 'Next' : 'Got it'"></span>
+                                <i x-show="queue.length > 0" class="fa-solid fa-arrow-right"></i>
+                                <i x-show="queue.length === 0" class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

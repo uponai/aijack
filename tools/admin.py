@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick, NewsletterSubscriber, SubmittedTool, ToolReport
+from .models import Category, Profession, Tag, Tool, ToolTranslation, ToolStack, ToolMedia, SavedTool, SavedStack, SearchQuery, AffiliateClick, NewsletterSubscriber, SubmittedTool, ToolReport, Notification
 
 
 class ToolTranslationInline(admin.TabularInline):
@@ -260,4 +260,44 @@ class ToolReportAdmin(admin.ModelAdmin):
     def mark_as_resolved(self, request, queryset):
         queryset.update(is_resolved=True)
     mark_as_resolved.short_description = "Mark selected reports as resolved"
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'notification_type', 'is_active', 'visibility', 'priority', 'created_at', 'updated_at']
+    list_filter = ['notification_type', 'is_active', 'visibility', 'created_at']
+    search_fields = ['title', 'content']
+    readonly_fields = ['created_at', 'updated_at']
+    actions = ['activate_notifications', 'deactivate_notifications']
+    
+    fieldsets = (
+        ('Content', {
+            'fields': ('title', 'content')
+        }),
+        ('Settings', {
+            'fields': ('notification_type', 'is_active', 'visibility', 'priority')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+    
+    def activate_notifications(self, request, queryset):
+        count = queryset.update(is_active=True)
+        self.message_user(request, f"Activated {count} notification(s).")
+    activate_notifications.short_description = "Activate selected notifications"
+    
+    def deactivate_notifications(self, request, queryset):
+        count = queryset.update(is_active=False)
+        self.message_user(request, f"Deactivated {count} notification(s).")
+    deactivate_notifications.short_description = "Deactivate selected notifications"
+
+    class Media:
+        css = {
+            'all': ('https://cdn.jsdelivr.net/npm/tinymce@5/skins/ui/oxide/skin.min.css',)
+        }
+        js = (
+            'https://cdn.jsdelivr.net/npm/tinymce@5/tinymce.min.js',
+        )
 

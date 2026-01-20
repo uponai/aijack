@@ -685,6 +685,10 @@
                 -webkit-box-orient: vertical;
                 overflow: hidden;
             }
+
+            [x-cloak] {
+                display: none !important;
+            }
         </style>
 
         {% block extra_css %}{% endblock %}
@@ -723,6 +727,7 @@
         {% endif %}
 
         {% include '_modals.html' %}
+        {% include 'partials/_notification_modal.html' %}
 
         <script>
             // Global Helpers for Modals

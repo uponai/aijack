@@ -635,3 +635,49 @@ class ToolReport(models.Model):
 
     def __str__(self):
         return f"Report for {self.tool.name}: {self.get_reason_display()}"
+
+
+class Notification(models.Model):
+    """Site-wide notification popups for announcements and important messages."""
+    NOTIFICATION_TYPE_CHOICES = [
+        ('permanent', 'Permanent'),
+        ('news', 'News/Announcement'),
+    ]
+    VISIBILITY_CHOICES = [
+        ('public', 'Public (All Users)'),
+        ('auth_only', 'Authenticated Users Only'),
+    ]
+
+    title = models.CharField(max_length=200, help_text="Notification title")
+    content = models.TextField(help_text="HTML content for the notification popup")
+    youtube_url = models.URLField(blank=True, null=True, help_text="Optional: YouTube URL. If provided, video will display instead of content.")
+    notification_type = models.CharField(
+        max_length=20, 
+        choices=NOTIFICATION_TYPE_CHOICES, 
+        default='news',
+        help_text="Permanent notifications show first, news show by date"
+    )
+    is_active = models.BooleanField(
+        default=True, 
+        help_text="Only active notifications are displayed"
+    )
+    visibility = models.CharField(
+        max_length=20, 
+        choices=VISIBILITY_CHOICES, 
+        default='public',
+        help_text="Control who can see this notification"
+    )
+    priority = models.IntegerField(
+        default=0, 
+        help_text="Higher priority notifications show first (within same type)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-notification_type', '-priority', '-created_at']
+
+    def __str__(self):
+        type_icon = "📌" if self.notification_type == 'permanent' else "📰"
+        status = "✓" if self.is_active else "✗"
+        return f"{status} {type_icon} {self.title}"

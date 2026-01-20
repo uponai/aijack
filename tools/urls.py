@@ -63,4 +63,10 @@ urlpatterns = [
     path('admin-dashboard/webcheck/', views.admin_webcheck, name='admin_webcheck'),
     path('api/webcheck/pending/', views.api_get_pending_webcheck_tools, name='api_get_pending_webcheck_tools'),
     path('api/webcheck/process/<int:tool_id>/', views.api_process_webcheck_tool, name='api_process_webcheck_tool'),
+    
+    # Notifications API
+    path('api/notifications/', views.get_active_notifications, name='get_active_notifications'),
+    
+    # Admin Notifications
+    path('admin-dashboard/notifications/', views.admin_notifications, name='admin_notifications'),
 ]

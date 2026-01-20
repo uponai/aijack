@@ -1,0 +1,68 @@
+<tr class="hover:bg-slate-50 transition group">
+    <td class="py-4 px-4 align-top">
+        <div class="flex items-center gap-3">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg
+                {% if n.notification_type == 'permanent' %}bg-brand-50 text-brand-600{% else %}bg-cyan-50 text-cyan-600{% endif %}">
+                {% if n.notification_type == 'permanent' %}
+                <i class="fa-solid fa-bullhorn text-sm"></i>
+                {% else %}
+                <i class="fa-solid fa-bolt text-sm"></i>
+                {% endif %}
+            </div>
+            <div>
+                <div class="font-bold text-slate-800">{{ n.title }}</div>
+                <div class="text-xs text-slate-500 flex gap-2 mt-1">
+                    <span class="uppercase tracking-wider font-bold 
+                        {% if n.notification_type == 'permanent' %}text-brand-600{% else %}text-cyan-600{% endif %}">
+                        {{ n.get_notification_type_display }}
+                    </span>
+                    <span class="text-slate-300">|</span>
+                    <span>
+                        {% if n.visibility == 'public' %}
+                        <i class="fa-solid fa-earth-americas mr-1"></i>Public
+                        {% else %}
+                        <i class="fa-solid fa-lock mr-1"></i>Auth Only
+                        {% endif %}
+                    </span>
+                    {% if n.youtube_url %}
+                    <span class="text-slate-300">|</span>
+                    <span class="text-red-600"><i class="fa-brands fa-youtube mr-1"></i>Video</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </td>
+    <td class="py-4 px-4 align-top">
+        <div class="text-sm text-slate-600 line-clamp-2">{% if n.youtube_url %}{{ n.youtube_url }}{% else %}{{ n.content|striptags }}{% endif %}</div>
+    </td>
+    <td class="py-4 px-4 align-top text-center">
+        <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-100 text-slate-600 font-mono text-xs font-bold">{{ n.priority }}</span>
+    </td>
+    <td class="py-4 px-4 align-top text-right">
+        <form hx-post="{% url 'admin_notifications' %}" hx-target="closest tr" hx-swap="outerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_active">
+            <input type="hidden" name="notification_id" value="{{ n.id }}">
+            <button type="submit" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {% if n.is_active %}bg-brand-600{% else %}bg-slate-200{% endif %}">
+                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {% if n.is_active %}translate-x-5{% else %}translate-x-0{% endif %}"></span>
+            </button>
+        </form>
+    </td>
+    <td class="py-4 px-4 align-top text-right">
+        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button type="button"
+                    @click="editNotification({{ n.id }}, '{{ n.title|escapejs }}', '{{ n.content|escapejs }}', '{{ n.youtube_url|default:''|escapejs }}', '{{ n.notification_type }}', '{{ n.visibility }}', {{ n.priority }}, {{ n.is_active|yesno:'true,false' }})"
+                    class="p-2 text-slate-400 hover:text-brand-600 transition-colors" title="Edit">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            <form method="POST" onsubmit="return confirm('Are you sure you want to delete this notification?');">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="notification_id" value="{{ n.id }}">
+                <button type="submit" class="p-2 text-slate-400 hover:text-red-600 transition-colors" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </form>
+        </div>
+    </td>
+</tr>

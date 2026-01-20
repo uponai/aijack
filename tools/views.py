@@ -2036,3 +2036,107 @@ def api_process_webcheck_tool(request, tool_id):
         return JsonResponse({'success': False, 'error': 'Tool not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def get_active_notifications(request):
+    """API endpoint to fetch active notifications for the current user."""
+    from .models import Notification
+    
+    # Start with active notifications
+    notifications = Notification.objects.filter(is_active=True)
+    
+    # Filter by visibility based on authentication status
+    if request.user.is_authenticated:
+        # Show both public and auth_only notifications
+        notifications = notifications.filter(
+            Q(visibility='public') | Q(visibility='auth_only')
+        )
+    else:
+        # Show only public notifications
+        notifications = notifications.filter(visibility='public')
+    
+    # Order: permanent first, then by priority (desc), then by created_at (desc)
+    # The model already has this ordering, but we'll be explicit
+    notifications = notifications.order_by('-notification_type', '-priority', '-created_at')
+    
+    # Serialize to JSON
+    data = []
+    for n in notifications:
+        youtube_id = None
+        if n.youtube_url:
+            # Simple extraction for common YouTube URL formats
+            if 'v=' in n.youtube_url:
+                youtube_id = n.youtube_url.split('v=')[1].split('&')[0]
+            elif 'youtu.be/' in n.youtube_url:
+                youtube_id = n.youtube_url.split('youtu.be/')[1].split('?')[0]
+                
+        data.append({
+            'id': n.id,
+            'title': n.title,
+            'content': n.content,
+            'notification_type': n.notification_type,
+            'priority': n.priority,
+            'youtube_id': youtube_id
+        })
+    
+    return JsonResponse({'notifications': data})
+
+
+@staff_member_required
+@login_required
+def admin_notifications(request):
+    """Custom admin interface for managing notifications."""
+    from .models import Notification
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'create' or action == 'update':
+            notification_id = request.POST.get('notification_id')
+            title = request.POST.get('title')
+            content = request.POST.get('content', '')
+            youtube_url = request.POST.get('youtube_url', '')
+            notification_type = request.POST.get('notification_type')
+            is_active = request.POST.get('is_active') == 'on'
+            visibility = request.POST.get('visibility')
+            priority = int(request.POST.get('priority', 0))
+            
+            if notification_id:
+                notification = get_object_or_404(Notification, id=notification_id)
+                messages.success(request, f"Notification '{title}' updated successfully.")
+            else:
+                notification = Notification()
+                messages.success(request, f"Notification '{title}' created successfully.")
+            
+            notification.title = title
+            notification.content = content
+            notification.youtube_url = youtube_url
+            notification.notification_type = notification_type
+            notification.is_active = is_active
+            notification.visibility = visibility
+            notification.priority = priority
+            notification.save()
+            
+        elif action == 'delete':
+            notification_id = request.POST.get('notification_id')
+            notification = get_object_or_404(Notification, id=notification_id)
+            notification.delete()
+            messages.success(request, "Notification deleted.")
+            
+        elif action == 'toggle_active':
+            notification_id = request.POST.get('notification_id')
+            notification = get_object_or_404(Notification, id=notification_id)
+            notification.is_active = not notification.is_active
+            notification.save()
+            # If HTMX request, return partial
+            if request.headers.get('HX-Request'):
+                return render(request, 'partials/_admin_notification_row.html', {'n': notification})
+                
+        return redirect('admin_notifications')
+
+    notifications = Notification.objects.all()
+    
+    return render(request, 'admin_notifications.html', {
+        'notifications': notifications,
+        'active_tab': 'notifications'
+    })
