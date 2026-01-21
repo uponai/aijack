@@ -76,7 +76,13 @@ class ToolStackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'neon-input w-full'})
+            if 'class' not in self.fields[field].widget.attrs:
+                self.fields[field].widget.attrs.update({'class': 'neon-input w-full'})
+            else:
+                 # Ensure we don't lose existing classes (like select2) but add styling if needed
+                 current_class = self.fields[field].widget.attrs['class']
+                 if 'neon-input' not in current_class and 'select2' not in current_class:
+                     self.fields[field].widget.attrs['class'] += ' neon-input w-full'
         self.fields['is_featured'].widget.attrs.update({'class': 'neon-checkbox'})
 
 class ProfessionForm(forms.ModelForm):
@@ -88,6 +94,38 @@ class ProfessionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'neon-input w-full'})
+        
+        # Add reverse M2M fields
+        self.fields['tools'] = forms.ModelMultipleChoiceField(
+            queryset=Tool.objects.filter(status='published'),
+            required=False,
+            widget=forms.SelectMultiple(attrs={'class': 'select2 neon-input w-full'}),
+            label="Associated Tools"
+        )
+        self.fields['stacks'] = forms.ModelMultipleChoiceField(
+            queryset=ToolStack.objects.filter(visibility='public'),
+            required=False,
+            widget=forms.SelectMultiple(attrs={'class': 'select2 neon-input w-full'}),
+            label="Associated Stacks"
+        )
+        
+        if self.instance and self.instance.pk:
+            self.fields['tools'].initial = self.instance.tools.all()
+            self.fields['stacks'].initial = self.instance.stacks.all()
+
+    def save(self, commit=True):
+        profession = super().save(commit=False)
+        if commit:
+            profession.save()
+            
+            # Handle M2M
+            if 'tools' in self.cleaned_data:
+                profession.tools.set(self.cleaned_data['tools'])
+                
+            if 'stacks' in self.cleaned_data:
+                profession.stacks.set(self.cleaned_data['stacks'])
+                
+        return profession
 
 class ToolSubmissionForm(forms.ModelForm):
     class Meta:

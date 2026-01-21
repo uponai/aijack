@@ -1954,8 +1954,12 @@ def ai_complete_profession(request, slug):
         'meta_description': profession.meta_description or '(MISSING)',
     }
     
+    # Get context
+    available_tools = list(Tool.objects.filter(status='published').values_list('name', flat=True))
+    available_stacks = list(ToolStack.objects.filter(visibility='public').values_list('name', flat=True))
+
     # Call AI
-    completed_data = AIService.complete_profession_fields(profession_data)
+    completed_data = AIService.complete_profession_fields(profession_data, available_tools, available_stacks)
     
     if 'error' in completed_data:
         return JsonResponse({'success': False, 'error': completed_data['error']})
@@ -1983,6 +1987,28 @@ def ai_complete_profession(request, slug):
         profession.meta_description = completed_data['meta_description']
         updated_fields.append('meta_description')
     
+    # Handle tool suggestions
+    if 'tool_names' in completed_data:
+        for tool_name in completed_data['tool_names']:
+            try:
+                tool = Tool.objects.filter(name__iexact=tool_name, status='published').first()
+                if tool and tool not in profession.tools.all():
+                    profession.tools.add(tool)
+            except Tool.DoesNotExist:
+                continue
+        updated_fields.append('tools')
+
+    # Handle stack suggestions
+    if 'stack_names' in completed_data:
+        for stack_name in completed_data['stack_names']:
+            try:
+                stack = ToolStack.objects.filter(name__iexact=stack_name).first()
+                if stack and stack not in profession.stacks.all():
+                    profession.stacks.add(stack)
+            except ToolStack.DoesNotExist:
+                continue
+        updated_fields.append('stacks')
+
     profession.save()
     
     # Check completeness (all important fields filled)

@@ -396,8 +396,8 @@ Fields to complete:
 - tagline: Catchy one-liner (max 200 chars)
 - description: Detailed explanation of the stack's purpose and value
 - workflow_description: Step-by-step markdown guide on how the tools work together
-- tool_names: List of 3-8 tool names that should be in this stack (prefer existing tools)
-- profession_names: 1-3 target professions
+- tool_names: List of 3-8 relevant tools from the AVAILABLE TOOLS list (prefer existing tools)
+- profession_names: List of 1-3 relevant professions from the EXISTING PROFESSIONS list (prefer existing professions)
 - meta_title: SEO title (50-60 chars)
 - meta_description: SEO description (150-160 chars)
 
@@ -423,7 +423,7 @@ Meta Desc: {stack_data.get('meta_description', '(MISSING)')}
 AVAILABLE TOOLS: {tools_list}
 EXISTING PROFESSIONS: {professions_list}
 
-Complete missing fields. For tools, suggest the most relevant ones from AVAILABLE TOOLS.
+Complete missing fields. Suggest relevant tools and professions from the provided lists.
 """
 
         try:
@@ -453,16 +453,21 @@ Complete missing fields. For tools, suggest the most relevant ones from AVAILABL
             return {'error': str(e)}
 
     @staticmethod
-    def complete_profession_fields(profession_data):
+    def complete_profession_fields(profession_data, available_tools, available_stacks):
         """
         Complete missing fields for a profession using AI.
         profession_data: dict with current profession information
+        available_tools: list of tool names available in system
+        available_stacks: list of stack names available in system
         Returns: dict with completed fields
         """
         if not settings.GEMINI_API_KEY:
             return {'error': 'No API key configured'}
         
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        tools_list = ", ".join(available_tools[:100]) if available_tools else "None yet"
+        stacks_list = ", ".join(available_stacks[:50]) if available_stacks else "None yet"
         
         system_instruction = """
 You are an AI career expert helping complete missing information for profession entries.
@@ -475,6 +480,8 @@ Fields to complete:
 - icon: Font Awesome icon class (e.g., "fa-solid fa-code", "fa-solid fa-user-doctor")
 - meta_title: SEO title (50-60 chars)
 - meta_description: SEO description (150-160 chars)
+- tool_names: List of 3-8 relevant tools from the AVAILABLE TOOLS list (prefer existing tools)
+- stack_names: List of 1-3 relevant stacks from the AVAILABLE STACKS list (prefer existing stacks)
 
 Output valid JSON only with completed fields.
 """
@@ -487,7 +494,10 @@ Icon: {profession_data.get('icon', '(MISSING)')}
 Meta Title: {profession_data.get('meta_title', '(MISSING)')}
 Meta Desc: {profession_data.get('meta_description', '(MISSING)')}
 
-Complete missing fields. Make it professional and accurate.
+AVAILABLE TOOLS: {tools_list}
+AVAILABLE STACKS: {stacks_list}
+
+Complete missing fields. Suggest relevant tools and stacks from the provided lists.
 """
 
         try:
@@ -506,7 +516,7 @@ Complete missing fields. Make it professional and accurate.
             data = json.loads(json_match.group(0) if json_match else response_text)
             
             result = {}
-            for key in ['description', 'hero_tagline', 'icon', 'meta_title', 'meta_description']:
+            for key in ['description', 'hero_tagline', 'icon', 'meta_title', 'meta_description', 'tool_names', 'stack_names']:
                 if key in data:
                     result[key] = data[key]
             
