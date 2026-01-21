@@ -27,11 +27,12 @@
         {% for chapter in blog.chapters.all %}
         <div class="blog-slide
             snap-center snap-always w-full h-full flex-shrink-0 relative flex flex-col
-            md:block md:w-full md:h-auto md:flex-shrink md:relative md:bg-white
+            md:flex md:flex-row md:w-full md:h-auto md:flex-shrink md:relative md:bg-white md:items-start
+            md:pb-6
         ">
             {# Image Container - FORCE SQUARE aspect ratio #}
-            <div class="relative w-full aspect-square flex-shrink-0">
-                <img src="{{ chapter.image.url }}" alt="Chapter {{ chapter.order }}" class="w-full h-full object-cover">
+            <div class="relative w-full aspect-square flex-shrink-0 md:w-1/2 shadow-md md:shadow-none border-b-4 border-brand-500/20 md:border-none">
+                <img src="{{ chapter.image.url }}" alt="Chapter {{ chapter.order }}" class="w-full h-full object-cover md:rounded-lg">
 
                 {# Mobile Overlay Title (First Slide Only) #}
                 {% if forloop.first %}
@@ -47,7 +48,7 @@
             </div>
 
             {# Text Container #}
-            <div class="flex-1 bg-white p-6 md:p-8 overflow-y-auto md:overflow-visible text-slate-700 leading-relaxed text-lg pb-16">
+            <div class="flex-1 bg-white p-6 md:p-8 text-slate-700 leading-relaxed text-lg pb-16 md:pb-8 md:w-1/2 font-medium">
                 {{ chapter.text|linebreaks }}
             </div>
         </div>
