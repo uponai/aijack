@@ -828,16 +828,16 @@
                         <a href="{% url 'robots' %}" class="nav-link {% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}active{% endif %}" style="{% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}color: #06B6D4;{% endif %}">
                             Robots
                         </a>
+
+                        <a href="{% url 'blog_list' %}" class="nav-link text-slate-500 hover:text-brand-600 transition-colors {% if 'blog' in request.resolver_match.url_name %}active{% endif %}" title="Blog">
+                            Blog
+                        </a>
                         <a href="{% url 'submit_tool' %}" class="nav-link text-neon-magenta font-bold {% if request.resolver_match.url_name == 'submit_tool' %}active{% endif %}">
                             <i class="fa-solid fa-plus-circle mr-1"></i>Tool
                         </a>
 
                         <a href="{% url 'guide' %}" class="nav-link text-slate-500 hover:text-brand-600 transition-colors {% if request.resolver_match.url_name == 'guide' %}active{% endif %}" title="Platform Guide">
                             <i class="fa-solid fa-book-open text-lg"></i>
-                        </a>
-
-                        <a href="{% url 'search' %}" class="nav-link text-slate-500 hover:text-brand-600 transition-colors" title="Search">
-                            <i class="fa-solid fa-magnifying-glass text-lg"></i>
                         </a>
 
                         <div class="h-6 w-px bg-slate-200 mx-2"></div>
@@ -906,6 +906,7 @@
                     <a href="{% url 'browse_tools' %}" class="block nav-link {% if request.resolver_match.url_name == 'browse_tools' %}active{% endif %}">Tools</a>
                     <a href="{% url 'professions' %}" class="block nav-link {% if request.resolver_match.url_name == 'professions' %}active{% endif %}">Professions</a>
                     <a href="{% url 'stacks' %}" class="block nav-link {% if request.resolver_match.url_name == 'stacks' %}active{% endif %}">Stacks</a>
+                    <a href="{% url 'blog_list' %}" class="block nav-link {% if 'blog' in request.resolver_match.url_name %}active{% endif %}">Blog</a>
                     <a href="{% url 'guide' %}" class="block nav-link {% if request.resolver_match.url_name == 'guide' %}active{% endif %}">Guide</a>
                     <a href="{% url 'robots' %}" class="block nav-link {% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}active{% endif %}" style="{% if 'robots' in request.resolver_match.url_name or 'robot' in request.resolver_match.url_name %}color: #06B6D4;{% endif %}">
                         Robots

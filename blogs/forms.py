@@ -30,7 +30,7 @@ class BlogChapterForm(forms.ModelForm):
         fields = ['image', 'text', 'order']
         widgets = {
             'image': forms.FileInput(attrs={'class': 'file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100'}),
-            'text': forms.Textarea(attrs={'class': 'neon-input w-full', 'rows': 4, 'placeholder': 'Write your story chapter here...'}),
+            'text': forms.Textarea(attrs={'class': 'neon-input w-full', 'rows': 4, 'placeholder': 'Write your post chapter here...'}),
             'order': forms.NumberInput(attrs={'class': 'neon-input w-20', 'min': 0}),
         }
 

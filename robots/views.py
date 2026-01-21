@@ -99,6 +99,9 @@ def robot_detail(request, slug):
     # Robot's news
     robot_news = robot.news_articles.filter(is_published=True)[:3]
     
+    # Related Blog Posts
+    related_blog_posts = robot.blog_posts.filter(is_published=True).distinct()
+
     # Check if saved by user
     is_saved = False
     if request.user.is_authenticated:
@@ -109,6 +112,7 @@ def robot_detail(request, slug):
         'related_robots': related_robots,
         'robot_news': robot_news,
         'is_saved': is_saved,
+        'related_blog_posts': related_blog_posts,
     })
 
 

@@ -361,12 +361,16 @@ def profession_detail(request, slug, pricing=None):
     if pricing_filter:
         tools = tools.filter(pricing_type=pricing_filter)
     stacks = ToolStack.objects.filter(professions=profession)[:3]
+
+    # Related Blog Posts
+    related_blog_posts = profession.blog_posts.filter(is_published=True).distinct()
     
     return render(request, 'profession_detail.html', {
         'profession': profession,
         'tools': tools,
         'stacks': stacks,
         'counts': counts,
+        'related_blog_posts': related_blog_posts,
     })
 
 
@@ -392,10 +396,14 @@ def tool_detail(request, slug):
     # Log tool view for analytics
     AnalyticsService.log_tool_view(request, tool, source_page='tool_detail')
     
+    # Related Blog Posts
+    related_blog_posts = tool.blog_posts.filter(is_published=True).distinct()
+
     return render(request, 'tool_detail.html', {
         'tool': tool,
         'translation': translation,
         'related_tools': related_tools,
+        'related_blog_posts': related_blog_posts,
     })
 
 
@@ -509,8 +517,12 @@ def stack_detail(request, slug):
     # Log stack view for analytics
     AnalyticsService.log_stack_view(request, stack, source_page='stack_detail')
     
+    # Related Blog Posts
+    related_blog_posts = stack.blog_posts.filter(is_published=True).distinct()
+
     return render(request, 'stack_detail.html', {
         'stack': stack,
+        'related_blog_posts': related_blog_posts,
     })
 
 

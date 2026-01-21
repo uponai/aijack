@@ -28,7 +28,7 @@ from django.db.models import Q
 
 @staff_member_required
 def admin_blogs(request):
-    """Admin: List and manage blog posts (stories)."""
+    """Admin: List and manage blog posts."""
     query = request.GET.get('q', '')
     filter_type = request.GET.get('filter', 'all')
     
@@ -80,10 +80,10 @@ def admin_blog_create(request):
                     for obj in formset.deleted_objects:
                         obj.delete()
                         
-                    messages.success(request, f"Story '{blog.title}' created successfully.")
+                    messages.success(request, f"Post '{blog.title}' created successfully.")
                     return redirect('admin_blogs')
             except Exception as e:
-                messages.error(request, f"Error creating story: {e}")
+                messages.error(request, f"Error creating post: {e}")
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -93,7 +93,7 @@ def admin_blog_create(request):
     return render(request, 'blogs/admin/admin_blog_form.html', {
         'form': form,
         'formset': formset,
-        'title': 'Create New Story',
+        'title': 'Create New Post',
         'back_url': 'admin_blogs'
     })
 
@@ -117,10 +117,10 @@ def admin_blog_edit(request, pk):
                     for obj in formset.deleted_objects:
                         obj.delete()
                         
-                    messages.success(request, f"Story '{blog.title}' updated successfully.")
+                    messages.success(request, f"Post '{blog.title}' updated successfully.")
                     return redirect('admin_blogs')
             except Exception as e:
-                messages.error(request, f"Error updating story: {e}")
+                messages.error(request, f"Error updating post: {e}")
         else:
             messages.error(request, "Please correct the errors below.")
     else:
