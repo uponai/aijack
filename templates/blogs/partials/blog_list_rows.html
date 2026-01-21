@@ -1,0 +1,9 @@
+{% for blog in blogs %}
+<div {% if forloop.last and page_obj.has_next %}
+     hx-get="{% url 'blog_list' %}?page={{ page_obj.next_page_number }}"
+     hx-trigger="revealed"
+     hx-swap="afterend"
+     {% endif %}>
+    {% include 'includes/_blog_card.html' %}
+</div>
+{% endfor %}

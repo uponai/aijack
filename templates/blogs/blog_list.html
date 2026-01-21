@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Blogs & Stories | AIJACK{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+        <h1 class="text-4xl md:text-5xl font-heading font-black text-slate-800 mb-4">
+            Stories & <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-purple-600">Insights</span>
+        </h1>
+        <p class="text-lg text-slate-600">
+            Deep dives, tutorials, and visual stories about AI tools and robotics.
+        </p>
+    </div>
+
+    <!-- Blog Grid (Infinite Scroll) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="blog-grid">
+        {% include 'blogs/partials/blog_list_rows.html' %}
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="htmx-indicator flex justify-center py-8">
+        <i class="fa-solid fa-spinner fa-spin text-3xl text-brand-600"></i>
+    </div>
+</div>
+{% endblock %}

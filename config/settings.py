@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'axes',
     'tools',
     'robots',  # AI Robots app
+    'blogs',
     # 3rd party
     'allauth',
     'allauth.account',

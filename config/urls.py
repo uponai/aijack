@@ -22,6 +22,7 @@ from django.contrib.sitemaps.views import sitemap
 from django.views.generic import TemplateView
 from tools.sitemaps import StaticViewSitemap, ToolSitemap, ProfessionSitemap, StackSitemap, TagSitemap
 from robots.sitemaps import RobotSitemap, RobotCompanySitemap, RobotNewsSitemap, RobotStaticSitemap
+from blogs.sitemaps import BlogSitemap
 
 sitemaps = {
     'static': StaticViewSitemap,
@@ -34,6 +35,7 @@ sitemaps = {
     'robot_companies': RobotCompanySitemap,
     'robot_news': RobotNewsSitemap,
     'robot_static': RobotStaticSitemap,
+    'blogs': BlogSitemap,
 }
 
 urlpatterns = [
@@ -41,6 +43,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('', include('tools.urls')),
     path('', include('robots.urls')),  # AI Robots app
+    path('blogs/', include('blogs.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps, 'template_name': 'sitemap.xml'}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
 ]

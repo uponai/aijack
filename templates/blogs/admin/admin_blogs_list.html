@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Stories | Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+
+    {% include 'partials/admin_nav.html' with active_tab='blogs' %}
+
+    <!-- Header & Actions -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <h1 class="text-3xl font-heading font-black text-slate-800">
+            <i class="fa-solid fa-pen-nib text-pink-500 mr-2"></i>Manage Stories
+            <span class="ml-2 text-lg font-normal text-slate-400">({{ blogs.paginator.count }})</span>
+        </h1>
+        <div class="flex gap-3 w-full md:w-auto">
+            <form method="get" class="flex-1 md:flex-none flex items-center bg-white rounded-lg border border-slate-200 px-3 py-2 shadow-sm focus-within:border-pink-500 focus-within:ring-1 focus-within:ring-pink-500 transition">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search stories..." class="bg-transparent border-none outline-none text-sm w-full md:w-64 placeholder-slate-400">
+            </form>
+            <a href="{% url 'admin_blog_create' %}" class="neon-button-filled whitespace-nowrap bg-brand-600 text-white hover:bg-brand-700">
+                <i class="fa-solid fa-plus mr-2"></i>New Story
+            </a>
+        </div>
+    </div>
+
+    <!-- Blogs List -->
+    <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+        <!-- Filter Tabs -->
+        <div class="border-b border-slate-200 bg-slate-50/50 px-6 py-3 flex gap-4">
+            <a href="?filter=all{% if query %}&q={{ query }}{% endif %}" class="text-sm font-bold {% if filter_type == 'all' %}text-pink-600 border-b-2 border-pink-600 pb-3 -mb-3.5{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+                All Stories
+            </a>
+            <a href="?filter=published{% if query %}&q={{ query }}{% endif %}" class="text-sm font-bold {% if filter_type == 'published' %}text-pink-600 border-b-2 border-pink-600 pb-3 -mb-3.5{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+                Published
+            </a>
+            <a href="?filter=draft{% if query %}&q={{ query }}{% endif %}" class="text-sm font-bold {% if filter_type == 'draft' %}text-pink-600 border-b-2 border-pink-600 pb-3 -mb-3.5{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+                Drafts
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/50">
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Story</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Created</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm">Status</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for blog in blogs %}
+                    <tr class="hover:bg-slate-50/50 transition duration-150">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
+                                    {% if blog.first_image %}
+                                    <img src="{{ blog.first_image.url }}" alt="{{ blog.title }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <i class="fa-solid fa-pen-nib text-slate-400"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800">{{ blog.title }}</div>
+                                    <div class="text-xs text-slate-500">{{ blog.slug }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 text-sm text-slate-600">
+                            {{ blog.created_at|date:"M d, Y" }}
+                        </td>
+                        <td class="p-4">
+                            {% if blog.is_published %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-xs font-bold text-green-700 uppercase">
+                                <i class="fa-solid fa-check-circle mr-1"></i> Published
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-xs font-bold text-yellow-700 uppercase">
+                                <i class="fa-solid fa-pen-ruler mr-1"></i> Draft
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'blog_detail' blog.slug %}" target="_blank" class="p-2 text-slate-400 hover:text-pink-600 transition" title="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{% url 'admin_blog_edit' blog.pk %}" class="p-2 text-slate-400 hover:text-blue-600 transition" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-12 text-center text-slate-400">
+                            <i class="fa-solid fa-pen-nib text-4xl mb-4 opacity-50"></i>
+                            <p>No stories found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if blogs.paginator.num_pages > 1 %}
+        <div class="border-t border-slate-200 p-4 bg-slate-50/50 flex justify-center">
+            <div class="flex gap-2">
+                {% if blogs.has_previous %}
+                <a href="?page={{ blogs.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Previous</a>
+                {% endif %}
+
+                <span class="px-3 py-1 text-slate-500 text-sm">Page {{ blogs.number }} of {{ blogs.paginator.num_pages }}</span>
+
+                {% if blogs.has_next %}
+                <a href="?page={{ blogs.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}" class="px-3 py-1 rounded border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 text-sm">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

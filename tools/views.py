@@ -15,6 +15,7 @@ from .forms import ToolForm, ToolStackForm, ProfessionForm, ToolSubmissionForm
 from .search import SearchService
 from .ai_service import AIService
 from .analytics import AnalyticsService
+from blogs.models import BlogPost
 
 
 def home(request):

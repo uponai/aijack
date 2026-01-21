@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+
+    {% include 'partials/admin_nav.html' with active_tab='blogs' %}
+
+    <div class="neon-card p-8">
+        <div class="flex items-center justify-between mb-8 text-slate-800">
+            <h1 class="text-3xl font-heading font-black">{{ title }}</h1>
+            <a href="{% url back_url %}" class="text-slate-400 hover:text-pink-600 transition">
+                <i class="fa-solid fa-times text-2xl"></i>
+            </a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Main Post Fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2 md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-600 uppercase tracking-wider">Title <span class="text-red-500">*</span></label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<p class="text-sm text-red-500 mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-600 uppercase tracking-wider">Slug <span class="text-red-500">*</span></label>
+                    {{ form.slug }}
+                    {% if form.slug.errors %}<p class="text-sm text-red-500 mt-1">{{ form.slug.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="space-y-2 flex items-center pt-8">
+                    <div class="flex items-center gap-3">
+                        {{ form.is_published }}
+                        <label for="{{ form.is_published.id_for_label }}" class="font-bold text-slate-700 cursor-pointer select-none">
+                            Publish this story immediately?
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Taxonomy Fields -->
+            <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-600 uppercase tracking-wider">Related Tools</label>
+                    {{ form.tools }}
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-600 uppercase tracking-wider">Related Stacks</label>
+                    {{ form.stacks }}
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-600 uppercase tracking-wider">Related Robots</label>
+                    {{ form.robots }}
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-600 uppercase tracking-wider">Target Professions</label>
+                    {{ form.professions }}
+                </div>
+                <div class="space-y-2 md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-600 uppercase tracking-wider">Tags</label>
+                    {{ form.tags }}
+                </div>
+            </div>
+
+            <!-- Chapters Formset -->
+            <div class="border-t border-slate-200 pt-8 mt-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-heading font-bold text-slate-800">
+                        <i class="fa-solid fa-layer-group text-pink-500 mr-2"></i>Chapters
+                    </h2>
+                    <button type="button" id="add-chapter-btn" class="neon-button-sm bg-pink-100 text-pink-700 hover:bg-pink-200 border-none">
+                        <i class="fa-solid fa-plus mr-2"></i>Add Chapter
+                    </button>
+                </div>
+
+                {{ formset.management_form }}
+
+                <div id="chapters-container" class="space-y-6">
+                    {% for chapter_form in formset %}
+                    <div class="chapter-form neon-card p-6 relative bg-white border border-slate-200 shadow-sm relative transition-all duration-300 hover:shadow-md">
+                        {{ chapter_form.id }}
+
+                        <div class="absolute top-4 right-4 delete-wrapper">
+                            {% if chapter_form.instance.pk %}
+                            <div class="flex items-center gap-2 text-sm text-red-500">
+                                {{ chapter_form.DELETE }} <label for="{{ chapter_form.DELETE.id_for_label }}">Delete</label>
+                            </div>
+                            {% else %}
+                            <button type="button" class="text-slate-400 hover:text-red-500 transition remove-chapter-btn">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <!-- Image Preview & Upload -->
+                            <div class="md:col-span-4 space-y-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase">Chapter Image</label>
+                                <div class="w-full aspect-[9/16] bg-slate-100 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center relative group">
+                                    {% if chapter_form.instance.image %}
+                                    <img src="{{ chapter_form.instance.image.url }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <div class="text-center text-slate-400 p-4">
+                                        <i class="fa-regular fa-image text-3xl mb-2"></i>
+                                        <p class="text-xs">No image selected</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {{ chapter_form.image }}
+                            </div>
+
+                            <!-- Text & Order -->
+                            <div class="md:col-span-8 space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase">Order</label>
+                                        {{ chapter_form.order }}
+                                    </div>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase">Chapter Text</label>
+                                    {{ chapter_form.text }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Empty form template for JS -->
+                <div id="empty-form" class="hidden">
+                    <div class="chapter-form neon-card p-6 relative bg-white border border-slate-200 shadow-sm mt-6">
+                        <div class="absolute top-4 right-4">
+                            <button type="button" class="text-slate-400 hover:text-red-500 transition remove-chapter-btn">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div class="md:col-span-4 space-y-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase">Chapter Image</label>
+                                <div class="w-full aspect-[9/16] bg-slate-100 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center relative">
+                                    <div class="text-center text-slate-400 p-4">
+                                        <i class="fa-regular fa-image text-3xl mb-2"></i>
+                                        <p class="text-xs">No image selected</p>
+                                    </div>
+                                </div>
+                                {{ formset.empty_form.image }}
+                            </div>
+                            <div class="md:col-span-8 space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase">Order</label>
+                                        {{ formset.empty_form.order }}
+                                    </div>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase">Chapter Text</label>
+                                    {{ formset.empty_form.text }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="pt-8 flex items-center justify-end gap-4 border-t border-slate-100 mt-8 sticky bottom-0 bg-white/90 backdrop-blur pb-4 z-20">
+                <a href="{% url back_url %}" class="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition">Cancel</a>
+                <button type="submit" class="neon-button-filled">
+                    Save Story
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* Reuse Select2 styles from admin_form.html or base */
+    .select2-container--default .select2-selection--multiple {
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        min-height: 42px;
+        padding: 4px;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #ec4899;
+        box-shadow: 0 0 0 1px #ec4899;
+    }
+
+    .neon-checkbox {
+        @apply w-5 h-5 text-pink-600 border-slate-300 rounded focus:ring-pink-500;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $( document ).ready( function ()
+    {
+        $( '.select2' ).select2( {
+            width: '100%',
+            placeholder: "Select options...",
+            allowClear: true
+        } );
+
+        // Dynamic Formset Logic
+        const addBtn = document.getElementById( 'add-chapter-btn' );
+        const totalForms = document.getElementById( 'id_chapters-TOTAL_FORMS' );
+        const container = document.getElementById( 'chapters-container' );
+        const emptyFormHtml = document.getElementById( 'empty-form' ).innerHTML;
+
+        addBtn.addEventListener( 'click', function ()
+        {
+            const formCount = parseInt( totalForms.value );
+            const newFormHtml = emptyFormHtml.replace( /__prefix__/g, formCount );
+
+            // Create a temporary container to convert string to DOM nodes
+            const tempDiv = document.createElement( 'div' );
+            tempDiv.innerHTML = newFormHtml;
+            const newForm = tempDiv.firstElementChild;
+
+            container.appendChild( newForm );
+
+            // Auto-increment order based on previous
+            const orderInput = newForm.querySelector( 'input[name$="-order"]' );
+            if ( orderInput )
+            {
+                orderInput.value = formCount + 1;
+            }
+
+            totalForms.value = formCount + 1;
+        } );
+
+        // Event delegation for removing new forms
+        container.addEventListener( 'click', function ( e )
+        {
+            if ( e.target.closest( '.remove-chapter-btn' ) )
+            {
+                const formRow = e.target.closest( '.chapter-form' );
+                formRow.remove();
+                // Optionally re-index forms, but Django handles sparse formsets okay usually if ID is managed right.
+                // For simplicity, we just decrement total forms if it was the last one, or rely on POST data.
+                // Actually, simply removing the DOM element for a NEW form is fine.
+                // For existing forms, we use the DELETE checkbox handled in template.
+            }
+        } );
+    } );
+</script>
+{% endblock %}

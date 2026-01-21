@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ blog.title }} | AIJACK{% endblock %}
+
+{% block content %}
+{# Mobile Navigation Override (optional, maybe hide nav or make transparent) #}
+
+<div class="md:max-w-5xl md:mx-auto md:py-12">
+    {# Desktop Header (Hidden on Mobile usually, or maybe part of the first slide) #}
+    <div class="hidden md:block mb-8 px-4">
+        <h1 class="text-4xl font-heading font-black text-slate-900 mb-4">{{ blog.title }}</h1>
+        <div class="flex flex-wrap gap-2">
+            {% for tag in blog.tags.all %}
+            <span class="text-sm font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# Main Content Container #}
+    {# Mobile: Horizontal Snap Scroll. Desktop: Vertical Stack #}
+    <div class="
+        flex flex-row overflow-x-auto snap-x snap-mandatory h-[calc(100vh-64px)] w-full 
+        md:flex-col md:h-auto md:overflow-x-visible md:overflow-y-visible md:snap-none md:space-y-0
+        scrollbar-hide
+    ">
+
+        {% for chapter in blog.chapters.all %}
+        <div class="
+            snap-center snap-always w-full h-full flex-shrink-0 relative flex flex-col
+            md:block md:w-full md:h-auto md:flex-shrink md:relative md:bg-white
+        ">
+            {# Image Container - FORCE SQUARE aspect ratio #}
+            <div class="relative w-full aspect-square flex-shrink-0">
+                <img src="{{ chapter.image.url }}" alt="Chapter {{ chapter.order }}" class="w-full h-full object-cover">
+
+                {# Mobile Overlay Title (First Slide Only) #}
+                {% if forloop.first %}
+                <div class="md:hidden absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 pointer-events-none">
+                    <h1 class="text-3xl font-heading font-black text-white mb-2 leading-tight drop-shadow-md">{{ blog.title }}</h1>
+                    <div class="flex flex-wrap gap-2">
+                        {% for tag in blog.tags.all %}
+                        <span class="text-xs font-bold text-white bg-white/20 backdrop-blur-sm px-2 py-1 rounded">{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {# Text Container #}
+            <div class="flex-1 bg-white p-6 md:p-8 overflow-y-auto md:overflow-visible text-slate-700 leading-relaxed text-lg">
+                {{ chapter.text|linebreaks }}
+            </div>
+        </div>
+        {% endfor %}
+
+        {# Connections Slide/Section (Last Item) #}
+        {% if blog.tools.exists or blog.stacks.exists or blog.robots.exists %}
+        <div class="
+            snap-center snap-always w-full h-full flex-shrink-0 relative overflow-y-auto bg-slate-50
+            md:w-full md:h-auto md:bg-transparent md:overflow-visible
+        ">
+            <div class="p-6 md:p-0">
+                <h2 class="text-2xl font-heading font-bold text-slate-800 mb-6 md:mt-6">Related Resources</h2>
+
+                {% if blog.tools.exists %}
+                <div class="mb-8">
+                    <h3 class="font-bold text-slate-600 mb-4 px-2 uppercase tracking-wide text-sm">Tools</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% for tool in blog.tools.all %}
+                        {% include 'includes/_tool_card.html' with tool=tool compact=True %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if blog.stacks.exists %}
+                <div class="mb-8">
+                    <h3 class="font-bold text-slate-600 mb-4 px-2 uppercase tracking-wide text-sm">Stacks</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% for stack in blog.stacks.all %}
+                        {% include 'includes/_stack_card.html' with stack=stack compact=True %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if blog.robots.exists %}
+                <div class="mb-8">
+                    <h3 class="font-bold text-slate-600 mb-4 px-2 uppercase tracking-wide text-sm">Robots</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% for robot in blog.robots.all %}
+                        {% include 'robots/includes/_robot_card.html' with robot=robot %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
