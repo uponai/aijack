@@ -5,10 +5,9 @@ from .models import BlogPost, BlogChapter
 class BlogPostForm(forms.ModelForm):
     class Meta:
         model = BlogPost
-        fields = ['title', 'slug', 'is_published', 'tags', 'tools', 'stacks', 'professions', 'robots']
+        fields = ['title', 'is_published', 'tags', 'tools', 'stacks', 'professions', 'robots']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'neon-input w-full font-heading font-bold text-lg'}),
-            'slug': forms.TextInput(attrs={'class': 'neon-input w-full font-mono text-sm text-slate-500'}),
             'tags': forms.SelectMultiple(attrs={'class': 'select2'}),
             'tools': forms.SelectMultiple(attrs={'class': 'select2'}),
             'stacks': forms.SelectMultiple(attrs={'class': 'select2'}),

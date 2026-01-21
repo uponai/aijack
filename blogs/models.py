@@ -24,8 +24,17 @@ class BlogPost(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)
+        # Always generate slug from title + date (YYYYMMDD)
+        from django.utils import timezone
+        if not self.pk:
+            # For new posts, use current date
+            date_str = timezone.now().strftime('%Y%m%d')
+        else:
+            # For existing posts, use original creation date
+            date_str = self.created_at.strftime('%Y%m%d')
+        
+        base_slug = slugify(self.title)
+        self.slug = f"{date_str}-{base_slug}"
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
