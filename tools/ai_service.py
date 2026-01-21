@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db.models import Case, When
 from .search import SearchService
-from .models import Tool
+from .models import Tool, Profession, ToolStack
 import json
 from google import genai
 from google.genai import types
@@ -304,14 +304,27 @@ Generate the complete metadata JSON for this tool. Use search to verify details.
         categories_list = ", ".join(existing_categories) if existing_categories else "None yet"
         professions_list = ", ".join(existing_professions) if existing_professions else "None yet"
         tags_list = ", ".join(existing_tags) if existing_tags else "None yet"
+
+        # Semantic Search for related context (optional but helpful)
+        search_query = f"{tool_data.get('name')} {tool_data.get('short_description', '')}"
         
+        # Find relevant professions via vector search
+        try:
+            prof_ids = SearchService.search(search_query, n_results=10, collection_name="professions")
+            semantic_profs = list(Profession.objects.filter(id__in=prof_ids).values_list('name', flat=True))
+            if semantic_profs:
+                 # prioritize semantic matches
+                professions_list = ", ".join(semantic_profs + [p for p in existing_professions if p not in semantic_profs])
+        except Exception as e:
+            print(f"Vector search failed (professions): {e}")
+
         system_instruction = """
-You are an AI tools curator helping complete missing information.
+You are an AI tools curator helping complete tool information.
 
-Complete ONLY missing/empty fields. Use Google Search to verify if needed.
+Review the provided information. Complete missing fields AND augment existing lists (Categories, Professions, Tags) if they are incomplete or could be improved with more relevant items.
 
-Fields to complete:
-- pricing_type, category_names, profession_names, tag_names
+Fields to complete/improve:
+- pricing_type, category_names (2-4 relevant), profession_names (3-6 relevant target), tag_names (5-10 feature tags)
 - meta_title, meta_description
 - short_description, long_description
 - use_cases, pros, cons
@@ -336,7 +349,7 @@ Cons: {tool_data.get('cons', '(MISSING)')}
 
 EXISTING: Categories: {categories_list} | Professions: {professions_list} | Tags: {tags_list}
 
-Complete missing fields.
+Complete missing fields and suggest additional relevant items for categories, professions, and tags to improve coverage.
 """
 
         try:
@@ -382,17 +395,41 @@ Complete missing fields.
         
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
-        professions_list = ", ".join(existing_professions) if existing_professions else "None yet"
-        tools_list = ", ".join(available_tools[:50]) if available_tools else "None yet"  # Limit to 50 for context
+        # Semantic Search for context
+        search_query = f"{stack_data.get('name')} {stack_data.get('description', '')}"
+        
+        professions_str = "None yet"
+        tools_str = "None yet"
+        
+        try:
+            # 1. Find relevant Tools
+            tool_ids = SearchService.search(search_query, n_results=20, collection_name="tools")
+            semantic_tools = list(Tool.objects.filter(id__in=tool_ids).values_list('name', flat=True))
+            
+            # Combine dict-provided available tools (which might be comprehensive) with semantic ones
+            # We want semantic ones first or highlighted
+            all_tools = semantic_tools + [t for t in available_tools if t not in semantic_tools]
+            tools_str = ", ".join(all_tools[:60]) # Limit context size
+            
+            # 2. Find relevant Professions
+            prof_ids = SearchService.search(search_query, n_results=10, collection_name="professions")
+            semantic_profs = list(Profession.objects.filter(id__in=prof_ids).values_list('name', flat=True))
+            all_profs = semantic_profs + [p for p in existing_professions if p not in semantic_profs]
+            professions_str = ", ".join(all_profs)
+            
+        except Exception as e:
+            print(f"Vector search failed (stack): {e}")
+            professions_str = ", ".join(existing_professions) if existing_professions else "None yet"
+            tools_str = ", ".join(available_tools[:50]) if available_tools else "None yet"
         
         system_instruction = """
 You are an AI workflow architect helping complete missing information for tool stack entries.
 
 A stack is a curated bundle of AI tools that work together to solve a specific workflow.
 
-Complete ONLY missing/empty fields. Use Google Search to find the best tools and verify details.
+Review the provided information. Complete missing fields AND augment existing tool/profession lists if they can be improved with more relevant items. Use Google Search to verify.
 
-Fields to complete:
+Fields to complete/improve:
 - tagline: Catchy one-liner (max 200 chars)
 - description: Detailed explanation of the stack's purpose and value
 - workflow_description: Step-by-step markdown guide on how the tools work together
@@ -420,8 +457,10 @@ Professions: {stack_data.get('professions', '(MISSING)')}
 Meta Title: {stack_data.get('meta_title', '(MISSING)')}
 Meta Desc: {stack_data.get('meta_description', '(MISSING)')}
 
-AVAILABLE TOOLS: {tools_list}
-EXISTING PROFESSIONS: {professions_list}
+Meta Desc: {stack_data.get('meta_description', '(MISSING)')}
+
+RELEVANT TOOLS (Semantic & Available): {tools_str}
+RELEVANT PROFESSIONS (Semantic & Available): {professions_str}
 
 Complete missing fields. Suggest relevant tools and professions from the provided lists.
 """
@@ -466,15 +505,37 @@ Complete missing fields. Suggest relevant tools and professions from the provide
         
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
-        tools_list = ", ".join(available_tools[:100]) if available_tools else "None yet"
-        stacks_list = ", ".join(available_stacks[:50]) if available_stacks else "None yet"
+        
+        # Semantic Search for context
+        search_query = f"{profession_data.get('name')} {profession_data.get('description', '')}"
+        
+        tools_str = "None yet"
+        stacks_str = "None yet"
+        
+        try:
+            # 1. Find relevant Tools
+            tool_ids = SearchService.search(search_query, n_results=25, collection_name="tools")
+            semantic_tools = list(Tool.objects.filter(id__in=tool_ids).values_list('name', flat=True))
+            all_tools = semantic_tools + [t for t in available_tools if t not in semantic_tools]
+            tools_str = ", ".join(all_tools[:80])
+            
+            # 2. Find relevant Stacks
+            stack_ids = SearchService.search(search_query, n_results=10, collection_name="stacks")
+            semantic_stacks = list(ToolStack.objects.filter(id__in=stack_ids).values_list('name', flat=True))
+            all_stacks = semantic_stacks + [s for s in available_stacks if s not in semantic_stacks]
+            stacks_str = ", ".join(all_stacks[:40])
+            
+        except Exception as e:
+             print(f"Vector search failed (profession): {e}")
+             tools_str = ", ".join(available_tools[:100]) if available_tools else "None yet"
+             stacks_str = ", ".join(available_stacks[:50]) if available_stacks else "None yet"
         
         system_instruction = """
 You are an AI career expert helping complete missing information for profession entries.
 
-Complete ONLY missing/empty fields. Use Google Search to verify details.
+Review the provided information. Complete missing fields AND augment existing tool/stack lists if they can be improved with more relevant items. Use Google Search to verify.
 
-Fields to complete:
+Fields to complete/improve:
 - description: Detailed explanation of the profession (what they do, typical responsibilities)
 - hero_tagline: Catchy one-liner that captures the essence of this profession (max 100 chars)
 - icon: Font Awesome icon class (e.g., "fa-solid fa-code", "fa-solid fa-user-doctor")
@@ -494,10 +555,10 @@ Icon: {profession_data.get('icon', '(MISSING)')}
 Meta Title: {profession_data.get('meta_title', '(MISSING)')}
 Meta Desc: {profession_data.get('meta_description', '(MISSING)')}
 
-AVAILABLE TOOLS: {tools_list}
-AVAILABLE STACKS: {stacks_list}
+AVAILABLE TOOLS (Semantic & Available): {tools_str}
+AVAILABLE STACKS (Semantic & Available): {stacks_str}
 
-Complete missing fields. Suggest relevant tools and stacks from the provided lists.
+Complete missing fields. Suggest additional relevant tools and stacks to improve the profession's profile.
 """
 
         try:
