@@ -55,7 +55,7 @@
         {% endfor %}
 
         {# Connections Slide/Section (Last Item) #}
-        {% if blog.tools.exists or blog.stacks.exists or blog.robots.exists %}
+        {% if blog.tools.exists or blog.stacks.exists or blog.robots.exists or blog.professions.exists %}
         <div class="blog-slide
             snap-center snap-always w-full h-full flex-shrink-0 relative overflow-y-auto bg-slate-50
             md:w-full md:h-auto md:bg-transparent md:overflow-visible
@@ -91,6 +91,17 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {% for robot in blog.robots.all %}
                         {% include 'robots/includes/_robot_card.html' with robot=robot %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if blog.professions.exists %}
+                <div class="mb-8">
+                    <h3 class="font-bold text-slate-600 mb-4 px-2 uppercase tracking-wide text-sm">Professions</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% for profession in blog.professions.all %}
+                        {% include 'includes/_profession_card.html' with profession=profession %}
                         {% endfor %}
                     </div>
                 </div>
