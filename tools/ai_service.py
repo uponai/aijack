@@ -396,8 +396,8 @@ Fields to complete:
 - tagline: Catchy one-liner (max 200 chars)
 - description: Detailed explanation of the stack's purpose and value
 - workflow_description: Step-by-step markdown guide on how the tools work together
-- tool_names: List of 3-8 relevant tools from the AVAILABLE TOOLS list (prefer existing tools)
-- profession_names: List of 1-3 relevant professions from the EXISTING PROFESSIONS list (prefer existing professions)
+- tool_names: List of 5-18 relevant tools from the AVAILABLE TOOLS list (prefer existing tools)
+- profession_names: List of 3-6 relevant professions from the EXISTING PROFESSIONS list (prefer existing professions)
 - meta_title: SEO title (50-60 chars)
 - meta_description: SEO description (150-160 chars)
 
@@ -480,8 +480,8 @@ Fields to complete:
 - icon: Font Awesome icon class (e.g., "fa-solid fa-code", "fa-solid fa-user-doctor")
 - meta_title: SEO title (50-60 chars)
 - meta_description: SEO description (150-160 chars)
-- tool_names: List of 3-8 relevant tools from the AVAILABLE TOOLS list (prefer existing tools)
-- stack_names: List of 1-3 relevant stacks from the AVAILABLE STACKS list (prefer existing stacks)
+- tool_names: List of 13-18 relevant tools from the AVAILABLE TOOLS list (prefer existing tools)
+- stack_names: List of 5-8 relevant stacks from the AVAILABLE STACKS list (prefer existing stacks)
 
 Output valid JSON only with completed fields.
 """
