@@ -42,6 +42,8 @@
                     <tr class="border-b border-slate-100 bg-slate-50/50">
                         <th class="p-4 font-heading font-bold text-slate-600 text-sm">Profession</th>
                         <th class="p-4 font-heading font-bold text-slate-600 text-sm">Completeness</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm text-center">Tools</th>
+                        <th class="p-4 font-heading font-bold text-slate-600 text-sm text-center">Stacks</th>
                         <th class="p-4 font-heading font-bold text-slate-600 text-sm">Hero Tagline</th>
                         <th class="p-4 font-heading font-bold text-slate-600 text-sm text-right">Actions</th>
                     </tr>
@@ -85,6 +87,16 @@
                             </span>
                             {% endif %}
                         </td>
+                        <td class="p-4 text-center">
+                            <span class="inline-flex items-center justify-center bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full" title="Associated Tools">
+                                <i class="fa-solid fa-wrench mr-1 text-[10px]"></i>{{ profession.tools_count|default:0 }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center">
+                            <span class="inline-flex items-center justify-center bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded-full" title="Associated Stacks">
+                                <i class="fa-solid fa-layer-group mr-1 text-[10px]"></i>{{ profession.stacks_count|default:0 }}
+                            </span>
+                        </td>
                         <td class="p-4 text-sm text-slate-600">
                             {{ profession.hero_tagline|truncatechars:40 }}
                         </td>
@@ -104,7 +116,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="p-12 text-center text-slate-400">
+                        <td colspan="6" class="p-12 text-center text-slate-400">
                             <i class="fa-solid fa-user-tie text-4xl mb-4 opacity-50"></i>
                             <p>No professions found.</p>
                         </td>

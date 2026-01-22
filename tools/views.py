@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Q, Case, When
+from django.db.models import Q, Case, When, Count
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
@@ -1280,7 +1280,10 @@ def admin_professions(request):
     query = request.GET.get('q', '')
     filter_type = request.GET.get('filter', 'all')
     
-    professions = Profession.objects.all().order_by('name')
+    professions = Profession.objects.all().annotate(
+        tools_count=Count('tools', distinct=True),
+        stacks_count=Count('stacks', distinct=True)
+    ).order_by('name')
     
     if query:
         professions = professions.filter(
