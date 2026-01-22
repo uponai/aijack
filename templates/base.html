@@ -36,6 +36,8 @@
         {% block og_image %}
         {% if seo_image %}
         <meta property="og:image" content="{{ seo_image }}">
+        {% else %}
+        <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og_cover_default.png' %}">
         {% endif %}
         {% endblock %}
 
@@ -45,6 +47,8 @@
         <meta name="twitter:description" content="{% block twitter_description %}{{ seo_description|default:"Discover the best AI tools for professional workflows." }}{% endblock %}">
         {% if seo_image %}
         <meta name="twitter:image" content="{{ seo_image }}">
+        {% else %}
+        <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og_cover_default.png' %}">
         {% endif %}
 
         <!-- Schema.org -->
